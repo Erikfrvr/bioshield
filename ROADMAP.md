@@ -9,12 +9,12 @@ Marque o `[ ]` conforme terminar. Se travar numa fase, não pule: o que vem depo
 
 ## Fase 0 — Preparar o terreno
 
-- [ ] Criar o repositório `bioshield` no GitHub (conta Erikfrvr), privado por enquanto
-- [ ] Jogar o esqueleto dentro e fazer o primeiro commit
-- [ ] Conferir se o `.gitignore` está pegando `node_modules/` e `.env`
-- [ ] `cd backend && npm install`
-- [ ] Copiar `.env.example` para `.env` e preencher com os dados do seu MySQL
-- [ ] Criar o banco vazio `bioshield` no Workbench
+- [x] Criar o repositório `bioshield` no GitHub (conta Erikfrvr), privado por enquanto
+- [x] Jogar o esqueleto dentro e fazer o primeiro commit
+- [x] Conferir se o `.gitignore` está pegando `node_modules/` e `.env`
+- [X] `cd backend && npm install`
+- [X] Copiar `.env.example` para `.env` e preencher com os dados do seu MySQL
+- [X] Criar o banco vazio `bioshield` no Workbench
 
 **Marco 0:** repositório no ar e ambiente pronto.
 
