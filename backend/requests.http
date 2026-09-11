@@ -1,0 +1,28 @@
+### Arquivo de teste das rotas (extensao REST Client do VS Code).
+### Vou criando um bloco pra cada rota conforme eu termino ela no backend.
+
+@baseUrl = http://localhost:3000/api
+
+### ==========================
+### USUARIOS
+### ==========================
+
+### ==========================
+### PACIENTE (ficha medica)
+### ==========================
+
+### ==========================
+### MEDICAMENTOS
+### ==========================
+
+### ==========================
+### DOSES
+### ==========================
+
+### ==========================
+### CUIDADOR
+### ==========================
+
+### ==========================
+### EMERGENCIA (rota publica do QR)
+### ==========================

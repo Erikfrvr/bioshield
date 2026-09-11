@@ -1,0 +1,5 @@
+-- Script do banco do BioShield.
+-- Aqui eu escrevo o CREATE DATABASE, as tabelas e as chaves estrangeiras.
+-- Ordem que eu pretendo seguir: usuarios, pacientes, alergias, contatos_emergencia,
+-- medicamentos, doses e cuidador_paciente.
+-- Regra: o token do QR fica com indice unico, porque a busca da emergencia passa por ele.
