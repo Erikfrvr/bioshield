@@ -24,18 +24,18 @@ Marque o `[ ]` conforme terminar. Se travar numa fase, não pule: o que vem depo
 
 Arquivo: `database/bioshield.sql`
 
-- [ ] `usuarios` (id, nome, email único, senha)
-- [ ] `pacientes` (id, id_usuario, tipo_sanguineo, condicoes, observacoes, token_qr único, criado_em)
-- [ ] `alergias` (id, id_paciente, substancia, gravidade)
-- [ ] `contatos_emergencia` (id, id_paciente, nome, telefone, parentesco)
-- [ ] `medicamentos` (id, id_paciente, nome, dosagem, unidade, frequencia_horas, horario_inicial, data_inicio, data_fim)
-- [ ] `doses` (id, id_medicamento, horario_previsto, horario_confirmado, status)
-- [ ] `cuidador_paciente` (id, id_cuidador, id_paciente, autorizado_em)
-- [ ] `acessos_qr` (id, id_paciente, acessado_em, ip) para o log da LGPD
-- [ ] Chaves estrangeiras com `ON DELETE CASCADE` onde faz sentido
-- [ ] Índice único em `pacientes.token_qr`
-- [ ] Rodar o script inteiro do zero num banco limpo e conferir se não quebra
-- [ ] Inserir dois ou três registros falsos para você ter o que testar
+- [x] `usuarios` (id, nome, email único, senha)
+- [x] `pacientes` (id, id_usuario, tipo_sanguineo, condicoes, observacoes, token_qr único, criado_em)
+- [x] `alergias` (id, id_paciente, substancia, gravidade)
+- [x] `contatos_emergencia` (id, id_paciente, nome, telefone, parentesco)
+- [x] `medicamentos` (id, id_paciente, nome, dosagem, unidade, frequencia_horas, horario_inicial, data_inicio, data_fim)
+- [x] `doses` (id, id_medicamento, horario_previsto, horario_confirmado, status)
+- [x] `cuidador_paciente` (id, id_cuidador, id_paciente, autorizado_em)
+- [x] `acessos_qr` (id, id_paciente, acessado_em, ip) para o log da LGPD
+- [x] Chaves estrangeiras com `ON DELETE CASCADE` onde faz sentido
+- [x] Índice único em `pacientes.token_qr`
+- [x] Rodar o script inteiro do zero num banco limpo e conferir se não quebra
+- [x] Inserir dois ou três registros falsos para você ter o que testar
 
 **Marco 1:** banco criado e populado com dado de teste.
 
