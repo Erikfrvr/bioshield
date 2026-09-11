@@ -157,7 +157,8 @@ Projeto desenvolvido para o Empreenda Senac 2026, na categoria Cursos Técnicos,
 ## Equipe
 
 **Erik Mauricio Silva** — [@Erikfrvr](https://github.com/Erikfrvr)
-**Daiane Duarte**
+
+**Daiane Duarte** — [@DaiHoss](https://github.com/DaiHoss)
 
 ## Licença
 
