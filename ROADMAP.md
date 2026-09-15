@@ -43,7 +43,7 @@ Arquivo: `database/bioshield.sql`
 
 ## Fase 2 — Fundação do backend
 
-- [ ] `config/db.ts`: pool do mysql2 lendo o `.env` e teste de conexão no boot
+- [x] `config/db.ts`: pool do mysql2 lendo o `.env` e teste de conexão no boot
 - [ ] `server.ts`: express, dotenv, cors, `express.json()` e o listen
 - [ ] Subir com `npm run dev` e ver a mensagem de conexão bem sucedida no terminal
 - [ ] Criar uma rota boba `GET /api/status` só para confirmar que a API responde
