@@ -4,6 +4,13 @@
 @baseUrl = http://localhost:3000/api
 
 ### ==========================
+### STATUS
+### ==========================
+
+### Confirma que a API esta de pe
+GET {{baseUrl}}/status
+
+### ==========================
 ### USUARIOS
 ### ==========================
 
