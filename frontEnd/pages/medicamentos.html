@@ -1,2 +1,116 @@
 <!-- Essa tela lista os remedios que a pessoa toma e tem o formulario de cadastrar remedio novo.
      Cada item mostra nome, dosagem, frequencia e a proxima dose. -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0E3C39">
+  <title>Meus remédios | BioShield</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="medicamentos.css">
+</head>
+<body>
+  <a class="pular" href="#principal">Pular para o conteúdo</a>
+
+  <div class="app">
+    <header class="topo" id="topo"></header>
+
+    <main class="conteudo" id="principal">
+      <button type="button" class="botao" id="novoRemedio">Adicionar remédio</button>
+
+      <section class="cartao carregando" id="carregando">
+        <div class="esqueleto alto"></div>
+        <div class="esqueleto alto"></div>
+      </section>
+
+      <p class="aviso aviso-erro" id="erro" hidden></p>
+
+      <div class="remedios" id="lista"></div>
+
+      <section class="cartao vazio" id="vazio" hidden>
+        <strong>Nenhum remédio cadastrado</strong>
+        Cadastre o primeiro e o BioShield monta a agenda de doses sozinho.
+      </section>
+    </main>
+  </div>
+
+  <div class="sobreposicao" id="janela" hidden role="dialog" aria-modal="true" aria-labelledby="tituloJanela">
+    <div class="janela">
+      <h2 id="tituloJanela">Novo remédio</h2>
+      <p>A agenda de doses é montada a partir do horário da primeira tomada e do intervalo.</p>
+
+      <form id="formulario" novalidate>
+        <label class="campo">
+          <span>Nome do remédio</span>
+          <input type="text" id="nome" required placeholder="Losartana">
+        </label>
+
+        <div class="grade-dupla">
+          <label class="campo">
+            <span>Dosagem</span>
+            <input type="number" id="dosagem" min="0.01" step="0.01" required placeholder="50">
+          </label>
+
+          <label class="campo">
+            <span>Unidade</span>
+            <select id="unidade">
+              <option value="mg">mg</option>
+              <option value="ml">ml</option>
+              <option value="g">g</option>
+              <option value="gota">gota</option>
+              <option value="comprimido">comprimido</option>
+              <option value="unidade">unidade</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="campo">
+          <span>De quantas em quantas horas</span>
+          <select id="frequencia">
+            <option value="4">A cada 4 horas</option>
+            <option value="6">A cada 6 horas</option>
+            <option value="8">A cada 8 horas</option>
+            <option value="12" selected>A cada 12 horas</option>
+            <option value="24">1 vez por dia</option>
+            <option value="48">A cada 2 dias</option>
+            <option value="168">1 vez por semana</option>
+          </select>
+        </label>
+
+        <label class="campo">
+          <span>Horário da primeira dose do dia</span>
+          <input type="time" id="horario" value="08:00" required>
+        </label>
+
+        <div class="grade-dupla">
+          <label class="campo">
+            <span>Começa em</span>
+            <input type="date" id="dataInicio" required>
+          </label>
+
+          <label class="campo">
+            <span>Termina em</span>
+            <input type="date" id="dataFim">
+            <span class="dica">Deixe em branco para uso contínuo.</span>
+          </label>
+        </div>
+
+        <p class="aviso aviso-erro" id="erroFormulario" hidden></p>
+
+        <div class="linha-botoes">
+          <button type="button" class="botao botao-secundario" id="fechar">Cancelar</button>
+          <button type="submit" class="botao" id="salvar">Salvar remédio</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/demo.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/medicamentos.js"></script>
+</body>
+</html>

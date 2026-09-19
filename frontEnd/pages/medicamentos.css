@@ -1,1 +1,67 @@
 /* Estilo da lista de remedios e do formulario de cadastro. */
+
+.remedios {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.remedio {
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-left: 6px solid var(--teal);
+  border-radius: var(--raio-g);
+  padding: 1rem 1.1rem;
+  box-shadow: var(--sombra);
+  display: grid;
+  gap: 0.6rem;
+}
+
+.remedio.encerrado {
+  border-left-color: var(--borda-forte);
+  background: var(--menta-claro);
+}
+
+.remedio-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.remedio h2 {
+  font-size: 1.22rem;
+  line-height: 1.2;
+}
+
+.remedio-dose {
+  margin: 0.15rem 0 0;
+  font-size: 1rem;
+  color: var(--texto-suave);
+}
+
+.remedio-linhas {
+  display: grid;
+  gap: 0.3rem;
+  border-top: 1px solid var(--borda);
+  padding-top: 0.6rem;
+}
+
+.remedio-linha {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
+  font-size: 0.97rem;
+}
+
+.remedio-linha span { color: var(--texto-suave); }
+.remedio-linha strong { font-weight: 600; color: var(--teal); text-align: right; }
+
+.remedio-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.janela form { margin-top: 0.4rem; }
+.janela .linha-botoes { margin-top: 1.2rem; }

@@ -1,0 +1,62 @@
+<!-- Essa tela cria a conta. Nome, email e senha, nada alem disso.
+     A ficha medica vem depois, ja dentro do app, pra pessoa nao desistir logo no comeco. -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0E3C39">
+  <title>Criar conta no BioShield</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="entrada.css">
+</head>
+<body class="pagina-entrada">
+  <main class="entrada">
+    <header class="entrada-topo">
+      <a class="voltar" href="../index.html">Voltar para o login</a>
+      <p class="marca">Bio<span>Shield</span></p>
+      <h1>Criar conta</h1>
+      <p class="entrada-subtexto">Leva menos de um minuto. A ficha médica você preenche logo depois, com calma.</p>
+    </header>
+
+    <section class="cartao entrada-cartao">
+      <form id="formulario" novalidate>
+        <label class="campo">
+          <span>Nome completo</span>
+          <input type="text" id="nome" autocomplete="name" required placeholder="Como no documento">
+        </label>
+
+        <label class="campo">
+          <span>Email</span>
+          <input type="email" id="email" autocomplete="email" inputmode="email" required placeholder="voce@exemplo.com">
+        </label>
+
+        <label class="campo">
+          <span>Senha</span>
+          <input type="password" id="senha" autocomplete="new-password" required placeholder="No mínimo 6 caracteres">
+          <span class="forca" id="forca" data-nivel="0" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="dica">Use pelo menos 6 caracteres. Misturar letras e números deixa a conta mais segura.</span>
+        </label>
+
+        <label class="campo">
+          <span>Repetir a senha</span>
+          <input type="password" id="senha2" autocomplete="new-password" required placeholder="Digite a senha de novo">
+        </label>
+
+        <p class="aviso aviso-erro" id="erro" hidden></p>
+
+        <button type="submit" class="botao" id="enviar">Criar conta</button>
+      </form>
+
+      <p class="entrada-rodape">Já tem conta? <a href="../index.html">Entrar</a></p>
+    </section>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/demo.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/cadastro.js"></script>
+</body>
+</html>

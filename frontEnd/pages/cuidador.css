@@ -1,1 +1,112 @@
 /* Estilo do painel do cuidador e dos cards de paciente. */
+
+.cartao-vinculo { background: var(--menta); border-color: var(--borda-forte); }
+
+.cartao-vinculo p {
+  color: var(--teal-medio);
+  font-size: 0.95rem;
+  margin: 0.3rem 0 1rem;
+}
+
+.cartao-vinculo input {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.pacientes {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.paciente {
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-g);
+  padding: 1.05rem 1.1rem;
+  box-shadow: var(--sombra);
+  display: grid;
+  gap: 0.9rem;
+}
+
+.paciente-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.paciente h2 {
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.paciente-medidor {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.paciente-medidor .rotulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.paciente-medidor .rotulo strong {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--teal);
+}
+
+.trilha {
+  height: 0.75rem;
+  border-radius: 999px;
+  background: var(--menta);
+  overflow: hidden;
+}
+
+.trilha i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--coral);
+  transition: width 0.35s ease;
+}
+
+.trilha.boa i { background: var(--sucesso); }
+.trilha.media i { background: var(--ambar); }
+
+.paciente-linhas {
+  display: grid;
+  gap: 0.35rem;
+  border-top: 1px solid var(--borda);
+  padding-top: 0.7rem;
+}
+
+.paciente-linha {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
+  font-size: 0.97rem;
+}
+
+.paciente-linha span { color: var(--texto-suave); }
+.paciente-linha strong { font-weight: 600; color: var(--teal); text-align: right; }
+.paciente-linha strong.alerta { color: var(--coral-escuro); }
+
+.paciente-acoes {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.nota-privacidade {
+  font-size: 0.88rem;
+  color: var(--texto-suave);
+  padding: 0 0.2rem;
+  margin: 0;
+}

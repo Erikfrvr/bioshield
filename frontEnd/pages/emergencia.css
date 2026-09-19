@@ -1,2 +1,295 @@
 /* Estilo da ficha de emergencia: fonte grande, alergia em vermelho e botao de ligar bem visivel.
    Tudo pensado pra ser lido em tres segundos, na pressa, no celular de outra pessoa. */
+
+.pagina-emergencia {
+  background: var(--branco);
+  font-size: 1.06rem;
+}
+
+.ficha {
+  max-width: 34rem;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.faixa {
+  background: var(--coral);
+  color: var(--branco);
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.faixa-titulo {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.faixa-marca {
+  margin: 0;
+  font-weight: 900;
+  font-size: 0.95rem;
+  letter-spacing: -0.02em;
+}
+
+.faixa-marca span { font-weight: 300; }
+
+.pagina-emergencia main {
+  flex: 1;
+  padding: 1.25rem;
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.estado { display: grid; gap: 0.7rem; }
+
+.estado-aviso {
+  text-align: center;
+  padding: 2.5rem 1rem 1rem;
+}
+
+.estado-aviso h1 {
+  font-size: 1.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.estado-aviso p {
+  color: var(--texto-suave);
+  max-width: 34ch;
+  margin: 0 auto 0.5rem;
+}
+
+.estado-aviso .botao { margin-top: 1rem; }
+
+.identidade { border-bottom: 3px solid var(--menta); padding-bottom: 0.9rem; }
+
+.identidade h1 {
+  font-size: 2.1rem;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+  margin-bottom: 0.6rem;
+}
+
+.identidade-dados {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.sangue {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  margin: 0;
+  background: var(--menta);
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+}
+
+.sangue span {
+  font-size: 0.85rem;
+  color: var(--teal-medio);
+  font-weight: 600;
+}
+
+.sangue strong {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--teal);
+}
+
+.atualizacao {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.quadro {
+  border: 2px solid var(--borda);
+  border-radius: var(--raio-g);
+  padding: 1rem 1.1rem;
+}
+
+.quadro h2 {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--teal-medio);
+  margin-bottom: 0.6rem;
+}
+
+.quadro p { margin: 0; font-size: 1.1rem; line-height: 1.45; }
+
+.quadro-alergia {
+  border-color: var(--coral);
+  background: var(--coral-fraco);
+}
+
+.quadro-alergia h2 { color: var(--coral-escuro); }
+
+.alergias {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.alergias li {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.alergias strong {
+  font-size: 1.55rem;
+  font-weight: 900;
+  line-height: 1.12;
+  color: var(--coral-escuro);
+  letter-spacing: -0.02em;
+}
+
+.alergias .grau {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--branco);
+  background: var(--coral-escuro);
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
+  justify-self: start;
+}
+
+.alergias .grau-moderada { background: var(--ambar); }
+.alergias .grau-leve { background: var(--teal-medio); }
+
+.alergias .reacao {
+  font-size: 0.98rem;
+  color: #7a2d1c;
+}
+
+.alergias .nenhuma {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--teal);
+}
+
+.remedios {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.remedios li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.2rem 0.8rem;
+  border-bottom: 1px solid var(--borda);
+  padding-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.remedios li:last-child { border-bottom: 0; padding-bottom: 0; }
+.remedios strong { font-weight: 700; }
+
+.remedios span {
+  color: var(--texto-suave);
+  font-size: 0.95rem;
+  text-align: right;
+  flex: none;
+}
+
+.quadro-contato {
+  border-color: var(--teal);
+  background: var(--menta-claro);
+}
+
+.quadro-contato h2 { color: var(--teal); }
+
+.contatos { display: grid; gap: 0.7rem; }
+
+.ligar {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: var(--teal);
+  color: var(--branco);
+  text-decoration: none;
+  border-radius: var(--raio);
+  padding: 0.9rem 1rem;
+  min-height: 4rem;
+}
+
+.ligar:hover { background: var(--teal-medio); }
+
+.ligar svg {
+  width: 1.7rem;
+  height: 1.7rem;
+  flex: none;
+}
+
+.ligar .quem {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.ligar .quem > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ligar .quem strong {
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.ligar .quem span {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.botao-samu {
+  background: var(--coral);
+  border-color: var(--coral);
+  min-height: 3.8rem;
+  font-size: 1.15rem;
+}
+
+.botao-samu:hover { background: var(--coral-escuro); border-color: var(--coral-escuro); }
+
+.rodape {
+  padding: 1.25rem;
+  border-top: 1px solid var(--borda);
+  background: var(--menta-claro);
+}
+
+.rodape p {
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.rodape p:last-child { margin-bottom: 0; }
+
+@media (min-width: 40rem) {
+  .identidade h1 { font-size: 2.4rem; }
+  .alergias strong { font-size: 1.7rem; }
+}

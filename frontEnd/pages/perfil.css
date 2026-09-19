@@ -1,1 +1,194 @@
 /* Estilo da tela de perfil: o card do QR Code, os blocos da ficha e o formulario de edicao. */
+
+.cartao-qr {
+  background: linear-gradient(180deg, var(--teal) 0%, var(--teal) 42%, var(--branco) 42%);
+  border-color: var(--teal);
+  padding-top: 1.3rem;
+}
+
+.qr-cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 1.1rem;
+}
+
+.qr-cabecalho h2 { color: var(--branco); }
+
+.qr-explicacao {
+  margin: 0.25rem 0 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.92rem;
+  max-width: 30ch;
+}
+
+#situacaoQr { flex: none; }
+
+.qr-moldura {
+  position: relative;
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: 0.9rem;
+  display: grid;
+  justify-items: center;
+  box-shadow: var(--sombra-alta);
+  margin-bottom: 0.9rem;
+}
+
+.qr-moldura canvas {
+  width: 100%;
+  max-width: 15rem;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.qr-moldura.inativa canvas { opacity: 0.12; }
+
+.qr-cancelado {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.2rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.qr-cancelado strong {
+  font-size: 1.5rem;
+  color: var(--coral-escuro);
+  letter-spacing: 0.02em;
+}
+
+.qr-cancelado span {
+  color: var(--texto-suave);
+  font-size: 0.92rem;
+  max-width: 22ch;
+}
+
+.qr-endereco {
+  margin: 0 0 0.2rem;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+  word-break: break-all;
+  text-align: center;
+}
+
+.qr-gerado {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+  text-align: center;
+}
+
+.qr-linha-perigo { margin-top: 0.7rem; }
+
+.qr-nota {
+  margin: 1rem 0 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--borda);
+  font-size: 0.88rem;
+  color: var(--texto-suave);
+}
+
+.sem-ficha { border-color: var(--borda-forte); background: var(--menta); }
+.sem-ficha p { margin: 0.4rem 0 0; color: var(--teal-medio); }
+
+#formularioFicha {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.itens {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.item {
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: 0.85rem;
+  background: var(--menta-claro);
+  display: grid;
+  gap: 0.6rem;
+}
+
+.item .campo { margin-bottom: 0; }
+
+.item-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.item-topo strong {
+  font-size: 0.92rem;
+  color: var(--teal-medio);
+}
+
+.remover {
+  background: none;
+  border: 0;
+  color: var(--coral-escuro);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.3rem 0.4rem;
+  border-radius: 8px;
+}
+
+.remover:hover { background: var(--coral-fraco); }
+
+.codigo-cuidador {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  color: var(--teal);
+  text-align: center;
+  background: var(--menta);
+  border: 2px dashed var(--borda-forte);
+  border-radius: var(--raio);
+  padding: 0.9rem 0.5rem;
+  margin: 0 0 0.9rem;
+}
+
+.codigo-cuidador.vazio-codigo {
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--texto-suave);
+}
+
+.lista-acessos li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
+  border-bottom: 1px solid var(--borda);
+  padding-bottom: 0.6rem;
+  font-size: 0.95rem;
+}
+
+.lista-acessos li:last-child { border-bottom: 0; padding-bottom: 0; }
+
+.lista-acessos span {
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+.lista-consequencias {
+  margin: 0 0 1.1rem;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.45rem;
+  color: var(--texto);
+  font-size: 0.95rem;
+}
+
+.lista-consequencias li::marker { color: var(--coral); }

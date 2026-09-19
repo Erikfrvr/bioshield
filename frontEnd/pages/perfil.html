@@ -1,3 +1,183 @@
 <!-- Essa tela mostra a ficha medica do usuario: tipo sanguineo, alergias, condicoes e contato de emergencia.
      Tem o QR Code em destaque no topo, com botao pra salvar imagem e pra gerar um codigo novo.
      E a tela que a pessoa mais volta pra conferir se esta tudo certo. -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0E3C39">
+  <title>Minha ficha | BioShield</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="perfil.css">
+</head>
+<body>
+  <a class="pular" href="#principal">Pular para o conteúdo</a>
+
+  <div class="app">
+    <header class="topo" id="topo"></header>
+
+    <main class="conteudo" id="principal">
+      <section class="cartao carregando" id="carregando">
+        <div class="esqueleto alto"></div>
+        <div class="esqueleto"></div>
+        <div class="esqueleto"></div>
+      </section>
+
+      <section class="cartao sem-ficha" id="semFicha" hidden>
+        <h2>Você ainda não tem ficha médica</h2>
+        <p>A ficha é o que aparece para quem escaneia o seu QR Code numa emergência. Preencha abaixo e o código é gerado na hora.</p>
+      </section>
+
+      <section class="cartao cartao-qr" id="cartaoQr" hidden aria-labelledby="tituloQr">
+        <div class="qr-cabecalho">
+          <div>
+            <h2 id="tituloQr">Meu QR Code</h2>
+            <p class="qr-explicacao">Quem escanear vê a sua ficha sem precisar de login nem de aplicativo.</p>
+          </div>
+          <span class="etiqueta etiqueta-sucesso" id="situacaoQr">Ativo</span>
+        </div>
+
+        <div class="qr-moldura" id="molduraQr">
+          <canvas id="telaQr" aria-label="QR Code da sua ficha de emergência"></canvas>
+          <div class="qr-cancelado" id="marcaCancelado" hidden>
+            <strong>Cancelado</strong>
+            <span>Este código não abre mais a sua ficha</span>
+          </div>
+        </div>
+
+        <p class="qr-endereco" id="enderecoQr"></p>
+        <p class="qr-gerado" id="geradoEm"></p>
+
+        <div class="linha-botoes">
+          <button type="button" class="botao botao-secundario" id="baixarQr">Baixar imagem</button>
+          <a class="botao botao-secundario" id="irImprimir" href="imprimir.html">Imprimir folha</a>
+        </div>
+
+        <div class="linha-botoes qr-linha-perigo">
+          <button type="button" class="botao botao-secundario" id="rotacionarQr">Trocar código</button>
+          <button type="button" class="botao botao-perigo" id="cancelarQr">Cancelar QR Code</button>
+        </div>
+
+        <button type="button" class="botao botao-coral oculto" id="reativarQr">Gerar um código novo</button>
+
+        <p class="qr-nota">Perdeu o chaveiro, a pulseira ou o cartão? Cancele o código. Quem escanear o adesivo perdido vê um aviso de cancelado e nenhum dado seu.</p>
+      </section>
+
+      <form id="formularioFicha">
+        <section class="cartao" aria-labelledby="tituloFicha">
+          <div class="cartao-cabecalho">
+            <div>
+              <h2 id="tituloFicha">Ficha médica</h2>
+              <p>O que aparece para quem socorre você.</p>
+            </div>
+          </div>
+
+          <label class="campo">
+            <span>Tipo sanguíneo</span>
+            <select id="tipoSanguineo">
+              <option value="">Não sei informar</option>
+              <option>A+</option><option>A-</option>
+              <option>B+</option><option>B-</option>
+              <option>AB+</option><option>AB-</option>
+              <option>O+</option><option>O-</option>
+            </select>
+          </label>
+
+          <label class="campo">
+            <span>Condições de saúde</span>
+            <textarea id="condicoes" placeholder="Epilepsia, diabetes tipo 2, hipertensão"></textarea>
+            <span class="dica">Escreva do jeito que você falaria. Quem lê pode não ser da área da saúde.</span>
+          </label>
+
+          <label class="campo">
+            <span>Observações para quem socorre</span>
+            <textarea id="observacoes" placeholder="Usa aparelho auditivo. Mora sozinha. Carrega caneta de adrenalina na bolsa."></textarea>
+          </label>
+        </section>
+
+        <section class="cartao" aria-labelledby="tituloAlergias">
+          <div class="cartao-cabecalho">
+            <div>
+              <h2 id="tituloAlergias">Alergias</h2>
+              <p>As graves aparecem primeiro e em vermelho na ficha.</p>
+            </div>
+            <button type="button" class="botao botao-secundario botao-pequeno" id="novaAlergia">Adicionar</button>
+          </div>
+          <div class="itens" id="listaAlergias"></div>
+          <p class="vazio" id="vazioAlergias" hidden><strong>Nenhuma alergia cadastrada</strong>Se você não tem alergia conhecida, pode deixar em branco.</p>
+        </section>
+
+        <section class="cartao" aria-labelledby="tituloContatos">
+          <div class="cartao-cabecalho">
+            <div>
+              <h2 id="tituloContatos">Contatos de emergência</h2>
+              <p>Quem aparece com botão de ligar na ficha.</p>
+            </div>
+            <button type="button" class="botao botao-secundario botao-pequeno" id="novoContato">Adicionar</button>
+          </div>
+          <div class="itens" id="listaContatos"></div>
+          <p class="vazio" id="vazioContatos" hidden><strong>Nenhum contato cadastrado</strong>Sem contato, ninguém sabe para quem ligar.</p>
+        </section>
+
+        <p class="aviso aviso-erro" id="erroFicha" hidden></p>
+
+        <button type="submit" class="botao" id="salvar">Salvar ficha</button>
+      </form>
+
+      <section class="cartao" id="cartaoCodigo" hidden aria-labelledby="tituloCodigo">
+        <div class="cartao-cabecalho">
+          <div>
+            <h2 id="tituloCodigo">Código para o cuidador</h2>
+            <p>Entregue este código a quem você autoriza a acompanhar as suas doses.</p>
+          </div>
+        </div>
+        <p class="codigo-cuidador" id="valorCodigo">Nenhum código gerado</p>
+        <button type="button" class="botao botao-secundario" id="gerarCodigo">Gerar código</button>
+      </section>
+
+      <section class="cartao" id="cartaoAcessos" hidden aria-labelledby="tituloAcessos">
+        <div class="cartao-cabecalho">
+          <div>
+            <h2 id="tituloAcessos">Quem abriu a minha ficha</h2>
+            <p>Todo acesso pelo QR Code fica registrado.</p>
+          </div>
+        </div>
+        <ul class="lista lista-acessos" id="listaAcessos"></ul>
+        <p class="vazio" id="vazioAcessos" hidden><strong>Ninguém abriu ainda</strong>O registro aparece aqui na hora que acontecer.</p>
+      </section>
+    </main>
+  </div>
+
+  <div class="sobreposicao" id="janelaCancelar" hidden role="dialog" aria-modal="true" aria-labelledby="tituloCancelar">
+    <div class="janela">
+      <h2 id="tituloCancelar">Cancelar este QR Code?</h2>
+      <p>Use isso quando perder o chaveiro, a pulseira, a carteira ou o adesivo com o código colado.</p>
+
+      <ul class="lista-consequencias">
+        <li>Todo adesivo, cartão e pulseira que já foram impressos param de funcionar na hora.</li>
+        <li>Quem escanear vê apenas um aviso de código cancelado, sem nenhum dado seu.</li>
+        <li>A sua ficha continua salva. Depois você gera um código novo e imprime de novo.</li>
+      </ul>
+
+      <label class="campo">
+        <span>Para confirmar, escreva CANCELAR</span>
+        <input type="text" id="confirmacao" autocomplete="off" autocapitalize="characters" placeholder="CANCELAR">
+      </label>
+
+      <div class="linha-botoes">
+        <button type="button" class="botao botao-secundario" id="voltarCancelar">Voltar</button>
+        <button type="button" class="botao botao-coral" id="confirmarCancelar" disabled>Cancelar QR Code</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/demo.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/qrcode.js"></script>
+  <script src="../js/perfil.js"></script>
+</body>
+</html>
