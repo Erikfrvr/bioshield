@@ -1,3 +1,74 @@
 <!-- Essa tela e o login, a porta de entrada do app.
      Tem campo de email, campo de senha, botao de entrar e link pra criar conta.
      Quando o login da certo eu guardo o token e mando a pessoa pro perfil. -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0E3C39">
+  <meta name="description" content="BioShield: ficha médica de emergência em QR Code e lembrete de medicamentos.">
+  <title>Entrar no BioShield</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="pages/entrada.css">
+</head>
+<body class="pagina-entrada">
+  <main class="entrada">
+    <header class="entrada-topo">
+      <p class="marca">
+        <svg class="escudo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2.5l8 3.2v6.1c0 4.8-3.3 9-8 10.2-4.7-1.2-8-5.4-8-10.2V5.7z"/>
+          <path d="M12 8.2v7.1M8.5 11.7h7"/>
+        </svg>
+        Bio<span>Shield</span>
+      </p>
+      <h1>A sua ficha médica aparece mesmo quando você não consegue falar.</h1>
+      <p class="entrada-subtexto">Quem chega primeiro numa emergência costuma ser um desconhecido. Um QR Code no bolso mostra alergias, remédios em uso e quem chamar.</p>
+    </header>
+
+    <section class="cartao entrada-cartao">
+      <h2>Entrar</h2>
+      <p class="entrada-apoio">Use a conta que você criou no BioShield.</p>
+
+      <form id="formulario" novalidate>
+        <label class="campo">
+          <span>Email</span>
+          <input type="email" id="email" name="email" autocomplete="email" inputmode="email" required placeholder="voce@exemplo.com">
+        </label>
+
+        <label class="campo">
+          <span>Senha</span>
+          <input type="password" id="senha" name="senha" autocomplete="current-password" required placeholder="Sua senha">
+        </label>
+
+        <p class="aviso aviso-erro" id="erro" hidden></p>
+
+        <button type="submit" class="botao" id="enviar">Entrar</button>
+      </form>
+
+      <p class="entrada-rodape">Ainda não tem conta? <a href="pages/cadastro.html">Criar conta</a></p>
+    </section>
+
+    <section class="cartao entrada-demo" id="cartaoDemo" hidden>
+      <h3>Modo demonstração ligado</h3>
+      <p>O backend não respondeu, então o app está rodando com dados fictícios. Entre com uma destas contas para ver as telas cheias.</p>
+      <ul class="lista-contas">
+        <li><strong>maria.souza@exemplo.com</strong><span>paciente com três remédios</span></li>
+        <li><strong>patricia.martins@exemplo.com</strong><span>cuidadora de dois pacientes</span></li>
+      </ul>
+      <p class="senha-demo">Senha das duas: <strong>123456</strong></p>
+    </section>
+
+    <footer class="entrada-creditos">
+      <p>BioShield. Projeto do Curso Técnico em Informática, Senac SP.</p>
+    </footer>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/demo.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>

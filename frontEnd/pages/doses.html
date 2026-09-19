@@ -1,2 +1,67 @@
 <!-- Essa tela e a agenda do dia: mostra os horarios das doses e o botao de confirmar que tomou.
      Em cima fica o percentual de adesao do dia e da semana. -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0E3C39">
+  <title>Doses de hoje | BioShield</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="doses.css">
+</head>
+<body>
+  <a class="pular" href="#principal">Pular para o conteúdo</a>
+
+  <div class="app">
+    <header class="topo" id="topo"></header>
+
+    <main class="conteudo" id="principal">
+      <section class="cartao cartao-adesao" id="cartaoAdesao" aria-labelledby="tituloAdesao">
+        <h2 id="tituloAdesao">Adesão</h2>
+
+        <div class="adesao-numero">
+          <strong id="percentualHoje">0%</strong>
+          <span id="resumoHoje">Nenhuma dose prevista para hoje</span>
+        </div>
+
+        <div class="barra" role="img" aria-label="Doses tomadas hoje" id="barraHoje">
+          <i></i>
+        </div>
+
+        <div class="adesao-semana">
+          <div>
+            <span>Últimos 7 dias</span>
+            <strong id="percentualSemana">0%</strong>
+          </div>
+          <div>
+            <span>Doses perdidas na semana</span>
+            <strong id="perdidasSemana">0</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="cartao carregando" id="carregando">
+        <div class="esqueleto alto"></div>
+        <div class="esqueleto alto"></div>
+      </section>
+
+      <p class="aviso aviso-erro" id="erro" hidden></p>
+
+      <div class="agenda" id="agenda"></div>
+
+      <section class="cartao vazio" id="vazio" hidden>
+        <strong>Nenhuma dose prevista para hoje</strong>
+        Cadastre um remédio e a agenda aparece aqui.
+      </section>
+    </main>
+  </div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/demo.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/doses.js"></script>
+</body>
+</html>

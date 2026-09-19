@@ -1,3 +1,100 @@
 <!-- Essa e a tela que abre quando alguem escaneia o QR Code da pessoa.
      Funciona sem login e sem instalar nada, porque quem abre normalmente e um estranho socorrendo.
      Mostra alergias em destaque, remedios em uso, tipo sanguineo e o botao de ligar pro contato. -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#E8604C">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Ficha de emergência BioShield.">
+  <title>Ficha de emergência | BioShield</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="emergencia.css">
+</head>
+<body class="pagina-emergencia">
+  <div class="ficha">
+    <header class="faixa">
+      <p class="faixa-titulo">Emergência médica</p>
+      <p class="faixa-marca">Bio<span>Shield</span></p>
+    </header>
+
+    <main id="conteudo">
+      <section class="estado" id="carregando">
+        <div class="esqueleto alto"></div>
+        <div class="esqueleto"></div>
+        <div class="esqueleto"></div>
+      </section>
+
+      <section class="estado estado-aviso" id="naoEncontrado" hidden>
+        <h1>Código não encontrado</h1>
+        <p>Este QR Code não corresponde a nenhuma ficha do BioShield. Confira se o código foi lido por inteiro e tente escanear de novo.</p>
+        <a class="botao botao-coral" href="tel:192">Ligar para o SAMU 192</a>
+      </section>
+
+      <section class="estado estado-aviso" id="cancelado" hidden>
+        <h1>Este código foi cancelado</h1>
+        <p>O titular cancelou este QR Code, provavelmente porque perdeu o item onde ele estava colado. Nenhum dado de saúde é mostrado aqui.</p>
+        <p>Se a pessoa precisa de socorro agora, ligue para a emergência.</p>
+        <a class="botao botao-coral" href="tel:192">Ligar para o SAMU 192</a>
+      </section>
+
+      <section class="estado estado-aviso" id="falhou" hidden>
+        <h1>Não consegui abrir a ficha</h1>
+        <p id="mensagemFalha">Tente novamente em alguns segundos.</p>
+        <a class="botao botao-coral" href="tel:192">Ligar para o SAMU 192</a>
+      </section>
+
+      <div id="ficha" hidden>
+        <section class="identidade">
+          <h1 id="nome"></h1>
+          <div class="identidade-dados">
+            <p class="sangue" id="sangue" hidden><span>Tipo sanguíneo</span><strong></strong></p>
+            <p class="atualizacao" id="atualizacao"></p>
+          </div>
+        </section>
+
+        <section class="quadro quadro-alergia" id="quadroAlergias">
+          <h2>Alergias</h2>
+          <ul class="alergias" id="listaAlergias"></ul>
+        </section>
+
+        <section class="quadro" id="quadroCondicoes" hidden>
+          <h2>Condições de saúde</h2>
+          <p id="condicoes"></p>
+        </section>
+
+        <section class="quadro" id="quadroRemedios" hidden>
+          <h2>Remédios em uso</h2>
+          <ul class="remedios" id="listaRemedios"></ul>
+        </section>
+
+        <section class="quadro" id="quadroObservacoes" hidden>
+          <h2>Observações</h2>
+          <p id="observacoes"></p>
+        </section>
+
+        <section class="quadro quadro-contato" id="quadroContatos">
+          <h2>Quem avisar</h2>
+          <div class="contatos" id="listaContatos"></div>
+        </section>
+
+        <a class="botao botao-samu" href="tel:192">Ligar para o SAMU 192</a>
+      </div>
+    </main>
+
+    <footer class="rodape">
+      <p>Ficha gerada pelo titular no BioShield. Mostra apenas o que ajuda a socorrer.</p>
+      <p>Este acesso foi registrado, com data e hora, e fica visível para o dono da ficha.</p>
+    </footer>
+  </div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/demo.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/emergencia.js"></script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+/* Estilo da folha de impressao. Tudo em milimetro, porque o tamanho aqui e tamanho de verdade:
+   o cartao precisa caber na carteira e o mini adesivo precisa caber na pulseira. */
+
+.pagina-imprimir {
+  background: var(--menta);
+  display: grid;
+  grid-template-columns: minmax(18rem, 22rem) 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  padding: 1.5rem;
+  min-height: 100vh;
+}
+
+.painel {
+  position: sticky;
+  top: 1.5rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.painel-topo {
+  background: var(--teal);
+  color: var(--branco);
+  border-radius: var(--raio-g);
+  padding: 1.3rem;
+}
+
+.painel-topo h1 {
+  color: var(--branco);
+  font-size: 1.45rem;
+  margin: 0.8rem 0 0.5rem;
+}
+
+.painel-topo p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.93rem;
+}
+
+.voltar-escuro {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.voltar-escuro:hover { color: var(--branco); }
+
+.painel-controles {
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-g);
+  padding: 1.2rem;
+  box-shadow: var(--sombra);
+}
+
+.blocos {
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: 0.8rem 0.9rem 0.9rem;
+  margin: 0 0 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.blocos legend {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--teal);
+  padding: 0 0.35rem;
+}
+
+.blocos label {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.98rem;
+  cursor: pointer;
+}
+
+.blocos input {
+  width: 1.25rem;
+  height: 1.25rem;
+  min-height: 0;
+  accent-color: var(--teal);
+  flex: none;
+}
+
+.painel-nota {
+  margin: 0.9rem 0 0;
+  font-size: 0.87rem;
+  color: var(--texto-suave);
+}
+
+.folha {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 12mm 10mm;
+  background: var(--branco);
+  box-shadow: var(--sombra-alta);
+  color: #0e3c39;
+}
+
+.folha-topo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--borda);
+  padding-bottom: 3mm;
+  margin-bottom: 5mm;
+}
+
+.folha-topo .marca { font-size: 11pt; }
+
+.folha-instrucao {
+  margin: 0;
+  font-size: 8pt;
+  color: var(--texto-suave);
+}
+
+.bloco { margin-bottom: 5mm; }
+.bloco[hidden] { display: none; }
+
+.bloco-titulo {
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: var(--teal-medio);
+  margin: 0 0 2.5mm;
+  display: flex;
+  align-items: baseline;
+  gap: 2mm;
+}
+
+.bloco-titulo span {
+  font-weight: 400;
+  color: var(--texto-suave);
+  font-size: 7.5pt;
+}
+
+.grade {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3mm;
+}
+
+.etiqueta-impressa {
+  border: 1px dashed var(--borda-forte);
+  border-radius: 2mm;
+  background: var(--branco);
+  display: flex;
+  overflow: hidden;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.etiqueta-impressa canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.etiqueta-aviso {
+  font-weight: 900;
+  color: #c3402c;
+  line-height: 1.12;
+  letter-spacing: 0.01em;
+}
+
+.etiqueta-nome {
+  font-weight: 700;
+  color: #0e3c39;
+  line-height: 1.15;
+}
+
+.etiqueta-apoio {
+  color: #526a66;
+  line-height: 1.2;
+}
+
+.etiqueta-marca {
+  font-weight: 900;
+  color: #0e3c39;
+  letter-spacing: -0.02em;
+}
+
+.etiqueta-marca span { font-weight: 300; }
+
+.modelo-cartao {
+  width: 85mm;
+  height: 54mm;
+  align-items: center;
+  gap: 3mm;
+  padding: 4mm;
+}
+
+.modelo-cartao canvas { width: 34mm; height: 34mm; flex: none; }
+
+.modelo-cartao .texto {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6mm;
+  min-width: 0;
+}
+
+.modelo-cartao .etiqueta-aviso { font-size: 10pt; }
+.modelo-cartao .etiqueta-nome { font-size: 9pt; }
+.modelo-cartao .etiqueta-apoio { font-size: 6.6pt; }
+.modelo-cartao .etiqueta-marca { font-size: 8pt; margin-top: auto; }
+
+.modelo-adesivo {
+  width: 45mm;
+  height: 58mm;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5mm;
+  padding: 3mm 2mm;
+}
+
+.modelo-adesivo canvas { width: 34mm; height: 34mm; }
+.modelo-adesivo .etiqueta-aviso { font-size: 7.4pt; }
+.modelo-adesivo .etiqueta-nome { font-size: 7pt; }
+.modelo-adesivo .etiqueta-marca { font-size: 6.6pt; margin-top: auto; }
+
+.modelo-chaveiro {
+  width: 32mm;
+  height: 45mm;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.2mm;
+  padding: 2.5mm 1.5mm;
+}
+
+.modelo-chaveiro canvas { width: 25mm; height: 25mm; }
+.modelo-chaveiro .etiqueta-aviso { font-size: 5.6pt; }
+.modelo-chaveiro .etiqueta-nome { font-size: 5.4pt; }
+.modelo-chaveiro .etiqueta-marca { font-size: 5.4pt; margin-top: auto; }
+
+.modelo-mini {
+  width: 25mm;
+  height: 30mm;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.6mm;
+  padding: 1.4mm 1mm;
+}
+
+.modelo-mini canvas { width: 19mm; height: 19mm; }
+.modelo-mini .etiqueta-aviso { font-size: 4.4pt; }
+
+.folha-rodape {
+  border-top: 1px solid var(--borda);
+  padding-top: 3mm;
+  margin-top: 4mm;
+}
+
+.folha-rodape p {
+  margin: 0;
+  font-size: 7.5pt;
+  color: var(--texto-suave);
+}
+
+@media (max-width: 70rem) {
+  .pagina-imprimir {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+  .painel { position: static; }
+  .folha {
+    width: 100%;
+    min-height: 0;
+    padding: 6mm;
+    overflow-x: auto;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  .pagina-imprimir {
+    display: block;
+    padding: 0;
+    background: #fff;
+  }
+
+  .painel { display: none; }
+
+  .folha {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0;
+    padding: 12mm 10mm;
+    box-shadow: none;
+  }
+
+  .etiqueta-impressa {
+    border-color: #b7cdc5;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .etiqueta-aviso, .etiqueta-nome, .etiqueta-marca, .etiqueta-apoio {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

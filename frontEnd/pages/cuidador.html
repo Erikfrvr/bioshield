@@ -1,2 +1,61 @@
 <!-- Essa tela e o modo cuidador: o familiar ve os pacientes que acompanha e como esta a adesao de cada um.
      Tem tambem o campo pra colar o codigo de autorizacao e criar um vinculo novo. -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0E3C39">
+  <title>Modo cuidador | BioShield</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="cuidador.css">
+</head>
+<body>
+  <a class="pular" href="#principal">Pular para o conteúdo</a>
+
+  <div class="app">
+    <header class="topo" id="topo"></header>
+
+    <main class="conteudo" id="principal">
+      <section class="cartao cartao-vinculo" aria-labelledby="tituloVinculo">
+        <h2 id="tituloVinculo">Acompanhar alguém</h2>
+        <p>Peça o código de autorização à pessoa. Ela gera esse código na própria ficha, dentro do BioShield.</p>
+
+        <form id="formularioVinculo" novalidate>
+          <label class="campo">
+            <span>Código de autorização</span>
+            <input type="text" id="codigo" autocomplete="off" autocapitalize="characters" maxlength="10" placeholder="ABCD123">
+          </label>
+
+          <p class="aviso aviso-erro" id="erroVinculo" hidden></p>
+
+          <button type="submit" class="botao" id="vincular">Acompanhar</button>
+        </form>
+      </section>
+
+      <section class="cartao carregando" id="carregando">
+        <div class="esqueleto alto"></div>
+        <div class="esqueleto alto"></div>
+      </section>
+
+      <p class="aviso aviso-erro" id="erro" hidden></p>
+
+      <div class="pacientes" id="lista"></div>
+
+      <section class="cartao vazio" id="vazio" hidden>
+        <strong>Você ainda não acompanha ninguém</strong>
+        Use o código de autorização acima para criar o primeiro vínculo.
+      </section>
+
+      <p class="nota-privacidade">O cuidador vê o acompanhamento das doses. Ele não edita a ficha médica nem vê o histórico completo de quem acompanha.</p>
+    </main>
+  </div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/demo.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/cuidador.js"></script>
+</body>
+</html>

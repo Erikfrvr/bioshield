@@ -1,0 +1,101 @@
+<!-- Essa tela monta a folha A4 com o mesmo QR Code repetido em varios tamanhos,
+     cada etiqueta ja com o aviso de emergencia do lado. A pessoa imprime, recorta e cola
+     onde quiser: carteira, mochila, chaveiro, pulseira ou geladeira. -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0E3C39">
+  <title>Folha para imprimir | BioShield</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="imprimir.css">
+</head>
+<body class="pagina-imprimir">
+  <div class="painel">
+    <header class="painel-topo">
+      <a class="voltar-escuro" href="perfil.html">Voltar para a ficha</a>
+      <h1>Folha para imprimir</h1>
+      <p>O mesmo QR Code em quatro tamanhos, com o aviso de emergência ao lado. Imprima em papel comum ou em folha adesiva, recorte nas linhas tracejadas e cole onde fizer sentido.</p>
+    </header>
+
+    <div class="painel-controles">
+      <label class="campo">
+        <span>Texto da etiqueta</span>
+        <input type="text" id="textoEtiqueta" value="EM CASO DE EMERGÊNCIA ESCANEIE ME" maxlength="46">
+      </label>
+
+      <div class="grade-dupla">
+        <label class="campo">
+          <span>Nome na etiqueta</span>
+          <select id="mostrarNome">
+            <option value="sim">Mostrar o nome</option>
+            <option value="nao">Não mostrar</option>
+          </select>
+        </label>
+
+        <label class="campo">
+          <span>Resistência do código</span>
+          <select id="nivelCorrecao">
+            <option value="M" selected>Média, desenho mais aberto</option>
+            <option value="Q">Alta, aguenta mais risco</option>
+            <option value="H">Máxima, desenho mais denso</option>
+          </select>
+        </label>
+      </div>
+
+      <fieldset class="blocos">
+        <legend>O que entra na folha</legend>
+        <label><input type="checkbox" data-bloco="cartao" checked> Cartão de carteira</label>
+        <label><input type="checkbox" data-bloco="adesivo" checked> Adesivo grande</label>
+        <label><input type="checkbox" data-bloco="chaveiro" checked> Etiqueta de chaveiro</label>
+        <label><input type="checkbox" data-bloco="mini" checked> Mini adesivo</label>
+      </fieldset>
+
+      <p class="aviso aviso-erro" id="erro" hidden></p>
+
+      <button type="button" class="botao" id="imprimir">Imprimir folha</button>
+      <p class="painel-nota">Na janela de impressão, escolha papel A4, marque a opção de imprimir cores de fundo e deixe a escala em 100%. Não use “ajustar à página”, senão o tamanho real muda.</p>
+    </div>
+  </div>
+
+  <main class="folha" id="folha">
+    <header class="folha-topo">
+      <p class="marca">Bio<span>Shield</span></p>
+      <p class="folha-instrucao">Recorte nas linhas tracejadas. Todas as etiquetas abrem a mesma ficha de emergência.</p>
+    </header>
+
+    <section class="bloco" data-bloco="cartao">
+      <h2 class="bloco-titulo">Cartão de carteira <span>85 x 54 mm</span></h2>
+      <div class="grade grade-cartao" id="gradeCartao"></div>
+    </section>
+
+    <section class="bloco" data-bloco="adesivo">
+      <h2 class="bloco-titulo">Adesivo grande <span>45 x 58 mm, para mochila e geladeira</span></h2>
+      <div class="grade grade-adesivo" id="gradeAdesivo"></div>
+    </section>
+
+    <section class="bloco" data-bloco="chaveiro">
+      <h2 class="bloco-titulo">Etiqueta de chaveiro <span>32 x 45 mm</span></h2>
+      <div class="grade grade-chaveiro" id="gradeChaveiro"></div>
+    </section>
+
+    <section class="bloco" data-bloco="mini">
+      <h2 class="bloco-titulo">Mini adesivo <span>25 x 30 mm, para pulseira e celular</span></h2>
+      <div class="grade grade-mini" id="gradeMini"></div>
+    </section>
+
+    <footer class="folha-rodape">
+      <p>Ficha de emergência BioShield. Se você perder algum destes itens, cancele o código dentro do aplicativo e imprima uma folha nova.</p>
+    </footer>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/demo.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/qrcode.js"></script>
+  <script src="../js/imprimir.js"></script>
+</body>
+</html>
