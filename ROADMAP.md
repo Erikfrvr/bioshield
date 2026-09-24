@@ -85,7 +85,7 @@ Observação: essa rota deixou de ser boba. O front chama ela para decidir se us
 
 Fase nova, que nasceu do front. O cancelamento do QR Code precisa de duas colunas que o schema atual não tem.
 
-- [ ] Rodar o ALTER em `pacientes`:
+- [x] Rodar o ALTER em `pacientes`:
 
 ```sql
 ALTER TABLE pacientes
@@ -93,9 +93,9 @@ ALTER TABLE pacientes
   ADD COLUMN qr_cancelado_em TIMESTAMP NULL AFTER qr_ativo;
 ```
 
-- [ ] Levar essas duas colunas para dentro do `database/bioshield.sql`, para quem clonar o repositório já criar o banco certo
-- [ ] Acrescentar as duas linhas no `database/DICIONARIO_DADOS.md`
-- [ ] Rodar o `bioshield.sql` num banco limpo de novo e conferir que não quebrou
+- [x] Levar essas duas colunas para dentro do `database/bioshield.sql`, para quem clonar o repositório já criar o banco certo
+- [x] Acrescentar as duas linhas no `database/DICIONARIO_DADOS.md`
+- [x] Rodar o `bioshield.sql` num banco limpo de novo e conferir que não quebrou
 
 Por que coluna nova e não apagar o token: o índice único impede token nulo repetido, e apagar o token destrói o rastro de qual código foi impresso. Marcar como inativo mantém a auditoria e deixa o cancelamento reversível por um token novo.
 
