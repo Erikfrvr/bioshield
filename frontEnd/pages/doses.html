@@ -19,15 +19,19 @@
 
     <main class="conteudo" id="principal">
       <section class="cartao cartao-adesao" id="cartaoAdesao" aria-labelledby="tituloAdesao">
-        <h2 id="tituloAdesao">Adesão</h2>
+        <div class="adesao-principal">
+          <div class="anel" role="img" aria-label="Doses tomadas hoje" id="barraHoje">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="anel-trilha" cx="60" cy="60" r="52"/>
+              <circle class="anel-valor" id="anelHoje" cx="60" cy="60" r="52"/>
+            </svg>
+            <strong id="percentualHoje">0%</strong>
+          </div>
 
-        <div class="adesao-numero">
-          <strong id="percentualHoje">0%</strong>
-          <span id="resumoHoje">Nenhuma dose prevista para hoje</span>
-        </div>
-
-        <div class="barra" role="img" aria-label="Doses tomadas hoje" id="barraHoje">
-          <i></i>
+          <div class="adesao-texto">
+            <h2 id="tituloAdesao">Adesão de hoje</h2>
+            <p id="resumoHoje">Nenhuma dose prevista para hoje</p>
+          </div>
         </div>
 
         <div class="adesao-semana">
@@ -36,11 +40,16 @@
             <strong id="percentualSemana">0%</strong>
           </div>
           <div>
-            <span>Doses perdidas na semana</span>
+            <span>Perdidas na semana</span>
             <strong id="perdidasSemana">0</strong>
           </div>
         </div>
       </section>
+
+      <div class="titulo-secao">
+        <h2>Agenda de hoje</h2>
+        <span id="dataHoje"></span>
+      </div>
 
       <section class="cartao carregando" id="carregando">
         <div class="esqueleto alto"></div>

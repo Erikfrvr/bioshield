@@ -17,8 +17,11 @@
 <body class="pagina-emergencia">
   <div class="ficha">
     <header class="faixa">
-      <p class="faixa-titulo">Emergência médica</p>
-      <p class="faixa-marca">Bio<span>Shield</span></p>
+      <p class="faixa-titulo"><i aria-hidden="true"></i>Emergência médica</p>
+      <p class="faixa-marca">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5l8 3.2v6.1c0 4.8-3.3 9-8 10.2-4.7-1.2-8-5.4-8-10.2V5.7z"/><path d="M12 8.2v7.1M8.5 11.7h7"/></svg>
+        Bio<span>Shield</span>
+      </p>
     </header>
 
     <main id="conteudo">
@@ -49,15 +52,16 @@
 
       <div id="ficha" hidden>
         <section class="identidade">
-          <h1 id="nome"></h1>
-          <div class="identidade-dados">
-            <p class="sangue" id="sangue" hidden><span>Tipo sanguíneo</span><strong></strong></p>
+          <div class="identidade-nome">
+            <p class="identidade-rotulo">Ficha médica de</p>
+            <h1 id="nome"></h1>
             <p class="atualizacao" id="atualizacao"></p>
           </div>
+          <p class="sangue" id="sangue" hidden><span>Tipo sanguíneo</span><strong></strong></p>
         </section>
 
         <section class="quadro quadro-alergia" id="quadroAlergias">
-          <h2>Alergias</h2>
+          <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.2M12 17.2v.1"/></svg>Alergias</h2>
           <ul class="alergias" id="listaAlergias"></ul>
         </section>
 
@@ -81,7 +85,12 @@
           <div class="contatos" id="listaContatos"></div>
         </section>
 
-        <a class="botao botao-samu" href="tel:192">Ligar para o SAMU 192</a>
+        <div class="barra-samu">
+          <a class="botao botao-samu" href="tel:192">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.2 3.5h3l1.5 3.8-2 1.4a12 12 0 0 0 6.6 6.6l1.4-2 3.8 1.5v3a2 2 0 0 1-2.2 2C11.4 19 5 12.6 4.2 5.7a2 2 0 0 1 2-2.2z"/></svg>
+            Ligar para o SAMU 192
+          </a>
+        </div>
       </div>
     </main>
 

@@ -1,149 +1,189 @@
-/* Estilo da agenda de doses e da barra de adesao. */
+/* Estilo da agenda de doses e do anel de adesao.
+   A agenda e uma linha do tempo: horario na esquerda, remedio no cartao, status pela cor. */
 
 .cartao-adesao {
-  background: var(--teal);
-  border-color: var(--teal);
-  color: var(--branco);
+  background: var(--branco);
+  box-shadow: var(--sombra-media);
+  padding: 1.3rem;
 }
 
-.cartao-adesao h2 {
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 0.88rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin-bottom: 0.7rem;
-}
-
-.adesao-numero {
+.adesao-principal {
   display: flex;
-  align-items: baseline;
-  gap: 0.7rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.8rem;
+  align-items: center;
+  gap: 1.2rem;
 }
 
-.adesao-numero strong {
-  font-size: 3.2rem;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -0.04em;
+.anel {
+  position: relative;
+  width: 7.5rem;
+  height: 7.5rem;
+  flex: none;
+  display: grid;
+  place-items: center;
 }
 
-.adesao-numero span {
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 0.97rem;
-}
-
-.barra {
-  height: 0.9rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18);
-  overflow: hidden;
-}
-
-.barra i {
-  display: block;
+.anel svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
   height: 100%;
-  width: 0;
-  border-radius: 999px;
-  background: var(--coral);
-  transition: width 0.35s ease;
+  transform: rotate(-90deg);
 }
 
-.barra.cheia i { background: #5fd3a3; }
+.anel circle {
+  fill: none;
+  stroke-width: 11;
+}
+
+.anel-trilha { stroke: var(--menta); }
+
+.anel-valor {
+  stroke: var(--coral);
+  stroke-linecap: round;
+  stroke-dasharray: 327;
+  stroke-dashoffset: 327;
+  transition: stroke-dashoffset 0.9s var(--curva), stroke 0.3s ease;
+}
+
+.anel.cheia .anel-valor { stroke: var(--sucesso); }
+
+.anel strong {
+  position: relative;
+  font-family: var(--fonte-titulo);
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--teal);
+}
+
+.adesao-texto h2 {
+  font-size: 1.2rem;
+  margin-bottom: 0.3rem;
+}
+
+.adesao-texto p {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 1rem;
+}
 
 .adesao-semana {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.8rem;
-  margin-top: 1.1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+}
+
+.adesao-semana div {
+  background: var(--menta-claro);
+  border-radius: var(--raio);
+  padding: 0.7rem 0.9rem;
 }
 
 .adesao-semana span {
   display: block;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.88rem;
+  color: var(--texto-suave);
 }
 
 .adesao-semana strong {
+  font-family: var(--fonte-titulo);
   font-size: 1.5rem;
   font-weight: 800;
+  color: var(--teal);
 }
 
+/* ===== Linha do tempo ===== */
+
 .agenda {
+  position: relative;
   display: grid;
-  gap: 0.8rem;
+  gap: 0.75rem;
 }
 
 .dose {
+  position: relative;
   background: var(--branco);
   border: 1px solid var(--borda);
   border-radius: var(--raio-g);
-  padding: 0.95rem 1.05rem;
+  padding: 1rem 1.05rem;
   box-shadow: var(--sombra);
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 0.9rem;
   align-items: center;
+  transition: box-shadow 0.2s ease;
 }
 
 .dose-hora {
-  font-size: 1.45rem;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  width: 4.3rem;
+  height: 4.3rem;
+  border-radius: 18px;
+  background: var(--menta);
+  font-family: var(--fonte-titulo);
+  font-size: 1.2rem;
   font-weight: 800;
   color: var(--teal);
   letter-spacing: -0.02em;
-  min-width: 3.6rem;
 }
 
 .dose-corpo { min-width: 0; }
 
 .dose h2 {
-  font-size: 1.12rem;
+  font-size: 1.15rem;
   line-height: 1.2;
   margin-bottom: 0.1rem;
 }
 
 .dose p {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   color: var(--texto-suave);
 }
 
 .dose-acao { grid-column: 1 / -1; }
-.dose-acao .botao { min-height: 3rem; }
+.dose-acao .botao { min-height: 3.1rem; }
 
 .dose-tomada {
-  border-left: 6px solid var(--sucesso);
-  background: var(--sucesso-fraco);
+  background: var(--branco);
   box-shadow: none;
+  opacity: 0.9;
 }
 
-.dose-tomada .dose-hora { color: var(--sucesso); }
+.dose-tomada .dose-hora { background: var(--sucesso-fraco); color: var(--sucesso); }
+.dose-tomada h2 { color: var(--texto-suave); }
 
 .dose-perdida {
-  border-left: 6px solid var(--coral);
-  background: var(--coral-fraco);
+  border-color: #f3c3b9;
+  background: #fffaf8;
   box-shadow: none;
 }
 
-.dose-perdida .dose-hora { color: var(--coral-escuro); }
+.dose-perdida .dose-hora { background: var(--coral-fraco); color: var(--coral-escuro); }
 
 .dose-agora {
-  border-left: 6px solid var(--coral);
-  box-shadow: var(--sombra-alta);
+  border: 2px solid var(--coral);
+  box-shadow: 0 0 0 5px rgba(232, 96, 76, 0.12), var(--sombra-media);
 }
+
+.dose-agora .dose-hora { background: var(--coral); color: var(--branco); }
+.dose-agora .botao { background: var(--coral); border-color: var(--coral); }
+.dose-agora .botao:hover { background: var(--coral-escuro); border-color: var(--coral-escuro); }
 
 .dose-selo {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 700;
-  margin-top: 0.3rem;
+  margin-top: 0.35rem;
 }
+
+.dose-selo svg { width: 1rem; height: 1rem; }
 
 .dose-selo-tomada { color: var(--sucesso); }
 .dose-selo-perdida { color: var(--coral-escuro); }
+.dose-selo-agora { color: var(--coral-escuro); }

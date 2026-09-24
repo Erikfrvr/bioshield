@@ -16,6 +16,12 @@
   UI.montarNavegacao("doses");
   UI.marcarModo();
 
+  var dataHoje = new Date().toLocaleDateString("pt-BR", { day: "numeric", month: "long" });
+  UI.elemento("#dataHoje").textContent = dataHoje;
+
+  // Comprimento da volta do anel de adesao (2 x pi x raio 52 do SVG).
+  var VOLTA_DO_ANEL = 2 * Math.PI * 52;
+
   function formatarDosagem(valor) {
     var numero = Number(valor);
     return Number.isInteger(numero) ? String(numero) : numero.toFixed(2).replace(".", ",");
@@ -37,9 +43,11 @@
 
     var selo = "";
     if (dose.status === "tomada") {
-      selo = '<span class="dose-selo dose-selo-tomada">Tomada às ' + UI.formatarHora(dose.horarioConfirmado) + "</span>";
+      selo = '<span class="dose-selo dose-selo-tomada">' + UI.icone("certo") + "Tomada às " + UI.formatarHora(dose.horarioConfirmado) + "</span>";
     } else if (dose.status === "perdida") {
-      selo = '<span class="dose-selo dose-selo-perdida">Passou do horário sem confirmação</span>';
+      selo = '<span class="dose-selo dose-selo-perdida">' + UI.icone("alerta") + "Passou do horário sem confirmação</span>";
+    } else if (ehAgora(dose)) {
+      selo = '<span class="dose-selo dose-selo-agora">' + UI.icone("relogio") + "Está na hora</span>";
     }
 
     bloco.innerHTML =
@@ -56,7 +64,7 @@
       var botao = document.createElement("button");
       botao.type = "button";
       botao.className = "botao" + (dose.status === "perdida" ? " botao-secundario" : "");
-      botao.textContent = dose.status === "perdida" ? "Tomei mesmo assim" : "Confirmar que tomei";
+      botao.innerHTML = UI.icone("certo") + (dose.status === "perdida" ? "Tomei mesmo assim" : "Confirmar que tomei");
       botao.addEventListener("click", async function () {
         botao.disabled = true;
         botao.textContent = "Confirmando";
@@ -87,8 +95,12 @@
       : "Nenhuma dose prevista para hoje";
 
     var barra = UI.elemento("#barraHoje");
-    barra.querySelector("i").style.width = hoje.percentual + "%";
+    var anel = UI.elemento("#anelHoje");
+    var fracao = Math.max(0, Math.min(100, Number(hoje.percentual) || 0)) / 100;
+    anel.style.strokeDasharray = VOLTA_DO_ANEL;
+    anel.style.strokeDashoffset = VOLTA_DO_ANEL * (1 - fracao);
     barra.classList.toggle("cheia", hoje.percentual >= 80);
+    barra.setAttribute("aria-label", hoje.percentual + "% das doses de hoje confirmadas");
 
     UI.elemento("#percentualSemana").textContent = semana.percentual + "%";
     UI.elemento("#perdidasSemana").textContent = String(semana.perdidas === undefined ? 0 : semana.perdidas);

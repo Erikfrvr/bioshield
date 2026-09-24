@@ -9,6 +9,7 @@
   if (!sessao) return;
 
   var ficha = null;
+  var jaAbriuAba = false;
 
   var carregando = UI.elemento("#carregando");
   var semFicha = UI.elemento("#semFicha");
@@ -32,12 +33,42 @@
   UI.montarNavegacao("perfil");
   UI.marcarModo();
 
+  // Abas da tela. Cada painel tem data-aba igual ao botao que abre ele.
+  var abas = UI.todos(".aba");
+  var paineis = UI.todos(".painel-aba");
+
+  function abrirAba(nome) {
+    abas.forEach(function (aba) {
+      var ativa = aba.dataset.aba === nome;
+      aba.setAttribute("aria-selected", ativa ? "true" : "false");
+      aba.tabIndex = ativa ? 0 : -1;
+    });
+    paineis.forEach(function (painel) {
+      painel.classList.toggle("fora-da-aba", painel.dataset.aba !== nome);
+    });
+  }
+
+  abas.forEach(function (aba, indice) {
+    aba.addEventListener("click", function () { abrirAba(aba.dataset.aba); });
+    aba.addEventListener("keydown", function (evento) {
+      if (evento.key !== "ArrowRight" && evento.key !== "ArrowLeft") return;
+      var passo = evento.key === "ArrowRight" ? 1 : -1;
+      var proxima = abas[(indice + passo + abas.length) % abas.length];
+      proxima.focus();
+      abrirAba(proxima.dataset.aba);
+    });
+  });
+
+  abrirAba("qr");
+
+  var ICONE_REMOVER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
+
   function linhaAlergia(dados) {
     dados = dados || { substancia: "", gravidade: "moderada", observacao: "" };
     var bloco = document.createElement("div");
     bloco.className = "item item-alergia";
     bloco.innerHTML =
-      '<div class="item-topo"><strong>Alergia</strong><button type="button" class="remover">Remover</button></div>' +
+      '<div class="item-topo"><strong>Alergia</strong><button type="button" class="remover">' + ICONE_REMOVER + "Remover</button></div>" +
       '<label class="campo"><span>Substância</span><input type="text" class="campo-substancia" required placeholder="Dipirona" value="' + UI.escapar(dados.substancia) + '"></label>' +
       '<label class="campo"><span>Gravidade</span><select class="campo-gravidade">' +
         '<option value="leve">Leve</option>' +
@@ -46,7 +77,12 @@
       "</select></label>" +
       '<label class="campo"><span>Reação que costuma ter</span><input type="text" class="campo-observacao" placeholder="Inchaço no rosto e falta de ar" value="' + UI.escapar(dados.observacao || "") + '"></label>';
 
-    bloco.querySelector(".campo-gravidade").value = dados.gravidade || "moderada";
+    var seletorGravidade = bloco.querySelector(".campo-gravidade");
+    seletorGravidade.value = dados.gravidade || "moderada";
+    bloco.dataset.gravidade = seletorGravidade.value;
+    seletorGravidade.addEventListener("change", function () {
+      bloco.dataset.gravidade = seletorGravidade.value;
+    });
     bloco.querySelector(".remover").addEventListener("click", function () {
       bloco.remove();
       atualizarVazios();
@@ -59,7 +95,7 @@
     var bloco = document.createElement("div");
     bloco.className = "item item-contato";
     bloco.innerHTML =
-      '<div class="item-topo"><strong>Contato</strong><button type="button" class="remover">Remover</button></div>' +
+      '<div class="item-topo"><strong>Contato</strong><button type="button" class="remover">' + ICONE_REMOVER + "Remover</button></div>" +
       '<label class="campo"><span>Nome</span><input type="text" class="campo-nome" required placeholder="Patrícia, filha" value="' + UI.escapar(dados.nome) + '"></label>' +
       '<div class="grade-dupla">' +
         '<label class="campo"><span>Telefone</span><input type="tel" class="campo-telefone" inputmode="numeric" required placeholder="11987654321" value="' + UI.escapar(dados.telefone || "") + '"></label>' +
@@ -82,6 +118,7 @@
     if (!ficha || !ficha.tokenQr) return;
     var endereco = UI.urlDaFicha(ficha.tokenQr);
     enderecoQr.textContent = endereco;
+    UI.elemento("#verFicha").href = endereco;
 
     try {
       BioShieldQR.desenharNoCanvas(telaQr, endereco, { escala: 8, margem: 3, cor: "#0E3C39" });
@@ -105,6 +142,43 @@
     UI.elemento("#irImprimir").classList.toggle("oculto", !ativo);
     UI.elemento("#reativarQr").classList.toggle("oculto", ativo);
     UI.elemento("#rotacionarQr").classList.toggle("oculto", !ativo);
+    UI.elemento("#verFicha").classList.toggle("oculto", !ativo);
+  }
+
+  // Resumo do que a pessoa que socorre vai ver, pra conferir sem abrir o formulario.
+  function montarPrevia() {
+    var alergias = ficha.alergias || [];
+    var graves = alergias.filter(function (item) { return item.gravidade === "grave"; }).length;
+    var contatos = ficha.contatos || [];
+
+    var linhas = [
+      {
+        rotulo: "Tipo sanguíneo",
+        valor: ficha.tipoSanguineo || "Não informado",
+        falta: !ficha.tipoSanguineo
+      },
+      {
+        rotulo: "Alergias",
+        valor: alergias.length
+          ? alergias.map(function (item) { return item.substancia; }).join(", ")
+          : "Nenhuma registrada",
+        destaque: graves > 0
+      },
+      {
+        rotulo: "Quem avisar",
+        valor: contatos.length
+          ? contatos.map(function (item) { return item.nome.split(" ")[0]; }).join(", ")
+          : "Nenhum contato",
+        falta: !contatos.length
+      }
+    ];
+
+    UI.elemento("#previaLista").innerHTML = linhas.map(function (linha) {
+      var classe = linha.destaque ? " previa-alerta" : linha.falta ? " previa-falta" : "";
+      return '<li class="' + classe.trim() + '"><span>' + linha.rotulo + "</span><strong>" + UI.escapar(linha.valor) + "</strong></li>";
+    }).join("");
+
+    UI.elemento("#previa").hidden = false;
   }
 
   function preencher() {
@@ -121,6 +195,12 @@
     atualizarVazios();
     cartaoQr.hidden = false;
     semFicha.hidden = true;
+    UI.elemento("#abas").hidden = false;
+    if (!jaAbriuAba) {
+      abrirAba("qr");
+      jaAbriuAba = true;
+    }
+    montarPrevia();
     UI.elemento("#cartaoCodigo").hidden = false;
     UI.elemento("#cartaoAcessos").hidden = false;
     desenharQr();
@@ -156,7 +236,7 @@
       var acessos = await Api.listarAcessos(ficha.id);
       var lista = UI.elemento("#listaAcessos");
       lista.innerHTML = acessos.map(function (acesso) {
-        return "<li><strong>" + UI.formatarDataHora(acesso.acessadoEm) + "</strong><span>" + UI.escapar(acesso.userAgent || acesso.ip || "origem desconhecida") + "</span></li>";
+        return "<li><i aria-hidden=\"true\"></i><strong>" + UI.formatarDataHora(acesso.acessadoEm) + "</strong><span>" + UI.escapar(acesso.userAgent || acesso.ip || "origem desconhecida") + "</span></li>";
       }).join("");
       UI.elemento("#vazioAcessos").hidden = acessos.length > 0;
     } catch (erro) {
@@ -168,6 +248,7 @@
     if (!sessao.idPaciente) {
       carregando.hidden = true;
       semFicha.hidden = false;
+      abrirAba("ficha");
       listaAlergias.appendChild(linhaAlergia());
       listaContatos.appendChild(linhaContato());
       atualizarVazios();
@@ -180,6 +261,7 @@
     } catch (erro) {
       carregando.hidden = true;
       semFicha.hidden = false;
+      abrirAba("ficha");
       UI.mostrarErro(erroFicha, "Não consegui carregar a ficha agora. " + erro.message);
     }
   }
@@ -222,6 +304,7 @@
         Api.gravarSessao(atual);
         sessao = atual;
         UI.recado("Ficha criada e QR Code gerado.");
+        jaAbriuAba = false;
       }
       preencher();
     } catch (erro) {

@@ -15,6 +15,15 @@
     if (modo === "demo") UI.elemento("#cartaoDemo").hidden = false;
   });
 
+  // No modo demonstracao, tocar numa conta de exemplo ja preenche o formulario.
+  UI.todos(".lista-contas button").forEach(function (conta) {
+    conta.addEventListener("click", function () {
+      campoEmail.value = conta.dataset.email;
+      campoSenha.value = "123456";
+      botao.focus();
+    });
+  });
+
   if (Api.sessao()) location.replace("pages/perfil.html");
 
   formulario.addEventListener("submit", async function (evento) {

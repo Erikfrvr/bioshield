@@ -1,107 +1,168 @@
-/* Estilo das telas de entrada: login e criacao de conta. */
+/* Estilo das telas de entrada: login e criacao de conta.
+   No celular fica so o essencial. No computador a tela divide em duas colunas. */
 
 .pagina-entrada {
   background: var(--teal);
   min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Escudo grande e apagado no fundo, so decoracao. */
+.pagina-entrada::before {
+  content: "";
+  position: fixed;
+  right: -8rem;
+  top: -6rem;
+  width: 26rem;
+  height: 26rem;
+  opacity: 0.05;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.2' stroke-linejoin='round'%3E%3Cpath d='M12 2.5l8 3.2v6.1c0 4.8-3.3 9-8 10.2-4.7-1.2-8-5.4-8-10.2V5.7z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 .entrada {
+  position: relative;
   max-width: var(--largura-app);
   margin: 0 auto;
-  padding: 2rem 1.25rem 3rem;
+  padding: 2rem 1.1rem 2.5rem;
   display: grid;
-  gap: 1.1rem;
+  gap: 1.6rem;
+}
+
+.entrada-lado {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
 }
 
 .entrada-topo {
   color: var(--branco);
-  padding: 0.5rem 0 0.4rem;
+  padding: 0.5rem 0.25rem 0;
+  animation: surgir 0.5s var(--curva) both;
 }
 
 .entrada-topo .marca {
-  font-size: 1.35rem;
+  font-size: 1.4rem;
   color: var(--branco);
-  margin-bottom: 1.4rem;
+  margin-bottom: 1.8rem;
 }
-
-.entrada-topo .escudo { color: var(--coral); }
 
 .entrada-topo h1 {
   color: var(--branco);
-  font-size: 1.62rem;
-  font-weight: 700;
-  max-width: 19ch;
-  margin-bottom: 0.7rem;
+  font-size: 1.85rem;
+  font-weight: 800;
+  line-height: 1.15;
+  max-width: 18ch;
+  margin-bottom: 0.9rem;
+}
+
+.entrada-topo h1 em {
+  font-style: normal;
+  color: #ff9a88;
 }
 
 .entrada-subtexto {
-  color: rgba(255, 255, 255, 0.76);
-  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 1.05rem;
   max-width: 44ch;
   margin: 0;
 }
 
-.entrada-cartao { padding: 1.4rem; }
+.recursos { display: none; }
+
+.entrada-cartao {
+  padding: 1.6rem 1.4rem;
+  border: 0;
+  box-shadow: var(--sombra-alta);
+  animation: surgir 0.5s 0.08s var(--curva) both;
+}
+
+.entrada-cartao h2 { font-size: 1.5rem; }
 
 .entrada-apoio {
   color: var(--texto-suave);
-  margin: 0.2rem 0 1.2rem;
+  margin: 0.25rem 0 1.35rem;
 }
 
-.entrada-cartao .botao { margin-top: 0.4rem; }
+.entrada-cartao .botao { margin-top: 0.6rem; }
 
 .entrada-rodape {
-  margin: 1.1rem 0 0;
-  padding-top: 1.1rem;
+  margin: 1.3rem 0 0;
+  padding-top: 1.2rem;
   border-top: 1px solid var(--borda);
   text-align: center;
   color: var(--texto-suave);
 }
 
 .entrada-demo {
-  background: var(--menta);
-  border-color: var(--borda-forte);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--raio-g);
+  padding: 1.1rem 1.2rem 1.2rem;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.95rem;
+  animation: surgir 0.5s 0.16s var(--curva) both;
 }
 
-.entrada-demo h3 { margin-bottom: 0.4rem; }
+.entrada-demo strong { color: var(--branco); }
 
-.entrada-demo p {
-  color: var(--teal-medio);
-  font-size: 0.95rem;
+.entrada-demo-titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: #f7ddb0;
+  margin-bottom: 0.4rem;
+}
+
+.entrada-demo-titulo i {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #f5b54a;
 }
 
 .lista-contas {
   list-style: none;
-  margin: 0.9rem 0;
+  margin: 0.9rem 0 0;
   padding: 0;
   display: grid;
-  gap: 0.6rem;
+  gap: 0.55rem;
 }
 
-.lista-contas li {
-  background: var(--branco);
-  border: 1px solid var(--borda);
+.lista-contas button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  text-align: left;
+  font-family: inherit;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid transparent;
   border-radius: var(--raio);
-  padding: 0.6rem 0.8rem;
-  display: grid;
+  padding: 0.65rem 0.8rem;
+  color: var(--branco);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.lista-contas strong {
-  color: var(--teal);
-  font-size: 0.95rem;
-  word-break: break-all;
+.lista-contas button:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-.lista-contas span {
-  color: var(--texto-suave);
-  font-size: 0.87rem;
-}
+.lista-contas button > span:last-child { display: grid; }
+.lista-contas strong { font-size: 1rem; }
 
-.senha-demo { margin: 0; }
+.lista-contas small {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.88rem;
+}
 
 .entrada-creditos {
   text-align: center;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 0.85rem;
 }
 
@@ -113,25 +174,77 @@
   gap: 0.4rem;
   color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
-  font-size: 0.95rem;
-  margin-bottom: 1rem;
+  font-size: 0.97rem;
+  margin-bottom: 1.4rem;
+  padding: 0.3rem 0;
 }
 
+.voltar svg { width: 1.1rem; height: 1.1rem; }
 .voltar:hover { color: var(--branco); }
 
 .forca {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.35rem;
-  margin-top: 0.5rem;
+  margin-top: 0.55rem;
 }
 
 .forca i {
   height: 0.35rem;
   border-radius: 999px;
   background: var(--borda);
+  transition: background 0.2s ease;
 }
 
 .forca[data-nivel="1"] i:nth-child(1) { background: var(--coral); }
-.forca[data-nivel="2"] i:nth-child(-n+2) { background: var(--ambar); }
+.forca[data-nivel="2"] i:nth-child(-n+2) { background: #d4901f; }
 .forca[data-nivel="3"] i { background: var(--sucesso); }
+
+/* ===== Computador: duas colunas ===== */
+
+@media (min-width: 60rem) {
+  .entrada {
+    max-width: 68rem;
+    min-height: 100vh;
+    grid-template-columns: 1.15fr 1fr;
+    align-items: center;
+    gap: 5rem;
+    padding: 3rem 2.5rem;
+  }
+
+  .entrada-topo h1 { font-size: 2.9rem; max-width: 16ch; }
+  .entrada-subtexto { font-size: 1.15rem; }
+
+  .recursos {
+    list-style: none;
+    margin: 2.4rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 1.1rem;
+  }
+
+  .recursos li {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .recurso-icone {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--raio);
+    background: rgba(255, 255, 255, 0.08);
+    color: #ff9a88;
+    flex: none;
+  }
+
+  .recurso-icone svg { width: 1.5rem; height: 1.5rem; }
+
+  .recursos div { display: grid; }
+  .recursos strong { font-size: 1.05rem; }
+  .recursos div span { color: rgba(255, 255, 255, 0.68); font-size: 0.95rem; }
+
+  .entrada-cartao { padding: 2rem 1.8rem; }
+}

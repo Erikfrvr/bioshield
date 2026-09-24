@@ -28,21 +28,26 @@
     var encerrado = remedio.ativo === false;
     var bloco = document.createElement("article");
     bloco.className = "remedio" + (encerrado ? " encerrado" : "");
+    // A proxima dose e o que a pessoa mais procura, entao ela fica em destaque.
+    // Primeira dose do dia e periodo do tratamento ficam como detalhe, em letra menor.
     bloco.innerHTML =
       '<div class="remedio-topo">' +
-        "<div>" +
+        '<span class="icone-tile" aria-hidden="true">' + UI.icone("pilula") + "</span>" +
+        '<div class="remedio-nome">' +
           "<h2>" + UI.escapar(remedio.nome) + "</h2>" +
           '<p class="remedio-dose">' + formatarDosagem(remedio.dosagem) + " " + UI.escapar(remedio.unidade) + ", " + UI.escapar(UI.descreverFrequencia(remedio.frequenciaHoras)) + "</p>" +
         "</div>" +
         '<span class="etiqueta ' + (encerrado ? "" : "etiqueta-sucesso") + '">' + (encerrado ? "Encerrado" : "Em uso") + "</span>" +
       "</div>" +
-      '<div class="remedio-linhas">' +
-        '<div class="remedio-linha"><span>Próxima dose</span><strong>' + UI.escapar(UI.quandoFor(remedio.proximaDose)) + "</strong></div>" +
-        '<div class="remedio-linha"><span>Primeira dose do dia</span><strong>' + UI.escapar(String(remedio.horarioInicial).slice(0, 5)) + "</strong></div>" +
-        '<div class="remedio-linha"><span>Tratamento</span><strong>' + UI.escapar(UI.formatarData(remedio.dataInicio)) +
-          (remedio.dataFim ? " até " + UI.escapar(UI.formatarData(remedio.dataFim)) : " sem data de fim") + "</strong></div>" +
+      '<div class="remedio-proxima">' + UI.icone("relogio") +
+        "<span>Próxima dose</span><strong>" + UI.escapar(UI.quandoFor(remedio.proximaDose)) + "</strong>" +
       "</div>" +
-      '<div class="remedio-acoes"><button type="button" class="botao botao-perigo botao-pequeno">Remover</button></div>';
+      '<div class="remedio-rodape">' +
+        '<p class="remedio-detalhe">Primeira dose às ' + UI.escapar(String(remedio.horarioInicial).slice(0, 5)) +
+          ". Desde " + UI.escapar(UI.formatarData(remedio.dataInicio)) +
+          (remedio.dataFim ? " até " + UI.escapar(UI.formatarData(remedio.dataFim)) : ", uso contínuo") + ".</p>" +
+        '<button type="button" class="botao-texto perigo">' + UI.icone("lixo") + "Remover</button>" +
+      "</div>";
 
     bloco.querySelector("button").addEventListener("click", async function () {
       var certeza = confirm("Remover " + remedio.nome + "? O histórico de doses desse remédio sai junto.");
