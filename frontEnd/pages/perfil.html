@@ -1,6 +1,8 @@
 <!-- Essa tela mostra a ficha medica do usuario: tipo sanguineo, alergias, condicoes e contato de emergencia.
      Tem o QR Code em destaque no topo, com botao pra salvar imagem e pra gerar um codigo novo.
-     E a tela que a pessoa mais volta pra conferir se esta tudo certo. -->
+     E a tela que a pessoa mais volta pra conferir se esta tudo certo.
+     Fica dividida em tres abas (QR Code, Ficha medica e Privacidade) pra pessoa nao se perder
+     numa pagina comprida demais. -->
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -19,139 +21,222 @@
     <header class="topo" id="topo"></header>
 
     <main class="conteudo" id="principal">
+      <div class="abas" role="tablist" aria-label="Partes da ficha" id="abas" hidden>
+        <button type="button" role="tab" class="aba" data-aba="qr" id="abaQr" aria-controls="painelQr">QR Code</button>
+        <button type="button" role="tab" class="aba" data-aba="ficha" id="abaFicha" aria-controls="painelFicha">Ficha médica</button>
+        <button type="button" role="tab" class="aba" data-aba="privacidade" id="abaPrivacidade" aria-controls="painelPrivacidade">Privacidade</button>
+      </div>
+
       <section class="cartao carregando" id="carregando">
         <div class="esqueleto alto"></div>
         <div class="esqueleto"></div>
         <div class="esqueleto"></div>
       </section>
 
-      <section class="cartao sem-ficha" id="semFicha" hidden>
-        <h2>Você ainda não tem ficha médica</h2>
-        <p>A ficha é o que aparece para quem escaneia o seu QR Code numa emergência. Preencha abaixo e o código é gerado na hora.</p>
-      </section>
-
-      <section class="cartao cartao-qr" id="cartaoQr" hidden aria-labelledby="tituloQr">
-        <div class="qr-cabecalho">
-          <div>
-            <h2 id="tituloQr">Meu QR Code</h2>
-            <p class="qr-explicacao">Quem escanear vê a sua ficha sem precisar de login nem de aplicativo.</p>
-          </div>
-          <span class="etiqueta etiqueta-sucesso" id="situacaoQr">Ativo</span>
-        </div>
-
-        <div class="qr-moldura" id="molduraQr">
-          <canvas id="telaQr" aria-label="QR Code da sua ficha de emergência"></canvas>
-          <div class="qr-cancelado" id="marcaCancelado" hidden>
-            <strong>Cancelado</strong>
-            <span>Este código não abre mais a sua ficha</span>
-          </div>
-        </div>
-
-        <p class="qr-endereco" id="enderecoQr"></p>
-        <p class="qr-gerado" id="geradoEm"></p>
-
-        <div class="linha-botoes">
-          <button type="button" class="botao botao-secundario" id="baixarQr">Baixar imagem</button>
-          <a class="botao botao-secundario" id="irImprimir" href="imprimir.html">Imprimir folha</a>
-        </div>
-
-        <div class="linha-botoes qr-linha-perigo">
-          <button type="button" class="botao botao-secundario" id="rotacionarQr">Trocar código</button>
-          <button type="button" class="botao botao-perigo" id="cancelarQr">Cancelar QR Code</button>
-        </div>
-
-        <button type="button" class="botao botao-coral oculto" id="reativarQr">Gerar um código novo</button>
-
-        <p class="qr-nota">Perdeu o chaveiro, a pulseira ou o cartão? Cancele o código. Quem escanear o adesivo perdido vê um aviso de cancelado e nenhum dado seu.</p>
-      </section>
-
-      <form id="formularioFicha">
-        <section class="cartao" aria-labelledby="tituloFicha">
-          <div class="cartao-cabecalho">
+      <!-- ===== Aba QR Code ===== -->
+      <div class="painel-aba" id="painelQr" data-aba="qr" role="tabpanel" aria-labelledby="abaQr">
+        <section class="cartao cartao-qr" id="cartaoQr" hidden aria-labelledby="tituloQr">
+          <div class="qr-cabecalho">
             <div>
-              <h2 id="tituloFicha">Ficha médica</h2>
-              <p>O que aparece para quem socorre você.</p>
+              <h2 id="tituloQr">Meu QR Code</h2>
+              <p class="qr-explicacao">Quem escanear vê a sua ficha sem precisar de login nem de aplicativo.</p>
+            </div>
+            <span class="etiqueta etiqueta-sucesso" id="situacaoQr">Ativo</span>
+          </div>
+
+          <div class="qr-moldura" id="molduraQr">
+            <canvas id="telaQr" aria-label="QR Code da sua ficha de emergência"></canvas>
+            <div class="qr-cancelado" id="marcaCancelado" hidden>
+              <strong>Cancelado</strong>
+              <span>Este código não abre mais a sua ficha</span>
             </div>
           </div>
 
-          <label class="campo">
-            <span>Tipo sanguíneo</span>
-            <select id="tipoSanguineo">
-              <option value="">Não sei informar</option>
-              <option>A+</option><option>A-</option>
-              <option>B+</option><option>B-</option>
-              <option>AB+</option><option>AB-</option>
-              <option>O+</option><option>O-</option>
-            </select>
-          </label>
+          <p class="qr-gerado" id="geradoEm"></p>
+          <p class="qr-endereco" id="enderecoQr"></p>
 
-          <label class="campo">
-            <span>Condições de saúde</span>
-            <textarea id="condicoes" placeholder="Epilepsia, diabetes tipo 2, hipertensão"></textarea>
-            <span class="dica">Escreva do jeito que você falaria. Quem lê pode não ser da área da saúde.</span>
-          </label>
+          <div class="linha-botoes qr-acoes">
+            <button type="button" class="botao botao-claro" id="baixarQr">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg>
+              Baixar imagem
+            </button>
+            <a class="botao botao-coral" id="irImprimir" href="imprimir.html">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3.5h10V9M7 17.5H4.5v-7a1.5 1.5 0 0 1 1.5-1.5h12a1.5 1.5 0 0 1 1.5 1.5v7H17"/><path d="M7 14h10v6.5H7z"/></svg>
+              Imprimir folha
+            </a>
+          </div>
 
-          <label class="campo">
-            <span>Observações para quem socorre</span>
-            <textarea id="observacoes" placeholder="Usa aparelho auditivo. Mora sozinha. Carrega caneta de adrenalina na bolsa."></textarea>
-          </label>
+          <button type="button" class="botao botao-coral oculto" id="reativarQr">Gerar um código novo</button>
+
+          <div class="qr-rodape">
+            <p class="qr-nota">Perdeu o chaveiro, a pulseira ou o cartão? Cancele o código. Quem escanear o adesivo perdido vê um aviso de cancelado e nenhum dado seu.</p>
+            <div class="qr-linha-perigo">
+              <button type="button" class="botao-escuro" id="rotacionarQr">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16M20 20v-4h-4"/></svg>
+                Trocar código
+              </button>
+              <button type="button" class="botao-escuro perigo" id="cancelarQr">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg>
+                Cancelar QR Code
+              </button>
+            </div>
+          </div>
         </section>
 
-        <section class="cartao" aria-labelledby="tituloAlergias">
+        <section class="cartao previa" id="previa" hidden aria-labelledby="tituloPrevia">
           <div class="cartao-cabecalho">
             <div>
-              <h2 id="tituloAlergias">Alergias</h2>
-              <p>As graves aparecem primeiro e em vermelho na ficha.</p>
+              <h2 id="tituloPrevia">O que aparece para quem socorre</h2>
+              <p>Um resumo do que está na sua ficha agora.</p>
             </div>
-            <button type="button" class="botao botao-secundario botao-pequeno" id="novaAlergia">Adicionar</button>
           </div>
-          <div class="itens" id="listaAlergias"></div>
-          <p class="vazio" id="vazioAlergias" hidden><strong>Nenhuma alergia cadastrada</strong>Se você não tem alergia conhecida, pode deixar em branco.</p>
+          <ul class="previa-lista" id="previaLista"></ul>
+          <a class="botao botao-secundario" id="verFicha" href="#" target="_blank" rel="noopener">
+            Ver a ficha como o socorrista vê
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+          </a>
+        </section>
+      </div>
+
+      <!-- ===== Aba Ficha medica ===== -->
+      <div class="painel-aba" id="painelFicha" data-aba="ficha" role="tabpanel" aria-labelledby="abaFicha">
+        <section class="cartao sem-ficha" id="semFicha" hidden>
+          <span class="icone-tile coral" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5.5c0 4.2-2.9 7.9-7 9-4.1-1.1-7-4.8-7-9V6z"/><path d="M12 8.5v6M9 11.5h6"/></svg>
+          </span>
+          <div>
+            <h2>Você ainda não tem ficha médica</h2>
+            <p>A ficha é o que aparece para quem escaneia o seu QR Code numa emergência. Preencha abaixo e o código é gerado na hora.</p>
+          </div>
         </section>
 
-        <section class="cartao" aria-labelledby="tituloContatos">
+        <form id="formularioFicha">
+          <section class="cartao" aria-labelledby="tituloFicha">
+            <div class="cartao-cabecalho">
+              <div class="cabecalho-com-icone">
+                <span class="icone-tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3 3.6 6 7 6 10.2a6 6 0 0 1-12 0c0-3.2 3-6.6 6-10.2z"/></svg>
+                </span>
+                <div>
+                  <h2 id="tituloFicha">Dados de saúde</h2>
+                  <p>O básico para quem socorre você.</p>
+                </div>
+              </div>
+            </div>
+
+            <label class="campo">
+              <span>Tipo sanguíneo</span>
+              <select id="tipoSanguineo">
+                <option value="">Não sei informar</option>
+                <option>A+</option><option>A-</option>
+                <option>B+</option><option>B-</option>
+                <option>AB+</option><option>AB-</option>
+                <option>O+</option><option>O-</option>
+              </select>
+            </label>
+
+            <label class="campo">
+              <span>Condições de saúde</span>
+              <textarea id="condicoes" placeholder="Epilepsia, diabetes tipo 2, hipertensão"></textarea>
+              <span class="dica">Escreva do jeito que você falaria. Quem lê pode não ser da área da saúde.</span>
+            </label>
+
+            <label class="campo">
+              <span>Observações para quem socorre</span>
+              <textarea id="observacoes" placeholder="Usa aparelho auditivo. Mora sozinha. Carrega caneta de adrenalina na bolsa."></textarea>
+            </label>
+          </section>
+
+          <section class="cartao" aria-labelledby="tituloAlergias">
+            <div class="cartao-cabecalho">
+              <div class="cabecalho-com-icone">
+                <span class="icone-tile coral" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.2M12 17.2v.1"/></svg>
+                </span>
+                <div>
+                  <h2 id="tituloAlergias">Alergias</h2>
+                  <p>As graves aparecem primeiro e em vermelho.</p>
+                </div>
+              </div>
+            </div>
+            <div class="itens" id="listaAlergias"></div>
+            <p class="vazio vazio-compacto" id="vazioAlergias" hidden><strong>Nenhuma alergia cadastrada</strong>Se você não tem alergia conhecida, pode deixar em branco.</p>
+            <button type="button" class="botao-adicionar" id="novaAlergia">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              Adicionar alergia
+            </button>
+          </section>
+
+          <section class="cartao" aria-labelledby="tituloContatos">
+            <div class="cartao-cabecalho">
+              <div class="cabecalho-com-icone">
+                <span class="icone-tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6.2 3.5h3l1.5 3.8-2 1.4a12 12 0 0 0 6.6 6.6l1.4-2 3.8 1.5v3a2 2 0 0 1-2.2 2C11.4 19 5 12.6 4.2 5.7a2 2 0 0 1 2-2.2z"/></svg>
+                </span>
+                <div>
+                  <h2 id="tituloContatos">Contatos de emergência</h2>
+                  <p>Aparecem com botão de ligar na ficha.</p>
+                </div>
+              </div>
+            </div>
+            <div class="itens" id="listaContatos"></div>
+            <p class="vazio vazio-compacto" id="vazioContatos" hidden><strong>Nenhum contato cadastrado</strong>Sem contato, ninguém sabe para quem ligar.</p>
+            <button type="button" class="botao-adicionar" id="novoContato">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              Adicionar contato
+            </button>
+          </section>
+
+          <p class="aviso aviso-erro" id="erroFicha" hidden></p>
+
+          <div class="salvar-fixo">
+            <button type="submit" class="botao" id="salvar">Salvar ficha</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ===== Aba Privacidade ===== -->
+      <div class="painel-aba" id="painelPrivacidade" data-aba="privacidade" role="tabpanel" aria-labelledby="abaPrivacidade">
+        <section class="cartao" id="cartaoCodigo" hidden aria-labelledby="tituloCodigo">
           <div class="cartao-cabecalho">
-            <div>
-              <h2 id="tituloContatos">Contatos de emergência</h2>
-              <p>Quem aparece com botão de ligar na ficha.</p>
+            <div class="cabecalho-com-icone">
+              <span class="icone-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l8.5-8.5M16 7l2.5 2.5M14 9l2 2"/></svg>
+              </span>
+              <div>
+                <h2 id="tituloCodigo">Código para o cuidador</h2>
+                <p>Entregue só a quem você autoriza a acompanhar as suas doses.</p>
+              </div>
             </div>
-            <button type="button" class="botao botao-secundario botao-pequeno" id="novoContato">Adicionar</button>
           </div>
-          <div class="itens" id="listaContatos"></div>
-          <p class="vazio" id="vazioContatos" hidden><strong>Nenhum contato cadastrado</strong>Sem contato, ninguém sabe para quem ligar.</p>
+          <p class="codigo-cuidador" id="valorCodigo">Nenhum código gerado</p>
+          <button type="button" class="botao botao-secundario" id="gerarCodigo">Gerar código</button>
         </section>
 
-        <p class="aviso aviso-erro" id="erroFicha" hidden></p>
-
-        <button type="submit" class="botao" id="salvar">Salvar ficha</button>
-      </form>
-
-      <section class="cartao" id="cartaoCodigo" hidden aria-labelledby="tituloCodigo">
-        <div class="cartao-cabecalho">
-          <div>
-            <h2 id="tituloCodigo">Código para o cuidador</h2>
-            <p>Entregue este código a quem você autoriza a acompanhar as suas doses.</p>
+        <section class="cartao" id="cartaoAcessos" hidden aria-labelledby="tituloAcessos">
+          <div class="cartao-cabecalho">
+            <div class="cabecalho-com-icone">
+              <span class="icone-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
+              <div>
+                <h2 id="tituloAcessos">Quem abriu a minha ficha</h2>
+                <p>Todo acesso pelo QR Code fica registrado.</p>
+              </div>
+            </div>
           </div>
-        </div>
-        <p class="codigo-cuidador" id="valorCodigo">Nenhum código gerado</p>
-        <button type="button" class="botao botao-secundario" id="gerarCodigo">Gerar código</button>
-      </section>
-
-      <section class="cartao" id="cartaoAcessos" hidden aria-labelledby="tituloAcessos">
-        <div class="cartao-cabecalho">
-          <div>
-            <h2 id="tituloAcessos">Quem abriu a minha ficha</h2>
-            <p>Todo acesso pelo QR Code fica registrado.</p>
-          </div>
-        </div>
-        <ul class="lista lista-acessos" id="listaAcessos"></ul>
-        <p class="vazio" id="vazioAcessos" hidden><strong>Ninguém abriu ainda</strong>O registro aparece aqui na hora que acontecer.</p>
-      </section>
+          <ul class="lista lista-acessos" id="listaAcessos"></ul>
+          <p class="vazio vazio-compacto" id="vazioAcessos" hidden><strong>Ninguém abriu ainda</strong>O registro aparece aqui na hora que acontecer.</p>
+        </section>
+      </div>
     </main>
   </div>
 
   <div class="sobreposicao" id="janelaCancelar" hidden role="dialog" aria-modal="true" aria-labelledby="tituloCancelar">
     <div class="janela">
+      <span class="icone-tile coral janela-icone" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.2M12 17.2v.1"/></svg>
+      </span>
       <h2 id="tituloCancelar">Cancelar este QR Code?</h2>
       <p>Use isso quando perder o chaveiro, a pulseira, a carteira ou o adesivo com o código colado.</p>
 

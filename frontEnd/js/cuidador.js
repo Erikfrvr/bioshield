@@ -34,6 +34,7 @@
 
     bloco.innerHTML =
       '<div class="paciente-topo">' +
+        '<span class="avatar avatar-grande" aria-hidden="true">' + UI.escapar(UI.inicial(paciente.nome)) + "</span>" +
         "<h2>" + UI.escapar(paciente.nome) + "</h2>" +
         '<span class="etiqueta ' + (perdidas > 0 ? "etiqueta-grave" : "etiqueta-sucesso") + '">' +
           (perdidas > 0 ? "Atenção" : "Em dia") +
@@ -47,7 +48,7 @@
         '<div class="paciente-linha"><span>Próxima dose</span><strong>' + proxima + "</strong></div>" +
         '<div class="paciente-linha"><span>Doses perdidas na semana</span><strong class="' + (perdidas > 0 ? "alerta" : "") + '">' + perdidas + "</strong></div>" +
       "</div>" +
-      '<div class="paciente-acoes"><button type="button" class="botao botao-perigo botao-pequeno">Parar de acompanhar</button></div>';
+      '<div class="paciente-acoes"><button type="button" class="botao-texto perigo">Parar de acompanhar</button></div>';
 
     bloco.querySelector("button").addEventListener("click", async function () {
       var certeza = confirm("Parar de acompanhar " + paciente.nome + "?");

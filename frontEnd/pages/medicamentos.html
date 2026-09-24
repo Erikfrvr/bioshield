@@ -18,7 +18,10 @@
     <header class="topo" id="topo"></header>
 
     <main class="conteudo" id="principal">
-      <button type="button" class="botao" id="novoRemedio">Adicionar remédio</button>
+      <button type="button" class="botao botao-coral botao-destaque" id="novoRemedio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Adicionar remédio
+      </button>
 
       <section class="cartao carregando" id="carregando">
         <div class="esqueleto alto"></div>
@@ -84,7 +87,7 @@
           <input type="time" id="horario" value="08:00" required>
         </label>
 
-        <div class="grade-dupla">
+        <div class="grade-dupla grade-datas">
           <label class="campo">
             <span>Começa em</span>
             <input type="date" id="dataInicio" required>

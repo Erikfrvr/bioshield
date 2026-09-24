@@ -1,5 +1,7 @@
 /* Estilo da ficha de emergencia: fonte grande, alergia em vermelho e botao de ligar bem visivel.
-   Tudo pensado pra ser lido em tres segundos, na pressa, no celular de outra pessoa. */
+   Tudo pensado pra ser lido em tres segundos, na pressa, no celular de outra pessoa.
+   A ordem de leitura e: quem e, tipo sanguineo, alergias, remedios, quem avisar.
+   O botao do SAMU fica preso no rodape da tela, sempre ao alcance do polegar. */
 
 .pagina-emergencia {
   background: var(--branco);
@@ -7,134 +9,217 @@
 }
 
 .ficha {
-  max-width: 34rem;
+  max-width: 36rem;
   margin: 0 auto;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--branco);
 }
 
 .faixa {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   background: var(--coral);
   color: var(--branco);
-  padding: 0.85rem 1.25rem;
+  padding: 0.85rem 1.2rem;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
 
 .faixa-titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   margin: 0;
-  font-size: 1.12rem;
-  font-weight: 900;
+  white-space: nowrap;
+  font-family: var(--fonte-titulo);
+  font-size: 1.05rem;
+  font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
+/* Ponto pulsando, pra deixar claro que e uma tela de alerta. */
+.faixa-titulo i {
+  position: relative;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--branco);
+}
+
+.faixa-titulo i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--branco);
+  animation: pulso 1.6s ease-out infinite;
+}
+
+@keyframes pulso {
+  from { transform: scale(1); opacity: 0.7; }
+  to { transform: scale(2.6); opacity: 0; }
+}
+
 .faixa-marca {
+  display: flex;
+  align-items: center;
   margin: 0;
-  font-weight: 900;
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
   font-size: 0.95rem;
   letter-spacing: -0.02em;
 }
 
-.faixa-marca span { font-weight: 300; }
+.faixa-marca svg { width: 1.1rem; height: 1.1rem; margin-right: 0.3rem; }
+.faixa-marca span { font-weight: 500; }
 
 .pagina-emergencia main {
   flex: 1;
-  padding: 1.25rem;
+  padding: 1.3rem 1.1rem 1.5rem;
   display: grid;
   gap: 1rem;
   align-content: start;
 }
 
+#ficha {
+  display: grid;
+  gap: 0.9rem;
+}
+
+#ficha[hidden] { display: none; }
+
+/* ===== Estados de aviso (nao encontrado, cancelado, falha) ===== */
+
 .estado { display: grid; gap: 0.7rem; }
 
 .estado-aviso {
+  justify-items: center;
   text-align: center;
-  padding: 2.5rem 1rem 1rem;
+  padding: 2.5rem 0.5rem 1rem;
+}
+
+.estado-aviso::before {
+  content: "";
+  width: 4.5rem;
+  height: 4.5rem;
+  margin-bottom: 0.6rem;
+  border-radius: 50%;
+  background: var(--coral-fraco) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c3402c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5l9.5 16.5h-19z'/%3E%3Cpath d='M12 10v4.2M12 17.2v.1'/%3E%3C/svg%3E") center / 2rem no-repeat;
 }
 
 .estado-aviso h1 {
-  font-size: 1.5rem;
-  margin-bottom: 0.3rem;
+  font-size: 1.6rem;
+  margin-bottom: 0.2rem;
 }
 
 .estado-aviso p {
   color: var(--texto-suave);
   max-width: 34ch;
-  margin: 0 auto 0.5rem;
+  margin: 0 auto 0.3rem;
 }
 
-.estado-aviso .botao { margin-top: 1rem; }
+.estado-aviso .botao { margin-top: 1rem; max-width: 22rem; }
 
-.identidade { border-bottom: 3px solid var(--menta); padding-bottom: 0.9rem; }
+/* ===== Identidade ===== */
 
-.identidade h1 {
-  font-size: 2.1rem;
-  font-weight: 900;
-  letter-spacing: -0.025em;
-  line-height: 1.08;
-  margin-bottom: 0.6rem;
-}
-
-.identidade-dados {
+.identidade {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  flex-wrap: wrap;
+  padding-bottom: 0.3rem;
 }
 
-.sangue {
-  display: flex;
-  align-items: baseline;
-  gap: 0.45rem;
-  margin: 0;
-  background: var(--menta);
-  border-radius: 999px;
-  padding: 0.3rem 0.9rem;
+.identidade-nome { min-width: 0; }
+
+.identidade-rotulo {
+  margin: 0 0 0.15rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--texto-suave);
 }
 
-.sangue span {
-  font-size: 0.85rem;
-  color: var(--teal-medio);
-  font-weight: 600;
-}
-
-.sangue strong {
-  font-size: 1.25rem;
-  font-weight: 900;
-  color: var(--teal);
+.identidade h1 {
+  font-size: 1.95rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  margin-bottom: 0.4rem;
+  overflow-wrap: anywhere;
 }
 
 .atualizacao {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   color: var(--texto-suave);
 }
 
+.sangue {
+  flex: none;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0.1rem;
+  margin: 0;
+  min-width: 5.8rem;
+  padding: 0.7rem 0.8rem 0.6rem;
+  background: var(--teal);
+  color: var(--branco);
+  border-radius: 20px;
+  text-align: center;
+}
+
+.sangue span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.2;
+}
+
+.sangue strong {
+  font-family: var(--fonte-titulo);
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+/* ===== Quadros de informacao ===== */
+
 .quadro {
-  border: 2px solid var(--borda);
+  background: var(--menta-claro);
   border-radius: var(--raio-g);
-  padding: 1rem 1.1rem;
+  padding: 1.05rem 1.15rem;
 }
 
 .quadro h2 {
-  font-size: 0.92rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--fonte-titulo);
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--teal-medio);
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.65rem;
 }
 
-.quadro p { margin: 0; font-size: 1.1rem; line-height: 1.45; }
+.quadro h2 svg { width: 1.2rem; height: 1.2rem; }
+
+.quadro p { margin: 0; font-size: 1.12rem; line-height: 1.45; }
 
 .quadro-alergia {
-  border-color: var(--coral);
   background: var(--coral-fraco);
+  border: 2px solid var(--coral);
 }
 
 .quadro-alergia h2 { color: var(--coral-escuro); }
@@ -144,20 +229,31 @@
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.7rem;
+  gap: 0.6rem;
 }
 
 .alergias li {
   display: grid;
-  gap: 0.15rem;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.15rem 0.7rem;
+  background: var(--branco);
+  border-radius: var(--raio);
+  padding: 0.75rem 0.9rem;
 }
 
+.alergias li.alergia-grave { border-left: 6px solid var(--coral-escuro); }
+.alergias li.alergia-moderada { border-left: 6px solid #d4901f; }
+.alergias li.alergia-leve { border-left: 6px solid var(--teal-claro); }
+
 .alergias strong {
-  font-size: 1.55rem;
-  font-weight: 900;
+  font-family: var(--fonte-titulo);
+  font-size: 1.6rem;
+  font-weight: 800;
   line-height: 1.12;
   color: var(--coral-escuro);
   letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
 }
 
 .alergias .grau {
@@ -168,23 +264,27 @@
   color: var(--branco);
   background: var(--coral-escuro);
   border-radius: 999px;
-  padding: 0.1rem 0.6rem;
-  justify-self: start;
+  padding: 0.2rem 0.65rem;
 }
 
 .alergias .grau-moderada { background: var(--ambar); }
 .alergias .grau-leve { background: var(--teal-medio); }
 
 .alergias .reacao {
-  font-size: 0.98rem;
+  grid-column: 1 / -1;
+  font-size: 1rem;
   color: #7a2d1c;
 }
 
 .alergias .nenhuma {
+  grid-column: 1 / -1;
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--teal);
 }
+
+/* Sem alergia: o quadro volta a ser neutro. */
+#quadroAlergias:not(.quadro-alergia) .alergias li { background: transparent; padding: 0; }
 
 .remedios {
   list-style: none;
@@ -201,28 +301,27 @@
   justify-content: space-between;
   gap: 0.2rem 0.8rem;
   border-bottom: 1px solid var(--borda);
-  padding-bottom: 0.5rem;
-  font-size: 1.1rem;
+  padding-bottom: 0.55rem;
+  font-size: 1.12rem;
 }
 
 .remedios li:last-child { border-bottom: 0; padding-bottom: 0; }
-.remedios strong { font-weight: 700; }
+.remedios strong { font-weight: 700; color: var(--teal); }
 
 .remedios span {
   color: var(--texto-suave);
-  font-size: 0.95rem;
+  font-size: 0.97rem;
   text-align: right;
-  flex: none;
 }
 
 .quadro-contato {
-  border-color: var(--teal);
-  background: var(--menta-claro);
+  background: var(--branco);
+  padding: 0.3rem 0 0;
 }
 
 .quadro-contato h2 { color: var(--teal); }
 
-.contatos { display: grid; gap: 0.7rem; }
+.contatos { display: grid; gap: 0.6rem; }
 
 .ligar {
   display: flex;
@@ -231,17 +330,23 @@
   background: var(--teal);
   color: var(--branco);
   text-decoration: none;
-  border-radius: var(--raio);
+  border-radius: 18px;
   padding: 0.9rem 1rem;
-  min-height: 4rem;
+  min-height: 4.2rem;
+  transition: background 0.15s ease, transform 0.1s ease;
 }
 
 .ligar:hover { background: var(--teal-medio); }
+.ligar:active { transform: scale(0.985); }
 
 .ligar svg {
-  width: 1.7rem;
-  height: 1.7rem;
+  width: 1.5rem;
+  height: 1.5rem;
   flex: none;
+  box-sizing: content-box;
+  padding: 0.55rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .ligar .quem {
@@ -258,38 +363,59 @@
 .ligar .quem strong {
   font-size: 1.15rem;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.2;
 }
 
 .ligar .quem span {
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.97rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* ===== Botao do SAMU preso no rodape ===== */
+
+.barra-samu {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  margin: 0.4rem -1.1rem -1.5rem;
+  padding: 0.75rem 1.1rem calc(0.75rem + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.94);
+  border-top: 1px solid var(--borda);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 .botao-samu {
   background: var(--coral);
   border-color: var(--coral);
-  min-height: 3.8rem;
-  font-size: 1.15rem;
+  min-height: 3.9rem;
+  font-size: 1.18rem;
+  border-radius: 18px;
 }
 
 .botao-samu:hover { background: var(--coral-escuro); border-color: var(--coral-escuro); }
 
 .rodape {
-  padding: 1.25rem;
-  border-top: 1px solid var(--borda);
+  padding: 1.2rem 1.2rem 1.4rem;
   background: var(--menta-claro);
 }
 
 .rodape p {
   margin: 0 0 0.35rem;
-  font-size: 0.85rem;
+  font-size: 0.87rem;
   color: var(--texto-suave);
 }
 
 .rodape p:last-child { margin-bottom: 0; }
 
+@media (max-width: 22rem) {
+  .identidade { flex-direction: column; }
+  .sangue { grid-auto-flow: column; gap: 0.6rem; align-items: baseline; }
+}
+
 @media (min-width: 40rem) {
-  .identidade h1 { font-size: 2.4rem; }
-  .alergias strong { font-size: 1.7rem; }
+  .identidade h1 { font-size: 2.5rem; }
+  .alergias strong { font-size: 1.75rem; }
+  .ficha { box-shadow: var(--sombra-alta); }
+  .pagina-emergencia { background: var(--menta); }
 }

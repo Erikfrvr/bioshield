@@ -1,6 +1,7 @@
 <!-- Essa tela e o login, a porta de entrada do app.
      Tem campo de email, campo de senha, botao de entrar e link pra criar conta.
-     Quando o login da certo eu guardo o token e mando a pessoa pro perfil. -->
+     Quando o login da certo eu guardo o token e mando a pessoa pro perfil.
+     No computador ela vira duas colunas: a apresentacao do app de um lado e o formulario do outro. -->
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -23,46 +24,68 @@
         </svg>
         Bio<span>Shield</span>
       </p>
-      <h1>A sua ficha médica aparece mesmo quando você não consegue falar.</h1>
+      <h1>A sua ficha médica aparece mesmo quando você <em>não consegue falar</em>.</h1>
       <p class="entrada-subtexto">Quem chega primeiro numa emergência costuma ser um desconhecido. Um QR Code no bolso mostra alergias, remédios em uso e quem chamar.</p>
+
+      <ul class="recursos">
+        <li>
+          <span class="recurso-icone" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.2"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1.2"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1.2"/><path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM14 20.5h1M20.5 14v1"/></svg>
+          </span>
+          <div><strong>QR Code de emergência</strong><span>Abre a ficha sem login e sem aplicativo.</span></div>
+        </li>
+        <li>
+          <span class="recurso-icone" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5.2l3.2 2"/></svg>
+          </span>
+          <div><strong>Lembrete de remédio</strong><span>Confirme cada dose e acompanhe a adesão.</span></div>
+        </li>
+        <li>
+          <span class="recurso-icone" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0"/><path d="M17 10.5c1.6-1.3 4-.2 4 1.7 0 1.6-2.1 3.1-4 4.3-1.9-1.2-4-2.7-4-4.3 0-1.9 2.4-3 4-1.7z"/></svg>
+          </span>
+          <div><strong>Modo cuidador</strong><span>A família acompanha as doses de longe.</span></div>
+        </li>
+      </ul>
     </header>
 
-    <section class="cartao entrada-cartao">
-      <h2>Entrar</h2>
-      <p class="entrada-apoio">Use a conta que você criou no BioShield.</p>
+    <div class="entrada-lado">
+      <section class="cartao entrada-cartao">
+        <h2>Entrar</h2>
+        <p class="entrada-apoio">Use a conta que você criou no BioShield.</p>
 
-      <form id="formulario" novalidate>
-        <label class="campo">
-          <span>Email</span>
-          <input type="email" id="email" name="email" autocomplete="email" inputmode="email" required placeholder="voce@exemplo.com">
-        </label>
+        <form id="formulario" novalidate>
+          <label class="campo">
+            <span>Email</span>
+            <input type="email" id="email" name="email" autocomplete="email" inputmode="email" required placeholder="voce@exemplo.com">
+          </label>
 
-        <label class="campo">
-          <span>Senha</span>
-          <input type="password" id="senha" name="senha" autocomplete="current-password" required placeholder="Sua senha">
-        </label>
+          <label class="campo">
+            <span>Senha</span>
+            <input type="password" id="senha" name="senha" autocomplete="current-password" required placeholder="Sua senha">
+          </label>
 
-        <p class="aviso aviso-erro" id="erro" hidden></p>
+          <p class="aviso aviso-erro" id="erro" hidden></p>
 
-        <button type="submit" class="botao" id="enviar">Entrar</button>
-      </form>
+          <button type="submit" class="botao" id="enviar">Entrar</button>
+        </form>
 
-      <p class="entrada-rodape">Ainda não tem conta? <a href="pages/cadastro.html">Criar conta</a></p>
-    </section>
+        <p class="entrada-rodape">Ainda não tem conta? <a href="pages/cadastro.html">Criar conta</a></p>
+      </section>
 
-    <section class="cartao entrada-demo" id="cartaoDemo" hidden>
-      <h3>Modo demonstração ligado</h3>
-      <p>O backend não respondeu, então o app está rodando com dados fictícios. Entre com uma destas contas para ver as telas cheias.</p>
-      <ul class="lista-contas">
-        <li><strong>maria.souza@exemplo.com</strong><span>paciente com três remédios</span></li>
-        <li><strong>patricia.martins@exemplo.com</strong><span>cuidadora de dois pacientes</span></li>
-      </ul>
-      <p class="senha-demo">Senha das duas: <strong>123456</strong></p>
-    </section>
+      <section class="entrada-demo" id="cartaoDemo" hidden>
+        <p class="entrada-demo-titulo"><i></i> Modo demonstração</p>
+        <p>O backend não respondeu, então o app roda com dados fictícios. Toque numa conta para preencher. Senha das duas: <strong>123456</strong></p>
+        <ul class="lista-contas">
+          <li><button type="button" data-email="maria.souza@exemplo.com"><span class="avatar">M</span><span><strong>Maria Souza</strong><small>paciente com três remédios</small></span></button></li>
+          <li><button type="button" data-email="patricia.martins@exemplo.com"><span class="avatar">P</span><span><strong>Patrícia Martins</strong><small>cuidadora de dois pacientes</small></span></button></li>
+        </ul>
+      </section>
 
-    <footer class="entrada-creditos">
-      <p>BioShield. Projeto do Curso Técnico em Informática, Senac SP.</p>
-    </footer>
+      <footer class="entrada-creditos">
+        <p>BioShield. Projeto do Curso Técnico em Informática, Senac SP.</p>
+      </footer>
+    </div>
   </main>
 
   <script src="js/config.js"></script>

@@ -109,7 +109,7 @@ Esta é a fase mais importante do roadmap. Ela vira o molde de todas as outras. 
 
 Daiane não mexe nesta fase. Ela lê quando estiver pronta e copia o padrão.
 
-- [ ] `npm install bcryptjs jsonwebtoken` e os tipos, **junto com a Daiane na mesma hora**
+- [x] `npm install bcryptjs jsonwebtoken` e os tipos, **junto com a Daiane na mesma hora**
 - [ ] `models/valueObjects/Email.ts`
 - [ ] `models/valueObjects/Senha.ts`
 - [ ] `models/entidade/Usuario.ts`
@@ -127,7 +127,7 @@ Daiane não mexe nesta fase. Ela lê quando estiver pronta e copia o padrão.
 - [ ] Tentar cadastrar o mesmo email duas vezes e ver se o erro sobe com status 409
 
 **Marco 3:** consigo criar conta pela API. O molde das camadas está fechado. É aqui que a Daiane destrava.
-
+ 
 ---
 
 ## Fase 4 — Autenticação  ·  **Erik**

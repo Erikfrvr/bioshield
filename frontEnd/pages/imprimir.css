@@ -38,12 +38,23 @@
 }
 
 .voltar-escuro {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
   font-size: 0.95rem;
 }
 
 .voltar-escuro:hover { color: var(--branco); }
+
+.painel .grade-dupla {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.painel .grade-dupla .campo,
+.painel .campo { margin-bottom: 1rem; }
 
 .painel-controles {
   background: var(--branco);

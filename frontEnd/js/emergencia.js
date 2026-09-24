@@ -29,9 +29,14 @@
       UI.elemento("#quadroAlergias").classList.remove("quadro-alergia");
       return;
     }
-    lista.innerHTML = alergias.map(function (item) {
+    // As graves vem primeiro, porque e o que quem socorre precisa ler antes de tudo.
+    var ordem = { grave: 0, moderada: 1, leve: 2 };
+    var ordenadas = alergias.slice().sort(function (a, b) {
+      return (ordem[a.gravidade] === undefined ? 1 : ordem[a.gravidade]) - (ordem[b.gravidade] === undefined ? 1 : ordem[b.gravidade]);
+    });
+    lista.innerHTML = ordenadas.map(function (item) {
       var grau = GRAVIDADE[item.gravidade] || "Moderada";
-      return "<li>" +
+      return '<li class="alergia-' + UI.escapar(item.gravidade || "moderada") + '">' +
         "<strong>" + UI.escapar(item.substancia) + "</strong>" +
         '<span class="grau grau-' + UI.escapar(item.gravidade || "moderada") + '">' + grau + "</span>" +
         (item.observacao ? '<span class="reacao">' + UI.escapar(item.observacao) + "</span>" : "") +

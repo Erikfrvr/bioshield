@@ -1,36 +1,46 @@
 /* Estilo da lista de remedios e do formulario de cadastro. */
 
+.botao-destaque {
+  box-shadow: var(--sombra-media);
+}
+
 .remedios {
   display: grid;
-  gap: 0.9rem;
+  gap: 0.85rem;
 }
 
 .remedio {
   background: var(--branco);
   border: 1px solid var(--borda);
-  border-left: 6px solid var(--teal);
   border-radius: var(--raio-g);
-  padding: 1rem 1.1rem;
+  padding: 1.1rem 1.15rem 0.7rem;
   box-shadow: var(--sombra);
   display: grid;
-  gap: 0.6rem;
+  gap: 0.85rem;
 }
 
 .remedio.encerrado {
-  border-left-color: var(--borda-forte);
   background: var(--menta-claro);
+  box-shadow: none;
 }
+
+.remedio.encerrado .icone-tile { background: var(--borda); color: var(--texto-suave); }
 
 .remedio-topo {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.8rem;
+  gap: 0.85rem;
+}
+
+.remedio-nome {
+  flex: 1;
+  min-width: 0;
 }
 
 .remedio h2 {
-  font-size: 1.22rem;
+  font-size: 1.25rem;
   line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .remedio-dose {
@@ -39,29 +49,48 @@
   color: var(--texto-suave);
 }
 
-.remedio-linhas {
+.remedio-proxima {
   display: grid;
-  gap: 0.3rem;
-  border-top: 1px solid var(--borda);
-  padding-top: 0.6rem;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--menta-claro);
+  border-radius: var(--raio);
+  padding: 0.75rem 0.9rem;
+  font-size: 1rem;
 }
 
-.remedio-linha {
+.remedio-proxima svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--teal-claro);
+}
+
+.remedio-proxima span { color: var(--texto-suave); }
+
+.remedio-proxima strong {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  color: var(--teal);
+  text-align: right;
+}
+
+.remedio-rodape {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 0.8rem;
-  font-size: 0.97rem;
-}
-
-.remedio-linha span { color: var(--texto-suave); }
-.remedio-linha strong { font-weight: 600; color: var(--teal); text-align: right; }
-
-.remedio-acoes {
-  display: flex;
-  justify-content: flex-end;
   gap: 0.5rem;
+  border-top: 1px solid var(--borda);
+  padding-top: 0.45rem;
 }
+
+.remedio-detalhe {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.remedio-rodape .botao-texto { flex: none; }
 
 .janela form { margin-top: 0.4rem; }
-.janela .linha-botoes { margin-top: 1.2rem; }
+.janela .linha-botoes { margin-top: 1.3rem; }
