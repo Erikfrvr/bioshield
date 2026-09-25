@@ -14,6 +14,92 @@ GET {{baseUrl}}/status
 ### USUARIOS
 ### ==========================
 
+### Cadastro valido (esperado 201, volta id, nome e email, sem senha)
+### Se rodar de novo com o mesmo email vai dar 409, troque o email para cadastrar outro
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nome": "Teste da Silva",
+  "email": "teste.silva@exemplo.com",
+  "senha": "senhaForte123"
+}
+
+### Email repetido (esperado 409). Esse email ja existe nos dados ficticios
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nome": "Maria Repetida",
+  "email": "maria.souza@exemplo.com",
+  "senha": "senhaForte123"
+}
+
+### Email repetido escrito em maiusculo e com espaco (esperado 409, o Email normaliza antes de buscar)
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nome": "Maria Repetida",
+  "email": "  MARIA.SOUZA@EXEMPLO.COM ",
+  "senha": "senhaForte123"
+}
+
+### Email invalido (esperado 400)
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nome": "Teste Email Ruim",
+  "email": "email_sem_arroba",
+  "senha": "senhaForte123"
+}
+
+### Senha curta (esperado 400, minimo de 8 caracteres)
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nome": "Teste Senha Curta",
+  "email": "senha.curta@exemplo.com",
+  "senha": "abc12"
+}
+
+### Senha sem numero (esperado 400, precisa de letra e numero)
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nome": "Teste Senha Fraca",
+  "email": "senha.fraca@exemplo.com",
+  "senha": "somenteletras"
+}
+
+### Nome vazio (esperado 400)
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nome": "   ",
+  "email": "sem.nome@exemplo.com",
+  "senha": "senhaForte123"
+}
+
+### Corpo vazio (esperado 400)
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{}
+
+### Buscar usuario por id (esperado 200, sem senha na resposta)
+GET {{baseUrl}}/usuarios/1
+
+### Buscar usuario que nao existe (esperado 404)
+GET {{baseUrl}}/usuarios/99999
+
+### Buscar com id invalido (esperado 400)
+GET {{baseUrl}}/usuarios/abc
+
 ### ==========================
 ### PACIENTE (ficha medica)
 ### ==========================
