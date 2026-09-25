@@ -93,9 +93,9 @@ ALTER TABLE pacientes
   ADD COLUMN qr_cancelado_em TIMESTAMP NULL AFTER qr_ativo;
 ```
 
-- [ ] Levar essas duas colunas para dentro do `database/bioshield.sql`, para quem clonar o repositório já criar o banco certo
-- [ ] Acrescentar as duas linhas no `database/DICIONARIO_DADOS.md`
-- [ ] Rodar o `bioshield.sql` num banco limpo de novo e conferir que não quebrou
+- [x] Levar essas duas colunas para dentro do `database/bioshield.sql`, para quem clonar o repositório já criar o banco certo
+- [x] Acrescentar as duas linhas no `database/DICIONARIO_DADOS.md`
+- [x] Rodar o `bioshield.sql` num banco limpo de novo e conferir que não quebrou
 
 Por que coluna nova e não apagar o token: o índice único impede token nulo repetido, e apagar o token destrói o rastro de qual código foi impresso. Marcar como inativo mantém a auditoria e deixa o cancelamento reversível por um token novo.
 
@@ -110,14 +110,14 @@ Esta é a fase mais importante do roadmap. Ela vira o molde de todas as outras. 
 Daiane não mexe nesta fase. Ela lê quando estiver pronta e copia o padrão.
 
 - [x] `npm install bcryptjs jsonwebtoken` e os tipos, **junto com a Daiane na mesma hora**
-- [ ] `models/valueObjects/Email.ts`
-- [ ] `models/valueObjects/Senha.ts`
-- [ ] `models/entidade/Usuario.ts`
-- [ ] `models/dto/usuario/CadastrarUsuarioDTO.ts`
-- [ ] `models/dto/usuario/LoginUsuarioDTO.ts`
-- [ ] `models/dto/usuario/UsuarioResponseDTO.ts`
-- [ ] `repository/UsuarioRepository.ts` (só a interface)
-- [ ] `infrastructure/usuarioInfrastructure.ts` (o SQL)
+- [x] `models/valueObjects/Email.ts`
+- [x] `models/valueObjects/Senha.ts`
+- [x] `models/entidade/Usuario.ts`
+- [x] `models/dto/usuario/CadastrarUsuarioDTO.ts`
+- [x] `models/dto/usuario/LoginUsuarioDTO.ts`
+- [x] `models/dto/usuario/UsuarioResponseDTO.ts`
+- [x] `repository/UsuarioRepository.ts` (só a interface)
+- [x] `infrastructure/usuarioInfrastructure.ts` (o SQL)
 - [ ] `services/UsuarioService.ts` com hash da senha e checagem de email repetido
 - [ ] `controllers/usuarioController.ts`
 - [ ] `routes/usuarioRoutes.ts` e registrar no `server.ts`
@@ -320,8 +320,8 @@ Oito telas, trinta e um arquivos. Passou por bateria automatizada no Chromium: 4
 ## Fase 12 — Demonstração
 
 - [ ] Popular o banco com um caso de exemplo bonito para gravar · **Daiane**
-- [ ] Imprimir a folha de etiquetas de verdade e colar num chaveiro para aparecer no vídeo · **Erik**
-- [ ] Gravar o fluxo completo: cadastro, ficha, QR, escanear com o celular, remédio, dose · **Erik**
+- [ ] Imprimir a folha de etiquetas de verdade e colar num chaveiro para aparecer na demo · **Erik**
+- [ ] Mostrar o fluxo completo: cadastro, ficha, QR, escanear com o celular, remédio, dose · **Erik**
 - [ ] Gravar o corte do cancelamento: escaneia e funciona, cancela no app, escaneia de novo e aparece o aviso · **Erik**
 - [ ] Guardar esse vídeo, ele serve para apresentação, portfólio e LinkedIn
 
@@ -350,8 +350,6 @@ O corte do cancelamento é o melhor plano do vídeo inteiro. É o que mostra que
 ## Se o tempo apertar
 
 Corte nesta ordem, de trás para frente: Fase 12, depois a Fase 9 (cuidador), depois o acabamento da Fase 11.
-
-O front já está pronto, então ele saiu da conta de corte. A Fase 10 não existe mais como risco.
 
 O que não pode ser cortado de jeito nenhum: Fases 1 a 6. Sem o QR de emergência funcionando não existe BioShield, existe um app de lembrete de remédio qualquer.
 

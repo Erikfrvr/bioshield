@@ -140,7 +140,7 @@ Em desenvolvimento. O andamento por fase está em [`ROADMAP.md`](ROADMAP.md).
 
 - [x] Estrutura do projeto
 - [x] Modelagem e dicionário de dados
-- [ ] Banco de dados
+- [x] Banco de dados
 - [ ] Cadastro e autenticação
 - [ ] Ficha médica
 - [ ] QR Code de emergência
