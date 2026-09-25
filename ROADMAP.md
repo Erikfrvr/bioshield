@@ -118,13 +118,13 @@ Daiane não mexe nesta fase. Ela lê quando estiver pronta e copia o padrão.
 - [x] `models/dto/usuario/UsuarioResponseDTO.ts`
 - [x] `repository/UsuarioRepository.ts` (só a interface)
 - [x] `infrastructure/usuarioInfrastructure.ts` (o SQL)
-- [ ] `services/UsuarioService.ts` com hash da senha e checagem de email repetido
-- [ ] `controllers/usuarioController.ts`
-- [ ] `routes/usuarioRoutes.ts` e registrar no `server.ts`
-- [ ] **Registrar de uma vez os seis routers no `server.ts`**, mesmo os vazios (paciente, emergencia, medicamento, dose, cuidador), para ninguém mais precisar abrir esse arquivo
-- [ ] Bloco de teste no `requests.http`
-- [ ] Cadastrar um usuário e conferir no Workbench se a senha gravou como hash
-- [ ] Tentar cadastrar o mesmo email duas vezes e ver se o erro sobe com status 409
+- [x] `services/UsuarioService.ts` com hash da senha e checagem de email repetido
+- [x] `controllers/usuarioController.ts`
+- [x] `routes/usuarioRoutes.ts` e registrar no `server.ts`
+- [x] **Registrar de uma vez os seis routers no `server.ts`**, mesmo os vazios (paciente, emergencia, medicamento, dose, cuidador), para ninguém mais precisar abrir esse arquivo
+- [x] Bloco de teste no `requests.http`
+- [x] Cadastrar um usuário e conferir no Workbench se a senha gravou como hash
+- [x] Tentar cadastrar o mesmo email duas vezes e ver se o erro sobe com status 409
 
 **Marco 3:** consigo criar conta pela API. O molde das camadas está fechado. É aqui que a Daiane destrava.
  
