@@ -7,6 +7,7 @@ import * as usuarioController from "../controllers/usuarioController";
 const router = Router();
 
 router.post("/usuarios", usuarioController.cadastrar);
+router.post("/usuarios/login", usuarioController.entrar);
 router.get("/usuarios/:id", usuarioController.buscarPorId);
 
 export default router;

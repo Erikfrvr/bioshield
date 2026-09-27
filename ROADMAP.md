@@ -132,9 +132,9 @@ Daiane não mexe nesta fase. Ela lê quando estiver pronta e copia o padrão.
 
 ## Fase 4 — Autenticação  ·  **Erik**
 
-- [ ] Método de login no `UsuarioService` comparando o hash
-- [ ] Gerar o token JWT com o id do usuário dentro
-- [ ] **Devolver `idPaciente` na resposta do login**, com `null` quando a pessoa ainda não preencheu a ficha
+- [x] Método de login no `UsuarioService` comparando o hash
+- [x] Gerar o token JWT com o id do usuário dentro
+- [x] **Devolver `idPaciente` na resposta do login**, com `null` quando a pessoa ainda não preencheu a ficha
 - [ ] Criar `middleware/autenticacao.ts` que lê o header e libera ou barra
 - [ ] Aplicar o middleware nas rotas que precisam de login
 - [ ] Deixar `GET /api/status` e `GET /api/emergencia/:token` **fora** do middleware

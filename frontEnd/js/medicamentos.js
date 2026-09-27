@@ -86,12 +86,95 @@
     }
   }
 
+  // ===== Periodo do tratamento =====
+  // A pessoa escolhe "uso continuo" ou "ate uma data". O resumo embaixo traduz a escolha em frase.
+
+  var campoInicio = UI.elemento("#dataInicio");
+  var campoFim = UI.elemento("#dataFim");
+  var blocoFim = UI.elemento("#blocoFim");
+  var resumoPeriodo = UI.elemento("#resumoPeriodo");
+
+  // Data no formato do input (aaaa-mm-dd) usando o fuso local, e nao UTC.
+  function dataDoInput(data) {
+    var mes = String(data.getMonth() + 1).padStart(2, "0");
+    var dia = String(data.getDate()).padStart(2, "0");
+    return data.getFullYear() + "-" + mes + "-" + dia;
+  }
+
+  function somarDias(valor, dias) {
+    var data = new Date(valor + "T12:00:00");
+    data.setDate(data.getDate() + dias);
+    return dataDoInput(data);
+  }
+
+  function diasEntre(inicio, fim) {
+    var umDia = 24 * 60 * 60 * 1000;
+    return Math.round((new Date(fim + "T12:00:00") - new Date(inicio + "T12:00:00")) / umDia) + 1;
+  }
+
+  function temDataFim() {
+    return formulario.querySelector('input[name="duracao"]:checked').value === "data";
+  }
+
+  function atualizarPeriodo() {
+    var comFim = temDataFim();
+    blocoFim.hidden = !comFim;
+    campoFim.min = campoInicio.value;
+
+    var inicio = campoInicio.value;
+    var fim = campoFim.value;
+
+    formulario.querySelectorAll(".atalho").forEach(function (atalho) {
+      var ativo = comFim && inicio && fim && somarDias(inicio, Number(atalho.dataset.dias) - 1) === fim;
+      atalho.classList.toggle("ativo", Boolean(ativo));
+      atalho.setAttribute("aria-pressed", ativo ? "true" : "false");
+    });
+
+    var frase;
+    resumoPeriodo.classList.toggle("alerta", Boolean(comFim && inicio && fim && fim < inicio));
+    if (!inicio) {
+      frase = "Escolha a data em que o tratamento começa.";
+    } else if (!comFim) {
+      frase = "<strong>Uso contínuo</strong> a partir de " + UI.escapar(UI.formatarData(inicio)) + ".";
+    } else if (!fim) {
+      frase = "Escolha uma duração ou a data do último dia.";
+    } else if (fim < inicio) {
+      frase = "O último dia não pode ser antes do início.";
+    } else {
+      var dias = diasEntre(inicio, fim);
+      frase = "<strong>" + dias + (dias === 1 ? " dia" : " dias") + "</strong> de tratamento, de " +
+        UI.escapar(UI.formatarData(inicio)) + " a " + UI.escapar(UI.formatarData(fim)) + ".";
+    }
+    // O span segura a frase inteira junta, do lado do icone do resumo.
+    resumoPeriodo.innerHTML = "<span>" + frase + "</span>";
+  }
+
+  formulario.querySelectorAll('input[name="duracao"]').forEach(function (opcao) {
+    opcao.addEventListener("change", function () {
+      atualizarPeriodo();
+      if (temDataFim() && !campoFim.value) campoFim.focus();
+    });
+  });
+
+  formulario.querySelectorAll(".atalho").forEach(function (atalho) {
+    atalho.addEventListener("click", function () {
+      if (!campoInicio.value) campoInicio.value = dataDoInput(new Date());
+      // "7 dias" conta o dia de inicio, entao o ultimo dia e inicio + 6.
+      campoFim.value = somarDias(campoInicio.value, Number(atalho.dataset.dias) - 1);
+      atualizarPeriodo();
+    });
+  });
+
+  campoInicio.addEventListener("input", atualizarPeriodo);
+  campoFim.addEventListener("input", atualizarPeriodo);
+
   function abrir() {
     UI.limparErro(erroFormulario);
     formulario.reset();
     UI.elemento("#horario").value = "08:00";
     UI.elemento("#frequencia").value = "12";
-    UI.elemento("#dataInicio").value = new Date().toISOString().slice(0, 10);
+    campoInicio.value = dataDoInput(new Date());
+    atualizarPeriodo();
     janela.hidden = false;
     UI.elemento("#nome").focus();
   }
@@ -122,8 +205,8 @@
       unidade: UI.elemento("#unidade").value,
       frequenciaHoras: Number(UI.elemento("#frequencia").value),
       horarioInicial: UI.elemento("#horario").value,
-      dataInicio: UI.elemento("#dataInicio").value,
-      dataFim: UI.elemento("#dataFim").value || null
+      dataInicio: campoInicio.value,
+      dataFim: temDataFim() ? campoFim.value || null : null
     };
 
     if (!dados.nome) {
@@ -136,6 +219,10 @@
     }
     if (!dados.horarioInicial || !dados.dataInicio) {
       UI.mostrarErro(erroFormulario, "Preencha o horário da primeira dose e a data de início.");
+      return;
+    }
+    if (temDataFim() && !dados.dataFim) {
+      UI.mostrarErro(erroFormulario, "Escolha a data do último dia ou marque uso contínuo.");
       return;
     }
     if (dados.dataFim && dados.dataFim < dados.dataInicio) {

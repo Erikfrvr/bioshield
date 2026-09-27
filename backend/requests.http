@@ -100,6 +100,52 @@ GET {{baseUrl}}/usuarios/99999
 ### Buscar com id invalido (esperado 400)
 GET {{baseUrl}}/usuarios/abc
 
+### Login valido com ficha preenchida (esperado 200, volta token, usuario e idPaciente com numero)
+### A senha dos dados ficticios e 123456
+POST {{baseUrl}}/usuarios/login
+Content-Type: application/json
+
+{
+  "email": "maria.souza@exemplo.com",
+  "senha": "123456"
+}
+
+### Login de conta recem criada, sem ficha (esperado 200 com idPaciente null)
+### Use o email que voce cadastrou no primeiro bloco desta secao
+POST {{baseUrl}}/usuarios/login
+Content-Type: application/json
+
+{
+  "email": "teste.silva@exemplo.com",
+  "senha": "senhaForte123"
+}
+
+### Senha errada (esperado 401, mensagem "Email ou senha não conferem.")
+POST {{baseUrl}}/usuarios/login
+Content-Type: application/json
+
+{
+  "email": "maria.souza@exemplo.com",
+  "senha": "senhaErrada1"
+}
+
+### Email que nao tem conta (esperado 401, a MESMA mensagem da senha errada)
+POST {{baseUrl}}/usuarios/login
+Content-Type: application/json
+
+{
+  "email": "ninguem@exemplo.com",
+  "senha": "123456"
+}
+
+### Login sem senha (esperado 400)
+POST {{baseUrl}}/usuarios/login
+Content-Type: application/json
+
+{
+  "email": "maria.souza@exemplo.com"
+}
+
 ### ==========================
 ### PACIENTE (ficha medica)
 ### ==========================
