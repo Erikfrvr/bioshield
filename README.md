@@ -94,7 +94,7 @@ cd bioshield/backend
 npm install
 ```
 
-Crie o banco executando, nesta ordem, os scripts `database/bioshield.sql` e `database/dados_teste.sql`.
+Crie o banco executando, nesta ordem, os scripts `database/bioshield.sql` e `database/dados_ficticios.sql`.
 
 Configure o ambiente:
 
@@ -102,7 +102,7 @@ Configure o ambiente:
 cp .env.example .env
 ```
 
-Preencha o `.env` com os dados do seu MySQL e suba o servidor:
+Preencha o `.env` com os dados do seu MySQL. No XAMPP o usuário `root` vem sem senha, então nesse caso deixe `DB_PASSWORD=` vazio. Depois suba o servidor:
 
 ```bash
 npm run dev
@@ -111,6 +111,20 @@ npm run dev
 A API responde em `http://localhost:3000/api`.
 
 Para o front, abra `frontEnd/index.html` com a extensão Live Server do VS Code.
+
+Para testar as rotas sem o front, use o arquivo `backend/requests.http` com a extensão REST Client do VS Code. Cada bloco tem o status esperado escrito no comentário.
+
+## Rotas prontas
+
+| Método | Rota | O que faz | Respostas |
+|---|---|---|---|
+| `GET` | `/api/status` | Confirma que a API está de pé | `200` |
+| `POST` | `/api/usuarios` | Cadastra uma conta com nome, email e senha | `201`, `400` dado inválido, `409` email já cadastrado |
+| `GET` | `/api/usuarios/:id` | Busca uma conta pelo id | `200`, `400` id inválido, `404` não encontrado |
+
+A senha precisa ter pelo menos 8 caracteres, com pelo menos uma letra e um número. Ela é gravada só como hash bcrypt e nunca volta em nenhuma resposta. O email é guardado em minúsculo, então `Maria@Exemplo.com` e `maria@exemplo.com` são a mesma conta.
+
+O contrato completo, incluindo as rotas que ainda vão ser feitas, está em [`frontEnd/CONTRATO_API.md`](frontEnd/CONTRATO_API.md).
 
 ## Banco de dados
 
@@ -141,7 +155,8 @@ Em desenvolvimento. O andamento por fase está em [`ROADMAP.md`](ROADMAP.md).
 - [x] Estrutura do projeto
 - [x] Modelagem e dicionário de dados
 - [x] Banco de dados
-- [ ] Cadastro e autenticação
+- [x] Cadastro de usuário
+- [ ] Login e autenticação com JWT
 - [ ] Ficha médica
 - [ ] QR Code de emergência
 - [ ] Medicamentos e doses

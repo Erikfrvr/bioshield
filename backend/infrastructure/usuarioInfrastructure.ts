@@ -58,6 +58,21 @@ export class UsuarioInfrastructure implements UsuarioRepository {
     }
   }
 
+  // Usado no login: descobre qual ficha e desse usuario. Cada usuario tem no maximo uma,
+  // porque pacientes.id_usuario e unico no banco.
+  async buscarIdPaciente(idUsuario: number): Promise<number | null> {
+    const conexao = await pool.getConnection();
+    try {
+      const [linhas] = await conexao.query<RowDataPacket[]>(
+        "SELECT id FROM pacientes WHERE id_usuario = ?",
+        [idUsuario]
+      );
+      return linhas.length === 0 ? null : Number(linhas[0].id);
+    } finally {
+      conexao.release();
+    }
+  }
+
   // Transforma a linha do banco na entidade. A senha do banco ja e hash, entao entra pelo aPartirDoHash
   private paraEntidade(linha: UsuarioLinha): Usuario {
     return new Usuario(

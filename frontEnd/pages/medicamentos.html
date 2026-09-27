@@ -87,18 +87,56 @@
           <input type="time" id="horario" value="08:00" required>
         </label>
 
-        <div class="grade-dupla grade-datas">
+        <!-- Periodo do tratamento: a pessoa escolhe entre uso continuo e data para acabar.
+             O campo "Termina em" so aparece quando o tratamento tem fim. -->
+        <fieldset class="periodo">
+          <legend>Por quanto tempo vai tomar?</legend>
+
           <label class="campo">
             <span>Começa em</span>
             <input type="date" id="dataInicio" required>
           </label>
 
-          <label class="campo">
-            <span>Termina em</span>
-            <input type="date" id="dataFim">
-            <span class="dica">Deixe em branco para uso contínuo.</span>
-          </label>
-        </div>
+          <div class="periodo-opcoes">
+            <label class="opcao-periodo">
+              <input type="radio" name="duracao" value="continuo" checked>
+              <span class="opcao-icone" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12c-2-2.7-3.6-4-5.5-4a4 4 0 0 0 0 8c1.9 0 3.5-1.3 5.5-4zm0 0c2 2.7 3.6 4 5.5 4a4 4 0 0 0 0-8c-1.9 0-3.5 1.3-5.5 4z"/></svg>
+              </span>
+              <span class="opcao-texto">
+                <strong>Uso contínuo</strong>
+                <small>Sem data para parar</small>
+              </span>
+            </label>
+
+            <label class="opcao-periodo">
+              <input type="radio" name="duracao" value="data">
+              <span class="opcao-icone" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4M9 15l2 2 4-4"/></svg>
+              </span>
+              <span class="opcao-texto">
+                <strong>Até uma data</strong>
+                <small>Tratamento com fim</small>
+              </span>
+            </label>
+          </div>
+
+          <div class="periodo-fim" id="blocoFim" hidden>
+            <div class="atalhos" role="group" aria-label="Duração rápida">
+              <button type="button" class="atalho" data-dias="7">7 dias</button>
+              <button type="button" class="atalho" data-dias="10">10 dias</button>
+              <button type="button" class="atalho" data-dias="14">14 dias</button>
+              <button type="button" class="atalho" data-dias="30">30 dias</button>
+            </div>
+
+            <label class="campo">
+              <span>Termina em</span>
+              <input type="date" id="dataFim">
+            </label>
+          </div>
+
+          <p class="periodo-resumo" id="resumoPeriodo" aria-live="polite"></p>
+        </fieldset>
 
         <p class="aviso aviso-erro" id="erroFormulario" hidden></p>
 

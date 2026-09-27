@@ -94,3 +94,207 @@
 
 .janela form { margin-top: 0.4rem; }
 .janela .linha-botoes { margin-top: 1.3rem; }
+
+/* ===== Periodo do tratamento ===== */
+
+.periodo {
+  margin: 0 0 1.05rem;
+  padding: 1.1rem 1rem 1rem;
+  border: 2px solid var(--borda);
+  border-radius: var(--raio-g);
+  background: linear-gradient(180deg, var(--menta-claro), var(--branco) 70%);
+  min-width: 0;
+}
+
+.periodo legend {
+  padding: 0 0.5rem;
+  margin-left: -0.3rem;
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--teal);
+}
+
+.periodo .campo { margin-bottom: 0.85rem; }
+
+.periodo-opcoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.opcao-periodo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.85rem 0.8rem;
+  background: var(--branco);
+  border: 2px solid var(--borda);
+  border-radius: var(--raio);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.2s ease, transform 0.2s var(--curva);
+}
+
+.opcao-periodo:hover { border-color: var(--borda-forte); }
+
+/* O radio de verdade fica invisivel mas continua focavel pelo teclado. */
+.opcao-periodo input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  pointer-events: none;
+}
+
+.opcao-icone {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 12px;
+  background: var(--menta);
+  color: var(--teal-medio);
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.25s var(--curva);
+}
+
+.opcao-icone svg { width: 1.45rem; height: 1.45rem; }
+
+.opcao-texto { display: grid; min-width: 0; line-height: 1.2; }
+
+.opcao-texto strong {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--teal);
+}
+
+.opcao-texto small {
+  font-size: 0.84rem;
+  color: var(--texto-suave);
+  margin-top: 0.15rem;
+}
+
+.opcao-periodo:has(input:checked) {
+  border-color: var(--teal-claro);
+  background: var(--menta);
+  box-shadow: 0 6px 18px rgba(14, 60, 57, 0.14);
+  transform: translateY(-1px);
+}
+
+.opcao-periodo:has(input:checked) .opcao-icone {
+  background: var(--teal);
+  color: var(--branco);
+  transform: scale(1.06);
+}
+
+/* Selo de "marcado" no canto do cartao escolhido. */
+.opcao-periodo::after {
+  content: "";
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 50%;
+  background: var(--coral) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center / 0.85rem no-repeat;
+  box-shadow: 0 0 0 3px var(--branco);
+  transform: scale(0);
+  transition: transform 0.25s var(--curva);
+}
+
+.opcao-periodo:has(input:checked)::after { transform: scale(1); }
+
+.opcao-periodo:has(input:focus-visible) {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(53, 129, 122, 0.25);
+}
+
+.periodo-fim {
+  margin-top: 0.95rem;
+  animation: subir 0.3s var(--curva) both;
+}
+
+.atalhos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.8rem;
+}
+
+.atalho {
+  font-family: var(--fonte-numero);
+  font-weight: 700;
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--teal-medio);
+  background: var(--branco);
+  border: 2px solid var(--borda);
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  min-height: 2.4rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.atalho:hover { border-color: var(--borda-forte); }
+
+.atalho:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(53, 129, 122, 0.25);
+}
+
+.atalho.ativo {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--branco);
+}
+
+.periodo-fim .campo { margin-bottom: 0; }
+
+.periodo-resumo {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0.95rem 0 0;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--raio);
+  background: var(--teal);
+  color: #d9ece7;
+  font-family: var(--fonte-numero);
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+}
+
+.periodo-resumo::before {
+  content: "";
+  flex: none;
+  width: 1.2rem;
+  height: 1.2rem;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff9b89' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='15.5' rx='3'/%3E%3Cpath d='M3.5 10h17M8 3v4M16 3v4'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.periodo-resumo strong {
+  font-family: var(--fonte-numero);
+  font-weight: 800;
+  color: var(--branco);
+}
+
+.periodo-resumo.alerta {
+  background: var(--coral-fraco);
+  color: var(--coral-escuro);
+}
+
+.periodo-resumo.alerta::before { filter: saturate(2) brightness(0.8); }
+
+@media (max-width: 24rem) {
+  .periodo-opcoes { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opcao-periodo, .opcao-icone, .opcao-periodo::after, .periodo-fim { transition: none; animation: none; }
+}

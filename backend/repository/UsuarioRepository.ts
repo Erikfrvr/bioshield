@@ -5,4 +5,6 @@ export interface UsuarioRepository {
     cadastrar(usuario: any):Promise<void>;
     buscarPorEmail(email: string): Promise<any>;
     buscarPorId(id: number): Promise<any>;
+    // Devolve o id da ficha medica desse usuario, ou null se ele ainda nao criou a ficha
+    buscarIdPaciente(idUsuario: number): Promise<number | null>;
 }
