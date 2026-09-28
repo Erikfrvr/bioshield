@@ -259,7 +259,7 @@ Começa depois do Marco 4. Roda em paralelo com as Fases 5 e 6 do Erik.
 
 ## Fase 9 — Modo cuidador  ·  **Daiane**
 
-- [ ] `entidade/Cuidador.ts`
+- [x] `entidade/Cuidador.ts`
 - [ ] Os dois DTOs de cuidador
 - [ ] `repository/CuidadorRepository.ts`
 - [ ] `infrastructure/cuidadorInfrastructure.ts`
