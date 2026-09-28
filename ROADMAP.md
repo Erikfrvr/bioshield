@@ -135,10 +135,10 @@ Daiane não mexe nesta fase. Ela lê quando estiver pronta e copia o padrão.
 - [x] Método de login no `UsuarioService` comparando o hash
 - [x] Gerar o token JWT com o id do usuário dentro
 - [x] **Devolver `idPaciente` na resposta do login**, com `null` quando a pessoa ainda não preencheu a ficha
-- [ ] Criar `middleware/autenticacao.ts` que lê o header e libera ou barra
-- [ ] Aplicar o middleware nas rotas que precisam de login
-- [ ] Deixar `GET /api/status` e `GET /api/emergencia/:token` **fora** do middleware
-- [ ] Testar rota protegida sem token (tem que dar 401) e com token (tem que passar)
+- [x] Criar `middleware/autenticacao.ts` que lê o header e libera ou barra
+- [x] Aplicar o middleware nas rotas que precisam de login
+- [x] Deixar `GET /api/status` e `GET /api/emergencia/:token` **fora** do middleware
+- [x] Testar rota protegida sem token (tem que dar 401) e com token (tem que passar)
 - [ ] Trocar o `config.js` do front para `MODO: "api"` e conferir que o login real funciona na tela
 
 O `idPaciente` no login não é firula. Sem ele o front precisa de uma rota extra só para descobrir qual ficha é do usuário logado, o que é uma ida a mais no servidor em toda abertura de tela.

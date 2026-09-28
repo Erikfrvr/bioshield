@@ -3,7 +3,7 @@
 
 window.BioShieldConfig = {
   URL_API: "http://localhost:3000/api",
-  MODO: "auto",
+  MODO: "api",
   TEMPO_LIMITE_MS: 2500,
   URL_PUBLICA_EMERGENCIA: ""
 };
