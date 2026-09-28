@@ -153,10 +153,349 @@ Content-Type: application/json
 ### ==========================
 ### MEDICAMENTOS
 ### ==========================
+### Rotas protegidas: rode primeiro o login abaixo. Os outros blocos pegam o token dele pelo nome.
+### Dados ficticios: a Maria (usuario 1) e dona do paciente 1. O paciente 2 e da Joana.
+### Os status 403 dependem da DUVIDA 9 do docs/DUVIDAS_CONTRATO.md (quem pode ver qual paciente).
+
+### Login da Maria (esperado 200). Guarda o token para esta secao e para DOSES
+# @name loginMaria
+POST {{baseUrl}}/usuarios/login
+Content-Type: application/json
+
+{
+  "email": "maria.souza@exemplo.com",
+  "senha": "123456"
+}
+
+### Listar remedios do paciente 1 (esperado 200, lista com proximaDose em cada um, ativos primeiro)
+### Conferir: dosagem vem numero (50, nao "50.00") e horarioInicial vem "08:00", sem segundos
+GET {{baseUrl}}/medicamentos?idPaciente=1
+Authorization: Bearer {{loginMaria.response.body.token}}
+
+### Listar sem token (esperado 401)
+GET {{baseUrl}}/medicamentos?idPaciente=1
+
+### Listar sem idPaciente (esperado 400)
+GET {{baseUrl}}/medicamentos
+Authorization: Bearer {{loginMaria.response.body.token}}
+
+### Listar remedios de um paciente que nao e da Maria (esperado 403)
+GET {{baseUrl}}/medicamentos?idPaciente=2
+Authorization: Bearer {{loginMaria.response.body.token}}
+
+### Cadastro valido (esperado 201, volta o remedio no formato do GET, com proximaDose preenchida)
+### Tambem gera a agenda: depois rode "Doses de hoje" e o remedio novo tem que aparecer la
+# @name cadastrarMedicamento
+POST {{baseUrl}}/medicamentos
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "idPaciente": 1,
+  "nome": "Omeprazol",
+  "dosagem": 20,
+  "unidade": "mg",
+  "frequenciaHoras": 12,
+  "horarioInicial": "07:30",
+  "dataInicio": "2026-09-28",
+  "dataFim": null
+}
+
+### Cadastro com data de fim e unidade diferente de mg (esperado 201)
+POST {{baseUrl}}/medicamentos
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "idPaciente": 1,
+  "nome": "Dipirona gotas",
+  "dosagem": 40,
+  "unidade": "gota",
+  "frequenciaHoras": 6,
+  "horarioInicial": "08:00",
+  "dataInicio": "2026-09-28",
+  "dataFim": "2026-10-02"
+}
+
+### Dosagem zero (esperado 400)
+POST {{baseUrl}}/medicamentos
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "idPaciente": 1,
+  "nome": "Teste Dosagem Zero",
+  "dosagem": 0,
+  "unidade": "mg",
+  "frequenciaHoras": 12,
+  "horarioInicial": "08:00",
+  "dataInicio": "2026-09-28",
+  "dataFim": null
+}
+
+### Frequencia fora do limite (esperado 400, o banco aceita de 1 a 168 horas)
+POST {{baseUrl}}/medicamentos
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "idPaciente": 1,
+  "nome": "Teste Frequencia",
+  "dosagem": 10,
+  "unidade": "mg",
+  "frequenciaHoras": 200,
+  "horarioInicial": "08:00",
+  "dataInicio": "2026-09-28",
+  "dataFim": null
+}
+
+### Unidade que nao existe (esperado 400, so aceita mg, ml, g, gota, comprimido e unidade)
+POST {{baseUrl}}/medicamentos
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "idPaciente": 1,
+  "nome": "Teste Unidade",
+  "dosagem": 1,
+  "unidade": "colher",
+  "frequenciaHoras": 12,
+  "horarioInicial": "08:00",
+  "dataInicio": "2026-09-28",
+  "dataFim": null
+}
+
+### Horario invalido (esperado 400)
+POST {{baseUrl}}/medicamentos
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "idPaciente": 1,
+  "nome": "Teste Horario",
+  "dosagem": 10,
+  "unidade": "mg",
+  "frequenciaHoras": 12,
+  "horarioInicial": "25:00",
+  "dataInicio": "2026-09-28",
+  "dataFim": null
+}
+
+### Data de fim antes da data de inicio (esperado 400)
+POST {{baseUrl}}/medicamentos
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "idPaciente": 1,
+  "nome": "Teste Datas",
+  "dosagem": 10,
+  "unidade": "mg",
+  "frequenciaHoras": 12,
+  "horarioInicial": "08:00",
+  "dataInicio": "2026-09-28",
+  "dataFim": "2026-09-20"
+}
+
+### Nome vazio (esperado 400)
+POST {{baseUrl}}/medicamentos
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "idPaciente": 1,
+  "nome": "   ",
+  "dosagem": 10,
+  "unidade": "mg",
+  "frequenciaHoras": 12,
+  "horarioInicial": "08:00",
+  "dataInicio": "2026-09-28",
+  "dataFim": null
+}
+
+### Cadastrar para paciente que nao e da Maria (esperado 403)
+POST {{baseUrl}}/medicamentos
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "idPaciente": 2,
+  "nome": "Teste Outro Paciente",
+  "dosagem": 10,
+  "unidade": "mg",
+  "frequenciaHoras": 12,
+  "horarioInicial": "08:00",
+  "dataInicio": "2026-09-28",
+  "dataFim": null
+}
+
+### Corpo vazio (esperado 400)
+POST {{baseUrl}}/medicamentos
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{}
+
+### Atualizacao parcial do remedio cadastrado acima (esperado 200, so a dosagem muda)
+PUT {{baseUrl}}/medicamentos/{{cadastrarMedicamento.response.body.id}}
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "dosagem": 40
+}
+
+### Mudar o horario refaz a agenda futura (esperado 200). DUVIDA 5
+### Conferir em "Doses de hoje": as doses previstas mudam de horario, as tomadas continuam iguais
+PUT {{baseUrl}}/medicamentos/{{cadastrarMedicamento.response.body.id}}
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "horarioInicial": "09:00",
+  "frequenciaHoras": 8
+}
+
+### Atualizar remedio que nao existe (esperado 404)
+PUT {{baseUrl}}/medicamentos/99999
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "dosagem": 40
+}
+
+### Atualizar remedio de outro paciente (esperado 403). O remedio 4 e da Joana
+PUT {{baseUrl}}/medicamentos/4
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "dosagem": 100
+}
+
+### Excluir o remedio cadastrado acima (esperado 204 ou 200). As doses dele somem junto pelo CASCADE
+DELETE {{baseUrl}}/medicamentos/{{cadastrarMedicamento.response.body.id}}
+Authorization: Bearer {{loginMaria.response.body.token}}
+
+### Excluir de novo o mesmo remedio (esperado 404)
+DELETE {{baseUrl}}/medicamentos/{{cadastrarMedicamento.response.body.id}}
+Authorization: Bearer {{loginMaria.response.body.token}}
+
+### Excluir com id invalido (esperado 400)
+DELETE {{baseUrl}}/medicamentos/abc
+Authorization: Bearer {{loginMaria.response.body.token}}
 
 ### ==========================
 ### DOSES
 ### ==========================
+### Usa o token do "Login da Maria" da secao MEDICAMENTOS. Rode aquele bloco antes.
+### Os dados ficticios so tem dose ate 25/09: para ter dose hoje, rode antes o
+### "Cadastro valido" de MEDICAMENTOS, que gera a agenda.
+
+### Doses de hoje do paciente 1 (esperado 200, ordenadas por horario, com nomeMedicamento)
+### Dose que passou 60 min do horario sem confirmacao ja tem que vir como "perdida". DUVIDA 2
+# @name dosesHoje
+GET {{baseUrl}}/doses/hoje?idPaciente=1
+Authorization: Bearer {{loginMaria.response.body.token}}
+
+### Doses de hoje sem token (esperado 401)
+GET {{baseUrl}}/doses/hoje?idPaciente=1
+
+### Doses de hoje sem idPaciente (esperado 400)
+GET {{baseUrl}}/doses/hoje
+Authorization: Bearer {{loginMaria.response.body.token}}
+
+### Doses de hoje de paciente que nao e da Maria (esperado 403)
+GET {{baseUrl}}/doses/hoje?idPaciente=2
+Authorization: Bearer {{loginMaria.response.body.token}}
+
+### Confirmar a primeira dose de hoje (esperado 200, volta id, status "tomada" e horarioConfirmado)
+POST {{baseUrl}}/doses/{{dosesHoje.response.body.$[0].id}}/confirmar
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "horarioConfirmado": "2026-09-28T11:03:00.000Z"
+}
+
+### Confirmar dose perdida, o "Tomei mesmo assim" (esperado 200, NAO pode bloquear)
+### A dose 4 dos dados ficticios e da Metformina, de 23/09 as 15:00, e esta como perdida
+POST {{baseUrl}}/doses/4/confirmar
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "horarioConfirmado": "2026-09-23T19:40:00.000Z"
+}
+
+### Confirmar sem horarioConfirmado (esperado 400)
+POST {{baseUrl}}/doses/4/confirmar
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{}
+
+### Confirmar com data invalida (esperado 400)
+POST {{baseUrl}}/doses/4/confirmar
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "horarioConfirmado": "ontem a noite"
+}
+
+### Confirmar dose que nao existe (esperado 404)
+POST {{baseUrl}}/doses/99999/confirmar
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "horarioConfirmado": "2026-09-28T11:03:00.000Z"
+}
+
+### Confirmar dose de outro paciente (esperado 403). A dose 17 e da Levotiroxina, da Joana
+POST {{baseUrl}}/doses/17/confirmar
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "horarioConfirmado": "2026-09-25T09:35:00.000Z"
+}
+
+### Adesao do paciente 1 (esperado 200, "hoje" e "semana" com previstas, tomadas, perdidas e percentual)
+### Conferir: percentual e inteiro de 0 a 100, e dose do futuro nao entra na conta. DUVIDA 1
+GET {{baseUrl}}/doses/adesao?idPaciente=1
+Authorization: Bearer {{loginMaria.response.body.token}}
+
+### Adesao sem token (esperado 401)
+GET {{baseUrl}}/doses/adesao?idPaciente=1
+
+### Adesao de paciente que nao e da Maria (esperado 403)
+GET {{baseUrl}}/doses/adesao?idPaciente=2
+Authorization: Bearer {{loginMaria.response.body.token}}
+
+### Login da Patricia, cuidadora vinculada aos pacientes 1 e 3 (esperado 200, idPaciente null)
+# @name loginPatricia
+POST {{baseUrl}}/usuarios/login
+Content-Type: application/json
+
+{
+  "email": "patricia.martins@exemplo.com",
+  "senha": "123456"
+}
+
+### Cuidadora vendo as doses de hoje de quem ela acompanha (esperado 200)
+GET {{baseUrl}}/doses/hoje?idPaciente=1
+Authorization: Bearer {{loginPatricia.response.body.token}}
+
+### Cuidadora vendo a adesao de quem ela acompanha (esperado 200)
+GET {{baseUrl}}/doses/adesao?idPaciente=1
+Authorization: Bearer {{loginPatricia.response.body.token}}
+
+### Cuidadora tentando ver paciente sem vinculo (esperado 403). A Joana nao autorizou a Patricia
+GET {{baseUrl}}/doses/adesao?idPaciente=2
+Authorization: Bearer {{loginPatricia.response.body.token}}
 
 ### ==========================
 ### CUIDADOR

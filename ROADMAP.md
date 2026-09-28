@@ -158,7 +158,7 @@ Isto não depende da Fase 3 e economiza horas depois. Consulta testada no Workbe
 - [x] Escrever e testar o SQL das doses de hoje, com join trazendo o nome do remédio
 - [x] Escrever e testar o SQL do cálculo de adesão dos últimos 7 dias
 - [x] Guardar essas consultas num arquivo de rascunho, comentadas (`database/rascunho_medicamentos_doses.sql`)
-- [ ] Preencher os blocos do `requests.http` nas seções MEDICAMENTOS e DOSES, com corpo de exemplo
+- [x] Preencher os blocos do `requests.http` nas seções MEDICAMENTOS e DOSES, com corpo de exemplo
 
 ---
 
