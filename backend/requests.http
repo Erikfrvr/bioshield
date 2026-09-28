@@ -91,17 +91,10 @@ Content-Type: application/json
 
 {}
 
-### Buscar usuario por id (esperado 200, sem senha na resposta)
-GET {{baseUrl}}/usuarios/1
-
-### Buscar usuario que nao existe (esperado 404)
-GET {{baseUrl}}/usuarios/99999
-
-### Buscar com id invalido (esperado 400)
-GET {{baseUrl}}/usuarios/abc
-
 ### Login valido com ficha preenchida (esperado 200, volta token, usuario e idPaciente com numero)
 ### A senha dos dados ficticios e 123456
+### O token desta resposta fica guardado em {{token}} e e usado nas rotas protegidas abaixo
+# @name login
 POST {{baseUrl}}/usuarios/login
 Content-Type: application/json
 
@@ -145,6 +138,46 @@ Content-Type: application/json
 {
   "email": "maria.souza@exemplo.com"
 }
+
+### ==========================
+### ROTAS PROTEGIDAS (middleware de autenticacao)
+### Rode o bloco "login" la em cima antes, e ele que preenche o {{token}}
+### ==========================
+
+@token = {{login.response.body.token}}
+
+### Sem token (esperado 401, "Você precisa estar logado para acessar isso.")
+GET {{baseUrl}}/usuarios/1
+
+### Token inventado (esperado 401, "Sua sessão expirou ou é inválida. Entre de novo.")
+GET {{baseUrl}}/usuarios/1
+Authorization: Bearer token.que.nao.existe
+
+### Header sem o "Bearer " na frente (esperado 401)
+GET {{baseUrl}}/usuarios/1
+Authorization: {{token}}
+
+### Com token valido (esperado 200, sem senha na resposta)
+GET {{baseUrl}}/usuarios/1
+Authorization: Bearer {{token}}
+
+### Usuario que nao existe, com token (esperado 404)
+GET {{baseUrl}}/usuarios/99999
+Authorization: Bearer {{token}}
+
+### Id invalido, com token (esperado 400)
+GET {{baseUrl}}/usuarios/abc
+Authorization: Bearer {{token}}
+
+### Router ainda vazio, mas ja protegido: sem token (esperado 401)
+GET {{baseUrl}}/pacientes/1
+
+### Router ainda vazio, com token: passa pelo middleware e cai no 404 do Express (esperado 404)
+GET {{baseUrl}}/pacientes/1
+Authorization: Bearer {{token}}
+
+### Rota publica do QR nao pode pedir token (esperado 404 enquanto a rota nao existe, NUNCA 401)
+GET {{baseUrl}}/emergencia/a3f81c2d94be47a0b6e15d7c0f29b834
 
 ### ==========================
 ### PACIENTE (ficha medica)
