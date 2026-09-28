@@ -1,4 +1,3 @@
--- Script do banco do BioShield.
 -- Aqui eu escrevo o CREATE DATABASE, as tabelas e as chaves estrangeiras.
 -- Ordem que eu pretendo seguir: usuarios, pacientes, alergias, contatos_emergencia,
 -- medicamentos, doses e cuidador_paciente.
@@ -28,6 +27,8 @@ CREATE TABLE pacientes (
     observacoes TEXT NULL,
     token_qr CHAR(32) NOT NULL,
     token_gerado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    qr_ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    qr_cancelado_em TIMESTAMP NULL,
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 

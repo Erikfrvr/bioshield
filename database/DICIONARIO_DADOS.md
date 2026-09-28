@@ -62,6 +62,8 @@ A ficha médica. É o centro do banco: quase tudo aponta para cá.
 | `observacoes` | TEXT | Sim | NULL | Texto livre para o socorrista |
 | `token_qr` | CHAR(32) | Não | — | Código do QR. Único e aleatório |
 | `token_gerado_em` | TIMESTAMP | Não | CURRENT_TIMESTAMP | Quando o token atual foi criado |
+| `qr_ativo` | BOOLEAN | Não | TRUE | Se o QR atual abre a ficha. FALSE quando o paciente cancela o código |
+| `qr_cancelado_em` | TIMESTAMP | Sim | NULL | Quando o QR atual foi cancelado. Nulo enquanto ele estiver ativo |
 | `criado_em` | TIMESTAMP | Não | CURRENT_TIMESTAMP | Criação da ficha |
 | `atualizado_em` | TIMESTAMP | Não | ON UPDATE CURRENT_TIMESTAMP | Última alteração |
 

@@ -85,7 +85,7 @@ Observação: essa rota deixou de ser boba. O front chama ela para decidir se us
 
 Fase nova, que nasceu do front. O cancelamento do QR Code precisa de duas colunas que o schema atual não tem.
 
-- [ ] Rodar o ALTER em `pacientes`:
+- [x] Rodar o ALTER em `pacientes`:
 
 ```sql
 ALTER TABLE pacientes
