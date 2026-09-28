@@ -99,7 +99,7 @@ ALTER TABLE pacientes
 
 Por que coluna nova e não apagar o token: o índice único impede token nulo repetido, e apagar o token destrói o rastro de qual código foi impresso. Marcar como inativo mantém a auditoria e deixa o cancelamento reversível por um token novo.
 
-**Marco 2.5:** banco preparado para o cancelamento.
+**Marco 2.5:** banco preparado para o cancelamento. **Feito.**
 
 ---
 
@@ -151,13 +151,13 @@ O `idPaciente` no login não é firula. Sem ele o front precisa de uma rota extr
 
 Isto não depende da Fase 3 e economiza horas depois. Consulta testada no Workbench é a parte difícil do infrastructure. Quando o molde sair, é só colar dentro.
 
-- [ ] Fase 2.5 inteira (o ALTER)
-- [ ] Ler o `frontEnd/CONTRATO_API.md` inteiro e anotar dúvida
-- [ ] Escrever e testar no Workbench o SQL de listar medicamentos de um paciente
-- [ ] Escrever e testar o SQL de inserir medicamento
-- [ ] Escrever e testar o SQL das doses de hoje, com join trazendo o nome do remédio
-- [ ] Escrever e testar o SQL do cálculo de adesão dos últimos 7 dias
-- [ ] Guardar essas consultas num arquivo de rascunho, comentadas
+- [x] Fase 2.5 inteira (o ALTER)
+- [x] Ler o `frontEnd/CONTRATO_API.md` inteiro e anotar dúvida (em `docs/DUVIDAS_CONTRATO.md`)
+- [x] Escrever e testar no Workbench o SQL de listar medicamentos de um paciente
+- [x] Escrever e testar o SQL de inserir medicamento
+- [x] Escrever e testar o SQL das doses de hoje, com join trazendo o nome do remédio
+- [x] Escrever e testar o SQL do cálculo de adesão dos últimos 7 dias
+- [x] Guardar essas consultas num arquivo de rascunho, comentadas (`database/rascunho_medicamentos_doses.sql`)
 - [ ] Preencher os blocos do `requests.http` nas seções MEDICAMENTOS e DOSES, com corpo de exemplo
 
 ---
@@ -336,7 +336,7 @@ O corte do cancelamento é o melhor plano do vídeo inteiro. É o que mostra que
 | 0 | Ambiente pronto | os dois | [x] |
 | 1 | Banco criado | os dois | [x] |
 | 2 | API de pé | Erik | [x] |
-| 2.5 | Banco pronto para o cancelamento | Daiane | [ ] |
+| 2.5 | Banco pronto para o cancelamento | Daiane | [x] |
 | 3 | Cadastro funcionando | Erik | [ ] |
 | 4 | Login e rotas protegidas | Erik | [ ] |
 | 5 | Ficha médica salvando | Erik | [ ] |
