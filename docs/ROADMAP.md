@@ -200,8 +200,8 @@ O coração do produto. Sem isso o BioShield é só mais um app de lembrete.
 - [x] **Método de cancelar:** marca `qr_ativo = FALSE` e grava `qr_cancelado_em`, sem apagar o token · `DELETE /pacientes/:id/qr`
 - [x] **Método de reativar:** gera token novo e volta `qr_ativo = TRUE` · `POST /pacientes/:id/qr/reativar`
 - [x] `entidade/FichaEmergencia.ts` (já ordena alergias e contatos e descarta remédio inativo)
-- [ ] `models/dto/emergencia/FichaEmergenciaResponseDTO.ts` com o mínimo necessário
-- [ ] `repository/EmergenciaRepository.ts`
+- [x] `models/dto/emergencia/FichaEmergenciaResponseDTO.ts` com o mínimo necessário
+- [x] `repository/EmergenciaRepository.ts`
 - [ ] `infrastructure/emergenciaInfrastructure.ts` com a busca por token e o log de acesso
 - [ ] `services/EmergenciaService.ts` montando a versão pública filtrada
 - [ ] Ordenar alergias por gravidade, grave primeiro
@@ -226,7 +226,7 @@ Cuidado com o reativar: ele **não** ressuscita o código antigo, gera outro. Se
 
 Começa depois do Marco 4. Roda em paralelo com as Fases 5 e 6 do Erik.
 
-- [ ] `valueObjects/Dosagem.ts`
+- [x] `valueObjects/Dosagem.ts`
 - [ ] `valueObjects/HorarioDose.ts`
 - [ ] `entidade/Medicamento.ts`
 - [ ] Os três DTOs de medicamento
