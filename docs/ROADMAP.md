@@ -166,12 +166,12 @@ Isto não depende da Fase 3 e economiza horas depois. Consulta testada no Workbe
 
 ## Fase 5 — Ficha médica  ·  **Erik**
 
-- [ ] `valueObjects/Telefone.ts`
-- [ ] `valueObjects/TipoSanguineo.ts`
-- [ ] `entidade/Alergia.ts`
-- [ ] `entidade/ContatoEmergencia.ts`
-- [ ] `entidade/Paciente.ts`
-- [ ] Os três DTOs de paciente
+- [x] `valueObjects/Telefone.ts`
+- [x] `valueObjects/TipoSanguineo.ts`
+- [x] `entidade/Alergia.ts`
+- [x] `entidade/ContatoEmergencia.ts`
+- [x] `entidade/Paciente.ts`
+- [x] Os três DTOs de paciente
 - [ ] `repository/PacienteRepository.ts`
 - [ ] `infrastructure/pacienteInfrastructure.ts` com o join de alergias e contato
 - [ ] `services/PacienteService.ts`
@@ -190,16 +190,16 @@ O endpoint do código do cuidador fica aqui, e não na Fase 9, de propósito: el
 
 ---
 
-## Fase 6 — QR Code e emergência  ·  **Erik**
+## Fase 6 — QR Code e emergência  ·  **Erik e Daiane**
 
 O coração do produto. Sem isso o BioShield é só mais um app de lembrete.
 
-- [ ] `valueObjects/TokenQR.ts` com token aleatório grande e imprevisível
-- [ ] Gerar o token no `PacienteService` na hora de criar a ficha
-- [ ] Método de rotacionar o token (gera novo e invalida o antigo)
-- [ ] **Método de cancelar:** marca `qr_ativo = FALSE` e grava `qr_cancelado_em`, sem apagar o token
-- [ ] **Método de reativar:** gera token novo e volta `qr_ativo = TRUE`
-- [ ] `entidade/FichaEmergencia.ts`
+- [x] `valueObjects/TokenQR.ts` com token aleatório grande e imprevisível
+- [ ] Gerar o token no `PacienteService` na hora de criar a ficha · o `gerarTokenQR` já existe, falta o `criar` da Fase 5 chamar ele com o INSERT dentro
+- [x] Método de rotacionar o token (gera novo e invalida o antigo) · `POST /pacientes/:id/qr/rotacionar`
+- [x] **Método de cancelar:** marca `qr_ativo = FALSE` e grava `qr_cancelado_em`, sem apagar o token · `DELETE /pacientes/:id/qr`
+- [x] **Método de reativar:** gera token novo e volta `qr_ativo = TRUE` · `POST /pacientes/:id/qr/reativar`
+- [x] `entidade/FichaEmergencia.ts` (já ordena alergias e contatos e descarta remédio inativo)
 - [ ] `models/dto/emergencia/FichaEmergenciaResponseDTO.ts` com o mínimo necessário
 - [ ] `repository/EmergenciaRepository.ts`
 - [ ] `infrastructure/emergenciaInfrastructure.ts` com a busca por token e o log de acesso
