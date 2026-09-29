@@ -41,6 +41,8 @@ Status que o front trata de forma diferente:
 | Status | Como o front reage |
 |---|---|
 | 401 no login | Mostra "Email ou senha não conferem" |
+| 401 em rota protegida | Token faltando, vencido ou adulterado |
+| 403 em rota protegida | Logado, mas pedindo dado de paciente que não é dele |
 | 409 no cadastro | Mostra "Esse email já tem conta" |
 | 404 na emergência | Tela de código não encontrado |
 | 410 na emergência | Tela de código cancelado |
@@ -61,6 +63,31 @@ ALTER TABLE pacientes
 O `DICIONARIO_DADOS.md` precisa ganhar essas duas linhas também.
 
 Por que coluna nova e não apagar o token: o índice único em `token_qr` impede token nulo repetido, e apagar o token destrói o rastro de qual código foi impresso. Marcar como inativo mantém a auditoria e deixa o cancelamento reversível pela geração de um token novo.
+
+O código do cuidador (`POST /api/pacientes/:id/codigo`) também precisa de lugar para ficar:
+
+```sql
+ALTER TABLE pacientes
+  ADD COLUMN codigo_cuidador CHAR(7) NULL AFTER qr_cancelado_em,
+  ADD COLUMN codigo_valido_ate TIMESTAMP NULL AFTER codigo_cuidador,
+  ADD CONSTRAINT uk_pacientes_codigo UNIQUE (codigo_cuidador);
+```
+
+As quatro colunas já estão no `database/bioshield.sql` e no `DICIONARIO_DADOS.md`. O ALTER serve só para quem já tem o banco criado.
+
+---
+
+## Quem pode ver o quê
+
+O token carrega só o id do usuário. O middleware `autenticar` põe esse id em `req.idUsuario`, e cada service confere o acesso com `services/AutorizacaoService.ts` antes de ler ou gravar:
+
+| Rotas | Quem passa |
+|---|---|
+| `/pacientes/:id` e tudo abaixo (QR, acessos, código), `/medicamentos` | Só o dono da ficha (`garantirDono`) |
+| `/doses/hoje`, `/doses/:id/confirmar`, `/doses/adesao` | O dono ou um cuidador com vínculo `ativo = TRUE` (`garantirAcompanhamento`) |
+| `/usuarios/:id`, `/cuidadores/:id/pacientes` | Só quando `:id` é o próprio usuário logado (`garantirMesmoUsuario`) |
+
+Fora disso a resposta é `403`. Paciente que não existe também devolve `403`, com a mesma mensagem, para que ninguém descubra quais ids existem trocando o número na URL. `404` fica para o recurso da própria rota (remédio ou dose que não existe).
 
 ---
 
@@ -213,7 +240,7 @@ Mais recente primeiro.
 
 ### POST /api/pacientes/:id/codigo
 
-Protegida. Gera o código de autorização que o paciente entrega ao cuidador. Sugestão: 7 caracteres, letras e números, com validade.
+Protegida, só o dono. Gera o código de autorização que o paciente entrega ao cuidador: 7 caracteres, letras e números, com validade. Grava em `pacientes.codigo_cuidador` e `pacientes.codigo_valido_ate`. Gerar de novo substitui o código anterior.
 
 ```json
 { "codigo": "MARIA24", "validoAte": "2026-09-19T10:00:00.000Z" }
@@ -377,11 +404,13 @@ Resposta:
 { "idVinculo": 1, "idPaciente": 1 }
 ```
 
-Código que não bate com ninguém devolve `404`. O vínculo só nasce a partir do código que o paciente gerou: é essa a autorização explícita.
+O cuidador é sempre quem está logado (`req.idUsuario`). O `idCuidador` do corpo continua sendo enviado pelo front, mas o backend ignora, senão daria para vincular a conta de outra pessoa.
+
+Código que não bate com ninguém, ou que já passou do `codigo_valido_ate`, devolve `404`. O vínculo só nasce a partir do código que o paciente gerou: é essa a autorização explícita.
 
 ### GET /api/cuidadores/:id/pacientes
 
-Protegida. `:id` é o id do usuário cuidador.
+Protegida. `:id` é o id do usuário cuidador e precisa ser o do usuário logado, senão `403`.
 
 ```json
 [

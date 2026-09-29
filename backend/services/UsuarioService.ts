@@ -13,6 +13,7 @@ import { LoginUsuarioDTO } from "../models/dto/usuario/LoginUsuarioDTO";
 import { UsuarioResponseDTO } from "../models/dto/usuario/UsuarioResponseDTO";
 import { LoginResponseDTO } from "../models/dto/usuario/LoginResponseDTO";
 import { UsuarioRepository } from "../repository/UsuarioRepository";
+import autorizacaoService from "./AutorizacaoService";
 
 const RODADAS_HASH = 10;
 
@@ -129,10 +130,13 @@ export class UsuarioService {
     };
   }
 
-  async buscarPorId(id: number): Promise<UsuarioResponseDTO> {
+  // idLogado vem do token (req.idUsuario). Cada um so le a propria conta.
+  async buscarPorId(id: number, idLogado: number | undefined): Promise<UsuarioResponseDTO> {
     if (!Number.isInteger(id) || id <= 0) {
       throw new ErroUsuario("validacao", "O id do usuário precisa ser um número inteiro positivo.");
     }
+
+    autorizacaoService.garantirMesmoUsuario(idLogado, id);
 
     const usuario = await this.repositorio.buscarPorId(id);
     if (!usuario) {
