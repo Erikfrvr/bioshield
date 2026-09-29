@@ -186,6 +186,48 @@ GET {{baseUrl}}/emergencia/a3f81c2d94be47a0b6e15d7c0f29b834
 ### ==========================
 ### PACIENTE (ficha medica)
 ### ==========================
+### Usa o token do bloco "login" da Maria (secao USUARIOS). A Maria e dona do paciente 1.
+
+### Rotacionar o QR do paciente 1 (esperado 200, tokenQr novo com 32 caracteres, qrAtivo true, qrCanceladoEm null)
+### Depois disso o token antigo a3f81c2d... para de abrir a emergencia
+POST {{baseUrl}}/pacientes/1/qr/rotacionar
+Authorization: Bearer {{token}}
+
+### Rotacionar sem token (esperado 401)
+POST {{baseUrl}}/pacientes/1/qr/rotacionar
+
+### Rotacionar o QR de ficha que nao e da Maria (esperado 403). O paciente 2 e da Joana
+POST {{baseUrl}}/pacientes/2/qr/rotacionar
+Authorization: Bearer {{token}}
+
+### Rotacionar ficha que nao existe (esperado 403, mesma resposta de ficha alheia)
+POST {{baseUrl}}/pacientes/99999/qr/rotacionar
+Authorization: Bearer {{token}}
+
+### Rotacionar com id invalido (esperado 400)
+POST {{baseUrl}}/pacientes/abc/qr/rotacionar
+Authorization: Bearer {{token}}
+
+### Cancelar o QR do paciente 1 (esperado 200, qrAtivo false e qrCanceladoEm preenchido)
+### Depois disso a emergencia com o token atual tem que devolver 410
+DELETE {{baseUrl}}/pacientes/1/qr
+Authorization: Bearer {{token}}
+
+### Cancelar de novo (esperado 409, "Esse QR Code já está cancelado.")
+DELETE {{baseUrl}}/pacientes/1/qr
+Authorization: Bearer {{token}}
+
+### Cancelar QR de ficha que nao e da Maria (esperado 403)
+DELETE {{baseUrl}}/pacientes/2/qr
+Authorization: Bearer {{token}}
+
+### Reativar o QR do paciente 1 (esperado 200, tokenQr DIFERENTE do que foi cancelado, qrAtivo true)
+POST {{baseUrl}}/pacientes/1/qr/reativar
+Authorization: Bearer {{token}}
+
+### Reativar QR de ficha que nao e da Maria (esperado 403)
+POST {{baseUrl}}/pacientes/2/qr/reativar
+Authorization: Bearer {{token}}
 
 ### ==========================
 ### MEDICAMENTOS
