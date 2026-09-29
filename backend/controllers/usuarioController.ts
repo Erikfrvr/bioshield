@@ -3,6 +3,7 @@
 // Cada funcao vai num try catch devolvendo 500 com mensagem clara quando der ruim.
 import { Request, Response } from "express";
 import usuarioService, { ErroUsuario, TipoErroUsuario } from "../services/UsuarioService";
+import { ErroAcesso } from "../services/AutorizacaoService";
 
 // Cada tipo de erro do service vira um status code. Ficou em tabela porque com quatro tipos
 // o if encadeado ja estava dificil de ler.
@@ -19,6 +20,12 @@ function responderErro(res: Response, erro: unknown): void {
   if (erro instanceof ErroUsuario) {
     const status = STATUS_POR_TIPO[erro.tipo];
     res.status(status).json({ mensagem: erro.message });
+    return;
+  }
+
+  // Logado, mas pedindo dado que nao e dele
+  if (erro instanceof ErroAcesso) {
+    res.status(403).json({ mensagem: erro.message });
     return;
   }
 
@@ -50,7 +57,7 @@ export async function entrar(req: Request, res: Response): Promise<void> {
 // GET /api/usuarios/:id
 export async function buscarPorId(req: Request, res: Response): Promise<void> {
   try {
-    const usuario = await usuarioService.buscarPorId(Number(req.params.id));
+    const usuario = await usuarioService.buscarPorId(Number(req.params.id), req.idUsuario);
     res.status(200).json(usuario);
   } catch (erro) {
     responderErro(res, erro);

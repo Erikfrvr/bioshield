@@ -139,6 +139,8 @@ Daiane não mexe nesta fase. Ela lê quando estiver pronta e copia o padrão.
 - [x] Aplicar o middleware nas rotas que precisam de login
 - [x] Deixar `GET /api/status` e `GET /api/emergencia/:token` **fora** do middleware
 - [x] Testar rota protegida sem token (tem que dar 401) e com token (tem que passar)
+- [x] `services/AutorizacaoService.ts`: quem pode ver qual paciente, com `403` (dúvida 9 do `docs/DUVIDAS_CONTRATO.md`)
+- [x] Colunas `codigo_cuidador` e `codigo_valido_ate` em `pacientes` (dúvida 8)
 - [ ] Trocar o `config.js` do front para `MODO: "api"` e conferir que o login real funciona na tela
 
 O `idPaciente` no login não é firula. Sem ele o front precisa de uma rota extra só para descobrir qual ficha é do usuário logado, o que é uma ida a mais no servidor em toda abertura de tela.
@@ -175,7 +177,8 @@ Isto não depende da Fase 3 e economiza horas depois. Consulta testada no Workbe
 - [ ] `services/PacienteService.ts`
 - [ ] `controllers/pacienteController.ts`
 - [ ] `routes/pacienteRoutes.ts`
-- [ ] **`POST /api/pacientes/:id/codigo`**, que gera o código de autorização do cuidador
+- [ ] **`POST /api/pacientes/:id/codigo`**, que gera o código de autorização do cuidador e grava em `codigo_cuidador` e `codigo_valido_ate`
+- [ ] Chamar `autorizacaoService.garantirDono` em todas as rotas de paciente
 - [ ] Tratar alergias e contatos como substituição completa no PUT, dentro de uma transação
 - [ ] Testar criar, ler e atualizar a ficha pelo `requests.http`
 - [ ] Conferir que o `PacienteResponseDTO` não está devolvendo senha nem nada de fora
@@ -229,7 +232,7 @@ Começa depois do Marco 4. Roda em paralelo com as Fases 5 e 6 do Erik.
 - [ ] Os três DTOs de medicamento
 - [ ] `repository/MedicamentoRepository.ts`
 - [ ] `infrastructure/medicamentoInfrastructure.ts` (cole aqui o SQL que você já testou no Workbench)
-- [ ] `services/MedicamentoService.ts`
+- [ ] `services/MedicamentoService.ts`, chamando `autorizacaoService.garantirDono` antes de ler ou gravar
 - [ ] Campo `proximaDose` na resposta: primeira dose prevista com horário no futuro, ou `null`
 - [ ] `controllers/medicamentoController.ts`
 - [ ] `routes/medicamentoRoutes.ts`
@@ -245,7 +248,7 @@ Começa depois do Marco 4. Roda em paralelo com as Fases 5 e 6 do Erik.
 - [ ] Os três DTOs de dose
 - [ ] `repository/DoseRepository.ts`
 - [ ] `infrastructure/doseInfrastructure.ts`
-- [ ] `services/DoseService.ts` com a janela de tolerância e o cálculo de adesão
+- [ ] `services/DoseService.ts` com a janela de tolerância e o cálculo de adesão, chamando `autorizacaoService.garantirAcompanhamento`
 - [ ] Deixar confirmar dose com status `perdida` também. O front tem o botão "Tomei mesmo assim"
 - [ ] Dose no futuro **não** entra no cálculo de adesão, senão o dia começa em 0% e assusta o usuário à toa
 - [ ] `controllers/doseController.ts`
@@ -263,7 +266,7 @@ Começa depois do Marco 4. Roda em paralelo com as Fases 5 e 6 do Erik.
 - [ ] Os dois DTOs de cuidador
 - [ ] `repository/CuidadorRepository.ts`
 - [ ] `infrastructure/cuidadorInfrastructure.ts`
-- [ ] `services/CuidadorService.ts` com a checagem de autorização pelo código
+- [ ] `services/CuidadorService.ts` com a checagem de autorização pelo código (`codigo_cuidador` válido até `codigo_valido_ate`), pegando o cuidador de `req.idUsuario`
 - [ ] O desvincular marca `ativo = FALSE`, não apaga a linha: quem teve acesso a dado de saúde fica registrado
 - [ ] `controllers/cuidadorController.ts`
 - [ ] `routes/cuidadorRoutes.ts`

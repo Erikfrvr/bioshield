@@ -101,7 +101,7 @@ ALTER TABLE pacientes
 
 Levar também para o `bioshield.sql` e para o `DICIONARIO_DADOS.md`.
 
-**Decisão:**
+**Decisão (Erik):** aceita como proposto. As colunas `codigo_cuidador` e `codigo_valido_ate` e o `UNIQUE` já estão no `bioshield.sql` e no `DICIONARIO_DADOS.md`. O ALTER ficou no `CONTRATO_API.md` para quem já tem o banco criado. O `POST /cuidadores/vincular` pega o cuidador de `req.idUsuario` (o token), não do corpo, e recusa código vencido com `404`.
 
 ### 9. Quem pode ver os dados de qual paciente
 
@@ -109,7 +109,13 @@ O JWT carrega só o id do usuário. Em `GET /api/medicamentos?idPaciente=1`, se 
 
 **Proposta:** uma função única, usada por todos os services, que libera quando o paciente é do usuário logado ou quando existe vínculo `ativo = TRUE` em `cuidador_paciente`. Cuidador só passa nas rotas de dose e adesão. Negar com `403`.
 
-**Decisão:** onde fica (middleware ou service) e quem escreve:
+**Decisão (Erik):** fica no **service**. O middleware `autenticar` (Fase 4) só descobre quem está logado e grava em `req.idUsuario`. Ele não tem como saber o paciente, porque o id chega de jeitos diferentes: `?idPaciente`, `:id`, ou atrás de um id de dose ou de remédio. Erik escreveu `services/AutorizacaoService.ts`, com repository e infrastructure no molde da Fase 3:
+
+- `garantirDono(req.idUsuario, idPaciente)`: ficha, QR, acessos, código e medicamentos
+- `garantirAcompanhamento(req.idUsuario, idPaciente)`: doses e adesão, dono ou cuidador com vínculo ativo
+- `garantirMesmoUsuario(req.idUsuario, id)`: `/usuarios/:id` e `/cuidadores/:id/pacientes`
+
+As três lançam `ErroAcesso`, que o controller traduz para `403` (ver o `usuarioController`). Paciente inexistente também dá `403`, com a mesma mensagem. Cada service passa `req.idUsuario` para essas funções logo depois de validar os ids e antes de consultar o banco. O `GET /usuarios/:id` já usa isso.
 
 ---
 

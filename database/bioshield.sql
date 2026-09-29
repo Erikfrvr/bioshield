@@ -29,11 +29,14 @@ CREATE TABLE pacientes (
     token_gerado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     qr_ativo BOOLEAN NOT NULL DEFAULT TRUE,
     qr_cancelado_em TIMESTAMP NULL,
+    codigo_cuidador CHAR(7) NULL,
+    codigo_valido_ate TIMESTAMP NULL,
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     CONSTRAINT uk_pacientes_usuario UNIQUE (id_usuario),
     CONSTRAINT uk_pacientes_token UNIQUE (token_qr),
+    CONSTRAINT uk_pacientes_codigo UNIQUE (codigo_cuidador),
     CONSTRAINT fk_pacientes_usuario FOREIGN KEY (id_usuario)
         REFERENCES usuarios (id)
         ON DELETE CASCADE

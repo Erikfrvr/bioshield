@@ -161,7 +161,11 @@ Authorization: {{token}}
 GET {{baseUrl}}/usuarios/1
 Authorization: Bearer {{token}}
 
-### Usuario que nao existe, com token (esperado 404)
+### Conta de outra pessoa, com token (esperado 403). A Maria e o usuario 1, o 2 e a Joana
+GET {{baseUrl}}/usuarios/2
+Authorization: Bearer {{token}}
+
+### Usuario que nao existe, com token (esperado 403, a mesma resposta de conta alheia)
 GET {{baseUrl}}/usuarios/99999
 Authorization: Bearer {{token}}
 

@@ -64,12 +64,16 @@ A ficha médica. É o centro do banco: quase tudo aponta para cá.
 | `token_gerado_em` | TIMESTAMP | Não | CURRENT_TIMESTAMP | Quando o token atual foi criado |
 | `qr_ativo` | BOOLEAN | Não | TRUE | Se o QR atual abre a ficha. FALSE quando o paciente cancela o código |
 | `qr_cancelado_em` | TIMESTAMP | Sim | NULL | Quando o QR atual foi cancelado. Nulo enquanto ele estiver ativo |
+| `codigo_cuidador` | CHAR(7) | Sim | NULL | Código que o paciente entrega ao cuidador para autorizar o vínculo. Único. Nulo enquanto ninguém gerou |
+| `codigo_valido_ate` | TIMESTAMP | Sim | NULL | Até quando o `codigo_cuidador` vale. Depois disso o vínculo por ele é recusado |
 | `criado_em` | TIMESTAMP | Não | CURRENT_TIMESTAMP | Criação da ficha |
 | `atualizado_em` | TIMESTAMP | Não | ON UPDATE CURRENT_TIMESTAMP | Última alteração |
 
-Chaves: PK `id` | UNIQUE `id_usuario` | UNIQUE `token_qr` | FK `id_usuario` → `usuarios(id)` ON DELETE CASCADE
+Chaves: PK `id` | UNIQUE `id_usuario` | UNIQUE `token_qr` | UNIQUE `codigo_cuidador` | FK `id_usuario` → `usuarios(id)` ON DELETE CASCADE
 
 Regras: `tipo_sanguineo` aceita nulo porque muita gente não sabe o próprio tipo, e obrigar isso trava o cadastro. Rotacionar o QR significa gerar um `token_qr` novo e atualizar `token_gerado_em`: o anterior deixa de existir e para de funcionar na hora.
+
+O código do cuidador mora aqui porque cada paciente tem no máximo um código válido por vez. Gerar de novo sobrescreve o anterior. Depois que o vínculo nasce, o código pode ser apagado ou deixado vencer: o vínculo fica em `cuidador_paciente`, não depende mais dele.
 
 ---
 
