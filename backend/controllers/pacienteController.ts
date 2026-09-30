@@ -28,6 +28,36 @@ function responderErro(res: Response, erro: unknown): void {
   res.status(500).json({ mensagem: "Erro interno ao processar a requisição. Tente novamente." });
 }
 
+// GET /api/pacientes/:id
+export async function buscarPorId(req: Request, res: Response): Promise<void> {
+  try {
+    const ficha = await pacienteService.buscarPorId(Number(req.params.id), req.idUsuario);
+    res.status(200).json(ficha);
+  } catch (erro) {
+    responderErro(res, erro);
+  }
+}
+
+// POST /api/pacientes
+export async function criar(req: Request, res: Response): Promise<void> {
+  try {
+    const ficha = await pacienteService.criar(req.body, req.idUsuario);
+    res.status(201).json(ficha);
+  } catch (erro) {
+    responderErro(res, erro);
+  }
+}
+
+// PUT /api/pacientes/:id
+export async function atualizar(req: Request, res: Response): Promise<void> {
+  try {
+    const ficha = await pacienteService.atualizar(Number(req.params.id), req.body, req.idUsuario);
+    res.status(200).json(ficha);
+  } catch (erro) {
+    responderErro(res, erro);
+  }
+}
+
 // POST /api/pacientes/:id/qr/rotacionar
 export async function rotacionarQR(req: Request, res: Response): Promise<void> {
   try {

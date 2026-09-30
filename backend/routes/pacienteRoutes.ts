@@ -11,6 +11,10 @@ const router = Router();
 // estao montados em /api, e um router.use(autenticar) sem caminho barraria as rotas publicas dos outros.
 router.use("/pacientes", autenticar);
 
+router.get("/pacientes/:id", pacienteController.buscarPorId);
+router.post("/pacientes", pacienteController.criar);
+router.put("/pacientes/:id", pacienteController.atualizar);
+
 router.post("/pacientes/:id/qr/rotacionar", pacienteController.rotacionarQR);
 router.delete("/pacientes/:id/qr", pacienteController.cancelarQR);
 router.post("/pacientes/:id/qr/reativar", pacienteController.reativarQR);

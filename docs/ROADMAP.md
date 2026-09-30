@@ -172,16 +172,16 @@ Isto não depende da Fase 3 e economiza horas depois. Consulta testada no Workbe
 - [x] `entidade/ContatoEmergencia.ts`
 - [x] `entidade/Paciente.ts`
 - [x] Os três DTOs de paciente
-- [ ] `repository/PacienteRepository.ts`
-- [ ] `infrastructure/pacienteInfrastructure.ts` com o join de alergias e contato
-- [ ] `services/PacienteService.ts`
-- [ ] `controllers/pacienteController.ts`
-- [ ] `routes/pacienteRoutes.ts`
+- [x] `repository/PacienteRepository.ts`
+- [x] `infrastructure/pacienteInfrastructure.ts` com o join de alergias e contato
+- [x] `services/PacienteService.ts`
+- [x] `controllers/pacienteController.ts`
+- [x] `routes/pacienteRoutes.ts`
 - [ ] **`POST /api/pacientes/:id/codigo`**, que gera o código de autorização do cuidador e grava em `codigo_cuidador` e `codigo_valido_ate`
-- [ ] Chamar `autorizacaoService.garantirDono` em todas as rotas de paciente
-- [ ] Tratar alergias e contatos como substituição completa no PUT, dentro de uma transação
-- [ ] Testar criar, ler e atualizar a ficha pelo `requests.http`
-- [ ] Conferir que o `PacienteResponseDTO` não está devolvendo senha nem nada de fora
+- [x] Chamar `autorizacaoService.garantirDono` em todas as rotas de paciente · GET, PUT e as três do QR. O POST usa o id do token como dono. `/codigo` e `/acessos` chamam quando forem criadas
+- [x] Tratar alergias e contatos como substituição completa no PUT, dentro de uma transação · lista que não vem no PUT fica intocada, com os mesmos ids
+- [x] Testar criar, ler e atualizar a ficha pelo `requests.http`
+- [x] Conferir que o `PacienteResponseDTO` não está devolvendo senha nem nada de fora · só os 13 campos do contrato, sem email, senha nem `codigo_cuidador`
 - [ ] Abrir a tela de perfil no navegador e ver a ficha real carregando nos campos
 
 O endpoint do código do cuidador fica aqui, e não na Fase 9, de propósito: ele mexe no `pacienteController`, que é arquivo do Erik. Assim a Daiane não precisa encostar nele.
@@ -195,7 +195,7 @@ O endpoint do código do cuidador fica aqui, e não na Fase 9, de propósito: el
 O coração do produto. Sem isso o BioShield é só mais um app de lembrete.
 
 - [x] `valueObjects/TokenQR.ts` com token aleatório grande e imprevisível
-- [ ] Gerar o token no `PacienteService` na hora de criar a ficha · o `gerarTokenQR` já existe, falta o `criar` da Fase 5 chamar ele com o INSERT dentro
+- [x] Gerar o token no `PacienteService` na hora de criar a ficha · o `criar` chama o `gerarTokenQR` com o INSERT dentro
 - [x] Método de rotacionar o token (gera novo e invalida o antigo) · `POST /pacientes/:id/qr/rotacionar`
 - [x] **Método de cancelar:** marca `qr_ativo = FALSE` e grava `qr_cancelado_em`, sem apagar o token · `DELETE /pacientes/:id/qr`
 - [x] **Método de reativar:** gera token novo e volta `qr_ativo = TRUE` · `POST /pacientes/:id/qr/reativar`
