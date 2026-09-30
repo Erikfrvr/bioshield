@@ -173,10 +173,10 @@ Authorization: Bearer {{token}}
 GET {{baseUrl}}/usuarios/abc
 Authorization: Bearer {{token}}
 
-### Router ainda vazio, mas ja protegido: sem token (esperado 401)
+### Ficha sem token (esperado 401)
 GET {{baseUrl}}/pacientes/1
 
-### Router ainda vazio, com token: passa pelo middleware e cai no 404 do Express (esperado 404)
+### Ficha com token: passa pelo middleware (esperado 200, a ficha da Maria)
 GET {{baseUrl}}/pacientes/1
 Authorization: Bearer {{token}}
 
@@ -187,6 +187,114 @@ GET {{baseUrl}}/emergencia/a3f81c2d94be47a0b6e15d7c0f29b834
 ### PACIENTE (ficha medica)
 ### ==========================
 ### Usa o token do bloco "login" da Maria (secao USUARIOS). A Maria e dona do paciente 1.
+
+### Ler a propria ficha (esperado 200). Conferir: so os campos do contrato, nome sem email nem senha,
+### nada de codigo_cuidador, telefone so com digitos e contatos em ordem de prioridade
+GET {{baseUrl}}/pacientes/1
+Authorization: Bearer {{token}}
+
+### Ler ficha que nao e da Maria (esperado 403). O paciente 2 e da Joana
+GET {{baseUrl}}/pacientes/2
+Authorization: Bearer {{token}}
+
+### Ler ficha que nao existe (esperado 403, mesma resposta de ficha alheia)
+GET {{baseUrl}}/pacientes/99999
+Authorization: Bearer {{token}}
+
+### Ler com id invalido (esperado 400)
+GET {{baseUrl}}/pacientes/abc
+Authorization: Bearer {{token}}
+
+### Maria criando outra ficha (esperado 409, cada conta tem uma so)
+POST {{baseUrl}}/pacientes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{}
+
+### --- Criar e editar ficha: use uma conta SEM ficha ---
+### Cadastre uma conta no primeiro bloco de USUARIOS e faca login com ela aqui (troque o email)
+# @name loginSemFicha
+POST {{baseUrl}}/usuarios/login
+Content-Type: application/json
+
+{
+  "email": "teste.silva@exemplo.com",
+  "senha": "senha1234"
+}
+
+### Criar a ficha (esperado 201, ficha inteira com tokenQr de 32 caracteres e qrAtivo true)
+### O idUsuario do corpo e ignorado: o dono e sempre quem esta logado.
+### Contato sem prioridade ganha a posicao na lista (1, 2...). "o+" volta "O+" e o telefone volta so com digitos
+# @name criarFicha
+POST {{baseUrl}}/pacientes
+Authorization: Bearer {{loginSemFicha.response.body.token}}
+Content-Type: application/json
+
+{
+  "idUsuario": 1,
+  "tipoSanguineo": "o+",
+  "condicoes": "Hipertensão",
+  "observacoes": "Mora sozinha.",
+  "alergias": [
+    { "substancia": "Dipirona", "gravidade": "grave", "observacao": "Falta de ar" },
+    { "substancia": "Penicilina", "gravidade": "leve" }
+  ],
+  "contatos": [
+    { "nome": "Patrícia", "telefone": "(11) 98765-4321", "parentesco": "Filha" },
+    { "nome": "João", "telefone": "1133334444" }
+  ]
+}
+
+### Criar de novo com a mesma conta (esperado 409)
+POST {{baseUrl}}/pacientes
+Authorization: Bearer {{loginSemFicha.response.body.token}}
+Content-Type: application/json
+
+{}
+
+### Criar com tipo sanguineo invalido (esperado 400). Rode com uma conta sem ficha, senao o 409 vem antes
+POST {{baseUrl}}/pacientes
+Authorization: Bearer {{loginSemFicha.response.body.token}}
+Content-Type: application/json
+
+{ "tipoSanguineo": "0+" }
+
+### Ler a ficha criada (esperado 200, igual a resposta do POST)
+GET {{baseUrl}}/pacientes/{{criarFicha.response.body.id}}
+Authorization: Bearer {{loginSemFicha.response.body.token}}
+
+### Editar so as condicoes (esperado 200). O resto fica igual, inclusive os ids das alergias e dos contatos
+PUT {{baseUrl}}/pacientes/{{criarFicha.response.body.id}}
+Authorization: Bearer {{loginSemFicha.response.body.token}}
+Content-Type: application/json
+
+{ "condicoes": "Hipertensão e diabetes tipo 2" }
+
+### Editar as listas (esperado 200). Lista que vem substitui a inteira; null apaga o campo
+PUT {{baseUrl}}/pacientes/{{criarFicha.response.body.id}}
+Authorization: Bearer {{loginSemFicha.response.body.token}}
+Content-Type: application/json
+
+{
+  "tipoSanguineo": null,
+  "alergias": [{ "substancia": "Látex", "gravidade": "moderada" }],
+  "contatos": [{ "nome": "Ana", "telefone": "21999998888", "parentesco": "Vizinha", "prioridade": 1 }]
+}
+
+### Editar com telefone invalido (esperado 400, e nada da ficha muda, nem as condicoes)
+PUT {{baseUrl}}/pacientes/{{criarFicha.response.body.id}}
+Authorization: Bearer {{loginSemFicha.response.body.token}}
+Content-Type: application/json
+
+{ "condicoes": "Nao pode gravar", "contatos": [{ "nome": "B", "telefone": "00" }] }
+
+### Editar a ficha da Maria com outra conta (esperado 403)
+PUT {{baseUrl}}/pacientes/1
+Authorization: Bearer {{loginSemFicha.response.body.token}}
+Content-Type: application/json
+
+{ "condicoes": "x" }
 
 ### Rotacionar o QR do paciente 1 (esperado 200, tokenQr novo com 32 caracteres, qrAtivo true, qrCanceladoEm null)
 ### Depois disso o token antigo a3f81c2d... para de abrir a emergencia
