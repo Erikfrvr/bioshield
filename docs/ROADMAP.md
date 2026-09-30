@@ -31,8 +31,6 @@ Por isso a divisão tem três tempos:
 
 Trabalhem em branch por fatia (`erik/ficha-qr`, `daiane/medicamentos-doses`) e façam pull antes de cada push. Commit pequeno e frequente dói menos que merge grande.
 
----
-
 ## Fase 0 — Preparar o terreno
 
 - [x] Criar o repositório `bioshield` no GitHub (conta Erikfrvr), privado por enquanto
@@ -332,6 +330,55 @@ O corte do cancelamento é o melhor plano do vídeo inteiro. É o que mostra que
 
 ---
 
+## Fase 13 — Testes com Jest  ·  **Daiane**
+
+Poucos testes, no mesmo formato do que foi feito em aula: `describe`, `test` e `expect`, testando value object e entidade. Esses arquivos não falam com o banco, então não precisa de nada falso.
+
+Atenção ao copiar o exemplo da aula: aqui os métodos se chamam `getValor()` e `igualA()`, não `getValue()` e `equals()`. E a mensagem de erro é a que está escrita em cada arquivo (no Email é `"O email informado não é válido."`), então o `toThrow` tem que usar essa.
+
+Use o mesmo começo de arquivo da aula, `import { describe, expect, test } from '@jest/globals';`, e `test` em vez de `it`, para ficar igual ao que o professor corrige. Quando ele ensinar teste de infrastructure (o comentário `// Usar na UC de Teste` do projeto 16 indica que vem aí), acrescente aqui um teste do `usuarioInfrastructure` no mesmo formato que ele passar.
+
+### Preparar
+
+- [ ] Instalar junto com o Erik, num commit só, por causa do `package-lock.json`: `npm install -D jest @types/jest` e o mesmo transformador de TypeScript usado em aula. Se o `ts-jest` der erro com o TypeScript 7 do projeto, troque por `@swc/core @swc/jest`
+- [ ] Script `"test": "jest"` no `backend/package.json`
+- [ ] Criar a pasta `backend/tests/` e rodar `npm test` com o primeiro arquivo
+
+### Os testes
+
+- [ ] `tests/valueObjects/Email.test.ts`
+  - [ ] Aceita emails válidos e guarda em minúsculo (`" Maria@Exemplo.COM "` vira `"maria@exemplo.com"`)
+  - [ ] Rejeita emails inválidos (`"semarroba"`, `"a@b.c"`, `"maria teste@exemplo.com"`)
+  - [ ] `igualA` compara pelo valor
+- [ ] `tests/valueObjects/Senha.test.ts`
+  - [ ] Aceita senha com 8 caracteres, letra e número
+  - [ ] Rejeita senha curta, só letras e só números
+  - [ ] `String(senha)` mostra só `********`, nunca a senha
+- [ ] `tests/valueObjects/TipoSanguineo.test.ts`
+  - [ ] Aceita os oito tipos e normaliza `" ab- "` para `"AB-"`
+  - [ ] Rejeita `"0+"` com zero, `"C+"` e `"A"`
+  - [ ] `TipoSanguineo.opcional("")` devolve `null`
+- [ ] `tests/valueObjects/Telefone.test.ts`
+  - [ ] `"(11) 98765-4321"` vira `"11987654321"`
+  - [ ] Rejeita número curto, DDD `01` e celular sem o 9
+- [ ] `tests/valueObjects/TokenQR.test.ts`
+  - [ ] `gerar()` devolve 32 caracteres hexadecimais
+  - [ ] Dois tokens gerados são diferentes
+  - [ ] `aPartirDoValor` rejeita texto que não é token (`"abc"`)
+- [ ] `tests/entidade/Alergia.test.ts`
+  - [ ] Sem gravidade, a alergia fica `"moderada"`
+  - [ ] Rejeita gravidade `"fatal"` e substância vazia
+- [ ] `tests/entidade/FichaEmergencia.test.ts`
+  - [ ] Alergia grave aparece antes da leve
+  - [ ] Remédio com `ativo: false` não aparece na ficha
+- [ ] `tests/entidade/Cuidador.test.ts`
+  - [ ] `desvincular()` deixa o vínculo inativo
+  - [ ] Desvincular duas vezes dá erro
+
+**Marco 10:** `npm test` passando com esses oito arquivos.
+
+---
+
 ## Painel de acompanhamento
 
 | Marco | O que prova | Dono | Feito |
@@ -347,6 +394,7 @@ O corte do cancelamento é o melhor plano do vídeo inteiro. É o que mostra que
 | 7 | Lembrete de dose fechado | Daiane | [ ] |
 | 8 | Backend completo | Daiane | [ ] |
 | 9 | App navegável | pronto no front | [x] |
+| 10 | Testes do Jest passando | Daiane | [ ] |
 
 ---
 
