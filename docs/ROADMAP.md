@@ -225,8 +225,8 @@ Cuidado com o reativar: ele **não** ressuscita o código antigo, gera outro. Se
 Começa depois do Marco 4. Roda em paralelo com as Fases 5 e 6 do Erik.
 
 - [x] `valueObjects/Dosagem.ts`
-- [ ] `valueObjects/HorarioDose.ts`
-- [ ] `entidade/Medicamento.ts`
+- [x] `valueObjects/HorarioDose.ts`
+- [x] `entidade/Medicamento.ts`
 - [ ] Os três DTOs de medicamento
 - [ ] `repository/MedicamentoRepository.ts`
 - [ ] `infrastructure/medicamentoInfrastructure.ts` (cole aqui o SQL que você já testou no Workbench)
