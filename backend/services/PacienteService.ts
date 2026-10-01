@@ -13,6 +13,7 @@ import { AlergiaDTO, ContatoEmergenciaDTO, CriarPacienteDTO } from "../models/dt
 import { AtualizarPacienteDTO } from "../models/dto/paciente/AtualizarPacienteDTO";
 import { PacienteResponseDTO } from "../models/dto/paciente/PacienteResponseDTO";
 import { QrResponseDTO } from "../models/dto/paciente/QrResponseDTO";
+import { AcessoQrResponseDTO } from "../models/dto/paciente/AcessoQrResponseDTO";
 import { PacienteRepository } from "../repository/PacienteRepository";
 import autorizacaoService, { ErroAcesso } from "./AutorizacaoService";
 
@@ -163,6 +164,21 @@ export class PacienteService {
     this.validarId(idPaciente);
     await autorizacaoService.garantirDono(idLogado, idPaciente);
     return this.trocarToken(idPaciente);
+  }
+
+  // GET /pacientes/:id/acessos. Historico da LGPD, mais recente primeiro. So o dono ve:
+  // o cuidador acompanha dose, mas nao recebe o log de quem abriu a ficha.
+  async listarAcessos(idPaciente: number, idLogado: number | undefined): Promise<AcessoQrResponseDTO[]> {
+    this.validarId(idPaciente);
+    await autorizacaoService.garantirDono(idLogado, idPaciente);
+
+    const acessos = await this.repositorio.listarAcessos(idPaciente);
+    return acessos.map((a) => ({
+      id: a.id,
+      acessadoEm: a.acessadoEm.toISOString(),
+      ip: a.ip,
+      userAgent: a.userAgent,
+    }));
   }
 
   private async trocarToken(idPaciente: number): Promise<QrResponseDTO> {

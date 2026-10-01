@@ -9,7 +9,7 @@ import Paciente from "../models/entidade/Paciente";
 import Telefone from "../models/valueObjects/Telefone";
 import TipoSanguineo from "../models/valueObjects/TipoSanguineo";
 import TokenQR from "../models/valueObjects/TokenQR";
-import { ListasAlteradas, PacienteComNome, PacienteRepository } from "../repository/PacienteRepository";
+import { AcessoQr, ListasAlteradas, PacienteComNome, PacienteRepository } from "../repository/PacienteRepository";
 
 // Linha de pacientes com o nome que vem de usuarios pelo join
 interface PacienteLinha extends RowDataPacket {
@@ -40,6 +40,13 @@ interface ContatoLinha extends RowDataPacket {
   telefone: string;
   parentesco: string | null;
   prioridade: number;
+}
+
+interface AcessoLinha extends RowDataPacket {
+  id: number;
+  acessado_em: Date;
+  ip: string | null;
+  user_agent: string | null;
 }
 
 export class PacienteInfrastructure implements PacienteRepository {
@@ -194,6 +201,29 @@ export class PacienteInfrastructure implements PacienteRepository {
         [canceladoEm, idPaciente]
       );
       return resultado.affectedRows > 0;
+    } finally {
+      conexao.release();
+    }
+  }
+
+  // Mais recente primeiro. O id desempata dois acessos no mesmo segundo, que o TIMESTAMP nao separa.
+  // O indice idx_acessos_paciente (id_paciente, acessado_em) cobre o filtro e a ordem.
+  async listarAcessos(idPaciente: number): Promise<AcessoQr[]> {
+    const conexao = await pool.getConnection();
+    try {
+      const [linhas] = await conexao.query<AcessoLinha[]>(
+        `SELECT id, acessado_em, ip, user_agent
+           FROM acessos_qr
+          WHERE id_paciente = ?
+          ORDER BY acessado_em DESC, id DESC`,
+        [idPaciente]
+      );
+      return linhas.map((linha) => ({
+        id: Number(linha.id),
+        acessadoEm: linha.acessado_em,
+        ip: linha.ip,
+        userAgent: linha.user_agent,
+      }));
     } finally {
       conexao.release();
     }

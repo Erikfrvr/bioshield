@@ -78,6 +78,16 @@ export async function cancelarQR(req: Request, res: Response): Promise<void> {
   }
 }
 
+// GET /api/pacientes/:id/acessos
+export async function listarAcessos(req: Request, res: Response): Promise<void> {
+  try {
+    const acessos = await pacienteService.listarAcessos(Number(req.params.id), req.idUsuario);
+    res.status(200).json(acessos);
+  } catch (erro) {
+    responderErro(res, erro);
+  }
+}
+
 // POST /api/pacientes/:id/qr/reativar
 export async function reativarQR(req: Request, res: Response): Promise<void> {
   try {
