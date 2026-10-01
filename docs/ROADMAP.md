@@ -206,11 +206,11 @@ O coração do produto. Sem isso o BioShield é só mais um app de lembrete.
 - [x] Trazer só medicamento com `ativo = TRUE`
 - [x] Ordenar contatos por prioridade
 - [x] `controllers/emergenciaController.ts`
-- [x] `routes/emergenciaRoutes.ts` sem o middleware de autenticação
+- [x] `routes/emergenciaRoutes.ts` sem o middleware de autenticação · `GET /api/emergencia/:token`
 - [x] **Devolver 404 para token que não existe e 410 para token cancelado.** O front tem tela diferente para cada um
-- [x] `GET /api/pacientes/:id/acessos` devolvendo o histórico da LGPD, mais recente primeiro
+- [x] `GET /api/pacientes/:id/acessos` devolvendo o histórico da LGPD, mais recente primeiro · só o dono (`garantirDono`)
 - [x] Revisar campo por campo do que sai: nenhum email, senha, id ou token sobrando
-- [x] Testar com token inválido, token válido e token cancelado
+- [x] Testar com token inválido, token válido e token cancelado · 404, 200 e 410, com o acesso gravado em `acessos_qr`
 
 Cortado deste roadmap: o `npm install qrcode`. O front tem gerador próprio de QR Code em `js/qrcode.js`, sem CDN e sem biblioteca. O backend não precisa gerar imagem nenhuma, só entregar o token.
 
