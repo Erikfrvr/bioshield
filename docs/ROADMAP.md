@@ -227,15 +227,15 @@ Começa depois do Marco 4. Roda em paralelo com as Fases 5 e 6 do Erik.
 - [x] `valueObjects/Dosagem.ts`
 - [x] `valueObjects/HorarioDose.ts`
 - [x] `entidade/Medicamento.ts`
-- [ ] Os três DTOs de medicamento
-- [ ] `repository/MedicamentoRepository.ts`
-- [ ] `infrastructure/medicamentoInfrastructure.ts` (cole aqui o SQL que você já testou no Workbench)
-- [ ] `services/MedicamentoService.ts`, chamando `autorizacaoService.garantirDono` antes de ler ou gravar
-- [ ] Campo `proximaDose` na resposta: primeira dose prevista com horário no futuro, ou `null`
-- [ ] `controllers/medicamentoController.ts`
-- [ ] `routes/medicamentoRoutes.ts`
+- [x] Os três DTOs de medicamento
+- [x] `repository/MedicamentoRepository.ts`
+- [x] `infrastructure/medicamentoInfrastructure.ts` (cole aqui o SQL que você já testou no Workbench)
+- [x] `services/MedicamentoService.ts`, chamando `autorizacaoService.garantirDono` antes de ler ou gravar
+- [x] Campo `proximaDose` na resposta: primeira dose prevista com horário no futuro, ou `null`
+- [x] `controllers/medicamentoController.ts`
+- [x] `routes/medicamentoRoutes.ts`
 - [ ] Testar o CRUD inteiro pelo `requests.http`
-- [ ] Abrir a tela de remédios no navegador e ver a lista real aparecendo
+- [ ] Abrir a tel de remédios no navegador e ver a lista real aparecendo
 
 ---
 
