@@ -241,11 +241,11 @@ Começa depois do Marco 4. Roda em paralelo com as Fases 5 e 6 do Erik.
 
 ## Fase 8 — Doses e adesão  ·  **Daiane**
 
-- [ ] `entidade/Dose.ts` com os status previsto, tomada e perdida
-- [ ] Geração automática da agenda quando um medicamento é cadastrado
-- [ ] Os três DTOs de dose
-- [ ] `repository/DoseRepository.ts`
-- [ ] `infrastructure/doseInfrastructure.ts`
+- [x] `entidade/Dose.ts` com os status previsto, tomada e perdida
+- [x] Geração automática da agenda quando um medicamento é cadastrado
+- [x] Os três DTOs de dose
+- [x] `repository/DoseRepository.ts`
+- [x] `infrastructure/doseInfrastructure.ts`
 - [ ] `services/DoseService.ts` com a janela de tolerância e o cálculo de adesão, chamando `autorizacaoService.garantirAcompanhamento`
 - [ ] Deixar confirmar dose com status `perdida` também. O front tem o botão "Tomei mesmo assim"
 - [ ] Dose no futuro **não** entra no cálculo de adesão, senão o dia começa em 0% e assusta o usuário à toa
