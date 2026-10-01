@@ -9,7 +9,7 @@ import Paciente from "../models/entidade/Paciente";
 import Telefone from "../models/valueObjects/Telefone";
 import TipoSanguineo from "../models/valueObjects/TipoSanguineo";
 import TokenQR from "../models/valueObjects/TokenQR";
-import { ListasAlteradas, PacienteComNome, PacienteRepository } from "../repository/PacienteRepository";
+import { AcessoQr, ListasAlteradas, PacienteComNome, PacienteRepository } from "../repository/PacienteRepository";
 
 // Linha de pacientes com o nome que vem de usuarios pelo join
 interface PacienteLinha extends RowDataPacket {
@@ -41,6 +41,16 @@ interface ContatoLinha extends RowDataPacket {
   parentesco: string | null;
   prioridade: number;
 }
+
+interface AcessoLinha extends RowDataPacket {
+  id: number;
+  acessado_em: Date;
+  ip: string | null;
+  user_agent: string | null;
+}
+
+// Teto do historico. Sem isso um QR muito escaneado devolveria uma lista sem fim para a tela.
+const LIMITE_ACESSOS = 100;
 
 export class PacienteInfrastructure implements PacienteRepository {
   // Ficha, alergias e contatos entram juntos ou nao entram. Ficha pela metade na emergencia e pior que ficha nenhuma.
@@ -194,6 +204,29 @@ export class PacienteInfrastructure implements PacienteRepository {
         [canceladoEm, idPaciente]
       );
       return resultado.affectedRows > 0;
+    } finally {
+      conexao.release();
+    }
+  }
+
+  // Mais recente primeiro. O id desempata duas leituras no mesmo segundo.
+  async listarAcessos(idPaciente: number): Promise<AcessoQr[]> {
+    const conexao = await pool.getConnection();
+    try {
+      const [linhas] = await conexao.query<AcessoLinha[]>(
+        `SELECT id, acessado_em, ip, user_agent
+           FROM acessos_qr
+          WHERE id_paciente = ?
+          ORDER BY acessado_em DESC, id DESC
+          LIMIT ?`,
+        [idPaciente, LIMITE_ACESSOS]
+      );
+      return linhas.map((linha) => ({
+        id: Number(linha.id),
+        acessadoEm: linha.acessado_em,
+        ip: linha.ip,
+        userAgent: linha.user_agent,
+      }));
     } finally {
       conexao.release();
     }

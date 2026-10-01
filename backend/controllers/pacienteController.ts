@@ -23,8 +23,10 @@ function responderErro(res: Response, erro: unknown): void {
     return;
   }
 
-  // So a mensagem do erro. Nada de req.body: aqui tem dado de saude
-  console.error("Erro inesperado no pacienteController:", (erro as Error)?.message);
+  // So o codigo ou o nome do erro. Nada de req.body e nada de erro.message:
+  // a mensagem do MySQL as vezes repete o valor que deu problema, e aqui o valor e dado de saude.
+  const e = erro as { code?: string; name?: string };
+  console.error("Erro inesperado no pacienteController:", e?.code ?? e?.name ?? "desconhecido");
   res.status(500).json({ mensagem: "Erro interno ao processar a requisição. Tente novamente." });
 }
 
@@ -83,6 +85,16 @@ export async function reativarQR(req: Request, res: Response): Promise<void> {
   try {
     const qr = await pacienteService.reativarQR(Number(req.params.id), req.idUsuario);
     res.status(200).json(qr);
+  } catch (erro) {
+    responderErro(res, erro);
+  }
+}
+
+// GET /api/pacientes/:id/acessos
+export async function listarAcessos(req: Request, res: Response): Promise<void> {
+  try {
+    const acessos = await pacienteService.listarAcessos(Number(req.params.id), req.idUsuario);
+    res.status(200).json(acessos);
   } catch (erro) {
     responderErro(res, erro);
   }

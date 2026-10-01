@@ -205,12 +205,12 @@ O coração do produto. Sem isso o BioShield é só mais um app de lembrete.
 - [x] Ordenar alergias por gravidade, grave primeiro
 - [x] Trazer só medicamento com `ativo = TRUE`
 - [x] Ordenar contatos por prioridade
-- [ ] `controllers/emergenciaController.ts`
-- [ ] `routes/emergenciaRoutes.ts` sem o middleware de autenticação
-- [ ] **Devolver 404 para token que não existe e 410 para token cancelado.** O front tem tela diferente para cada um
-- [ ] `GET /api/pacientes/:id/acessos` devolvendo o histórico da LGPD, mais recente primeiro
-- [ ] Revisar campo por campo do que sai: nenhum email, senha, id ou token sobrando
-- [ ] Testar com token inválido, token válido e token cancelado
+- [x] `controllers/emergenciaController.ts`
+- [x] `routes/emergenciaRoutes.ts` sem o middleware de autenticação
+- [x] **Devolver 404 para token que não existe e 410 para token cancelado.** O front tem tela diferente para cada um
+- [x] `GET /api/pacientes/:id/acessos` devolvendo o histórico da LGPD, mais recente primeiro
+- [x] Revisar campo por campo do que sai: nenhum email, senha, id ou token sobrando
+- [x] Testar com token inválido, token válido e token cancelado
 
 Cortado deste roadmap: o `npm install qrcode`. O front tem gerador próprio de QR Code em `js/qrcode.js`, sem CDN e sem biblioteca. O backend não precisa gerar imagem nenhuma, só entregar o token.
 
@@ -309,7 +309,7 @@ Oito telas, trinta e um arquivos. Passou por bateria automatizada no Chromium: 4
 - [x] Mensagem de erro amigável no lugar de `alert` seco
 - [x] Estado de carregando nas telas que buscam dado
 - [x] Tela de emergência legível em três segundos, alergia em vermelho
-- [ ] Revisar LGPD no backend: nada de logar corpo de ficha médica, log de acesso gravando · **Erik**
+- [x] Revisar LGPD no backend: nada de logar corpo de ficha médica, log de acesso gravando · **Erik**
 - [x] Trocar todo dado de teste real por dado fictício antes de publicar
 - [ ] Corrigir o `README.md`: ele manda rodar `database/dados_teste.sql`, mas o arquivo chama `dados_ficticios.sql` · **Daiane**
 - [ ] `README.md` com print, descrição e instruções de instalação · **Daiane**
@@ -324,8 +324,13 @@ Dois recursos pensados para idoso e baixa visão, só no front, sem mexer no bac
 - [x] Botão pequeno e redondo com o símbolo de acessibilidade, que abre as opções ao toque
 - [x] Botões A− e A+ com quatro tamanhos de letra, guardando a escolha no navegador
 - [x] Botão de contraste reforçado: texto preto, bordas mais escuras e coral mais fechado
-- [ ] Passar por todas as telas com a letra no tamanho máximo e ver se algum texto fica apertado
-- [ ] Passar por todas as telas com o contraste ligado e ver se alguma cor ficou estranha
+- [x] Passar por todas as telas com a letra no tamanho máximo e ver se algum texto fica apertado
+- [x] Passar por todas as telas com o contraste ligado e ver se alguma cor ficou estranha
+- [x] Classe `letra-grande` no `style.css`: com a letra aumentada, os blocos lado a lado viram coluna
+- [ ] Conferir com a letra aumentada as janelas que abrem por cima da tela (adicionar remédio, editar ficha)
+- [ ] Conferir em um celular de verdade, e não só por print
+
+O teste foi feito por print, em largura de celular (360 px), nas sete telas. Antes do ajuste, o nome do paciente e o nome da alergia quebravam letra por letra na ficha de emergência, e o botão Sair saía da tela.
 
 A leitura em voz alta foi testada e retirada. Ficou só o que o usuário controla com um toque.
 
@@ -345,10 +350,10 @@ O corte do cancelamento é o melhor plano do vídeo inteiro. É o que mostra que
 
 A ideia é deixar QR Codes de pacientes fictícios na mesa para o visitante escanear com o próprio celular. As pegadinhas e a linha do tempo completa estão em `docs/DIA_DO_EVENTO.md`. Leiam antes de imprimir qualquer coisa.
 
-- [ ] Confirmar com o professor que o servidor tem endereço público, fora da rede do Senac
+- [ ] Confirmar com o professor o endereço do servidor e como o visitante entra no wifi "Senac Alunos"
 - [ ] Subir backend, banco com dados fictícios e a pasta `frontEnd/` no servidor
 - [ ] Preencher `URL_API` e `URL_PUBLICA_EMERGENCIA` no `config.js`, com `MODO: "api"` e tempo limite maior
-- [ ] Abrir uma ficha com o celular no 4G, antes de gerar qualquer QR
+- [ ] Abrir uma ficha com o celular no wifi "Senac Alunos", antes de gerar qualquer QR
 - [ ] **Só então** gerar e imprimir os QR Codes
 - [ ] Testar cada papel com dois celulares
 - [ ] Depois de impresso, não rotacionar, cancelar nem recriar paciente da mesa
@@ -375,34 +380,34 @@ Use o mesmo começo de arquivo da aula, `import { describe, expect, test } from 
 
 ### Os testes
 
-- [ ] `tests/valueObjects/Email.test.ts`
-  - [ ] Aceita emails válidos e guarda em minúsculo (`" Maria@Exemplo.COM "` vira `"maria@exemplo.com"`)
-  - [ ] Rejeita emails inválidos (`"semarroba"`, `"a@b.c"`, `"maria teste@exemplo.com"`)
-  - [ ] `igualA` compara pelo valor
-- [ ] `tests/valueObjects/Senha.test.ts`
-  - [ ] Aceita senha com 8 caracteres, maiúscula, minúscula, número e caractere especial
-  - [ ] Rejeita senha curta, sem maiúscula, sem minúscula, sem número e sem caractere especial
-  - [ ] `String(senha)` mostra só `********`, nunca a senha
-- [ ] `tests/valueObjects/TipoSanguineo.test.ts`
-  - [ ] Aceita os oito tipos e normaliza `" ab- "` para `"AB-"`
-  - [ ] Rejeita `"0+"` com zero, `"C+"` e `"A"`
-  - [ ] `TipoSanguineo.opcional("")` devolve `null`
-- [ ] `tests/valueObjects/Telefone.test.ts`
-  - [ ] `"(11) 98765-4321"` vira `"11987654321"`
+- [ ] `tests/valueObjects/Email.test.ts` · **Erik**,
+  - [ ] Aceita emails válidos e guarda em minúsculo (`" Maria@Exemplo.COM "` vira `"maria@exemplo.com"`) **Erik**
+  - [ ] Rejeita emails inválidos (`"semarroba"`, `"a@b.c"`, `"maria teste@exemplo.com"`) **Erik**
+  - [ ] `igualA` compara pelo valor **Erik**
+- [ ] `tests/valueObjects/Senha.test.ts` · **Erik**,
+  - [ ] Aceita senha com 8 caracteres, maiúscula, minúscula, número e caractere especial **Erik**,
+  - [ ] Rejeita senha curta, sem maiúscula, sem minúscula, sem número e sem caractere especial **Erik**,
+  - [ ] `String(senha)` mostra só `********`, nunca a senha **Erik**,
+- [ ] `tests/valueObjects/TipoSanguineo.test.ts` ·**Erik**,
+  - [ ] Aceita os oito tipos e normaliza `" ab- "` para `"AB-"` **Erik**,
+  - [ ] Rejeita `"0+"` com zero, `"C+"` e `"A"` **Erik**,
+  - [ ] `TipoSanguineo.opcional("")` devolve `null` **Erik**,
+- [ ] `tests/valueObjects/Telefone.test.ts` · **Erik**, 
+  - [ ] `"(11) 98765-4321"` vira `"11987654321"` **Erik**,
   - [ ] Rejeita número curto, DDD `01` e celular sem o 9
-- [ ] `tests/valueObjects/TokenQR.test.ts`
-  - [ ] `gerar()` devolve 32 caracteres hexadecimais
-  - [ ] Dois tokens gerados são diferentes
-  - [ ] `aPartirDoValor` rejeita texto que não é token (`"abc"`)
-- [ ] `tests/entidade/Alergia.test.ts`
-  - [ ] Sem gravidade, a alergia fica `"moderada"`
+- [ ] `tests/valueObjects/TokenQR.test.ts` · **Daiane**,
+  - [ ] `gerar()` devolve 32 caracteres hexadecimais **Daiane**,
+  - [ ] Dois tokens gerados são diferentes **Daiane**,
+  - [ ] `aPartirDoValor` rejeita texto que não é token (`"abc"`) **Daiane**,
+- [ ] `tests/entidade/Alergia.test.ts` · **Daiane**,
+  - [ ] Sem gravidade, a alergia fica `"moderada"` **Daiane**,
   - [ ] Rejeita gravidade `"fatal"` e substância vazia
-- [ ] `tests/entidade/FichaEmergencia.test.ts`
-  - [ ] Alergia grave aparece antes da leve
-  - [ ] Remédio com `ativo: false` não aparece na ficha
-- [ ] `tests/entidade/Cuidador.test.ts`
-  - [ ] `desvincular()` deixa o vínculo inativo
-  - [ ] Desvincular duas vezes dá erro
+- [ ] `tests/entidade/FichaEmergencia.test.ts` · **Daiane**,
+  - [ ] Alergia grave aparece antes da leve **Daiane**,
+  - [ ] Remédio com `ativo: false` não aparece na ficha **Daiane**,
+- [ ] `tests/entidade/Cuidador.test.ts` · **Daiane**
+  - [ ] `desvincular()` deixa o vínculo inativo **Daiane**,
+  - [ ] Desvincular duas vezes dá erro **Daiane**,
 
 **Marco 10:** `npm test` passando com esses oito arquivos.
 

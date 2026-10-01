@@ -16,6 +16,14 @@ export interface ListasAlteradas {
     contatos: boolean;
 }
 
+// Uma leitura do QR, como esta gravada em acessos_qr
+export interface AcessoQr {
+    id: number;
+    acessadoEm: Date;
+    ip: string | null;
+    userAgent: string | null;
+}
+
 export interface PacienteRepository {
     // Grava a ficha com as alergias e os contatos numa transacao so e devolve o id gerado dentro da entidade.
     criar(paciente: Paciente): Promise<void>;
@@ -32,4 +40,6 @@ export interface PacienteRepository {
     // Marca qr_ativo = FALSE e grava qr_cancelado_em, sem tocar no token.
     // Devolve false quando o QR ja estava cancelado.
     cancelarQR(idPaciente: number, canceladoEm: Date): Promise<boolean>;
+    // Historico de leituras do QR dessa ficha, mais recente primeiro. Lista vazia quando ninguem escaneou.
+    listarAcessos(idPaciente: number): Promise<AcessoQr[]>;
 }

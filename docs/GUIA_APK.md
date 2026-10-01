@@ -190,7 +190,9 @@ Nenhuma das três saídas faz o QR abrir no celular de um estranho. Para isso é
 
 ## O que muda no Caminho B
 
-Se o professor deixar um servidor ativo com o BioShield, é este caminho. O app funciona sem cabo em qualquer rede e o QR abre no celular de qualquer pessoa, desde que o servidor tenha endereço público, acessível de fora da rede do Senac.
+Este caminho vale para um servidor com endereço público, acessível de qualquer rede.
+
+O servidor do professor não é esse caso: ele só funciona dentro do Senac. Com ele, o app e o QR abrem sem cabo, mas só para quem estiver no wifi "Senac Alunos". Foi o que decidimos usar no evento. Os ajustes no `config.js` são os mesmos abaixo, trocando "endereço público" pelo endereço do servidor do professor, e sem a exigência de HTTPS.
 
 Para a mesa de QR Codes do evento, leiam o `docs/DIA_DO_EVENTO.md`. Ele lista o que faz o QR parar de funcionar no dia, e a principal regra é: só imprimir depois que o `URL_PUBLICA_EMERGENCIA` estiver com o endereço definitivo.
 

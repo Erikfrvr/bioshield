@@ -48,6 +48,9 @@
   function aplicarLetra() {
     // No nivel padrao eu tiro o estilo, assim o style.css continua mandando (inclusive a regra de tela pequena).
     document.documentElement.style.fontSize = nivel === 0 ? "" : TAMANHOS[nivel] + "px";
+    // Com a letra aumentada, os blocos que ficam lado a lado passam a ficar um embaixo do outro.
+    // As regras estao no style.css, na classe letra-grande. Sem isso o nome do paciente quebrava letra por letra.
+    document.documentElement.classList.toggle("letra-grande", nivel >= 1);
     if (botaoMenor) botaoMenor.disabled = nivel === 0;
     if (botaoMaior) botaoMaior.disabled = nivel === TAMANHOS.length - 1;
   }

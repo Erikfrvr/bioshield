@@ -190,7 +190,7 @@ GET {{baseUrl}}/pacientes/1
 GET {{baseUrl}}/pacientes/1
 Authorization: Bearer {{token}}
 
-### Rota publica do QR nao pode pedir token (esperado 404 enquanto a rota nao existe, NUNCA 401)
+### Rota publica do QR nao pode pedir token (esperado 200 mesmo sem login, NUNCA 401)
 GET {{baseUrl}}/emergencia/a3f81c2d94be47a0b6e15d7c0f29b834
 
 ### ==========================
@@ -701,3 +701,38 @@ Authorization: Bearer {{loginPatricia.response.body.token}}
 ### ==========================
 ### EMERGENCIA (rota publica do QR)
 ### ==========================
+### Nenhum bloco daqui manda token de login. A rota e publica de proposito.
+
+### Token valido da Maria (esperado 200). Conferir: so os campos do contrato, sem id, email, senha ou tokenQr,
+### alergia grave primeiro, so remedio ativo (a Amoxicilina nao aparece) e contatos em ordem de prioridade
+GET {{baseUrl}}/emergencia/a3f81c2d94be47a0b6e15d7c0f29b834
+
+### Token que nao existe (esperado 404, "QR Code não encontrado.")
+GET {{baseUrl}}/emergencia/ffffffffffffffffffffffffffffffff
+
+### Token fora do formato (esperado 404, nem chega a consultar o banco)
+GET {{baseUrl}}/emergencia/lixo
+
+### Token cancelado (esperado 410, "Este QR Code foi cancelado pelo titular.", sem nenhum dado de saude)
+### Nos dados ficticios o paciente 5 ja esta com o QR cancelado
+GET {{baseUrl}}/emergencia/e86f20a7c4d1495fb3a7d05e1c92b47d
+
+### Historico de acessos da Maria (esperado 200, mais recente primeiro)
+### Rode o bloco "login" da secao USUARIOS antes. A leitura feita no primeiro bloco daqui tem que aparecer no topo
+GET {{baseUrl}}/pacientes/1/acessos
+Authorization: Bearer {{token}}
+
+### Historico de ficha que nao e da Maria (esperado 403)
+GET {{baseUrl}}/pacientes/2/acessos
+Authorization: Bearer {{token}}
+
+### Historico sem token (esperado 401)
+GET {{baseUrl}}/pacientes/1/acessos
+
+### JSON quebrado (esperado 400, "O corpo da requisição não é um JSON válido.")
+### Conferir no terminal do servidor: nao pode aparecer nenhum pedaco do corpo
+POST {{baseUrl}}/pacientes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "condicoes": "teste", "tipoSanguineo": O+ }
