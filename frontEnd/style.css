@@ -843,6 +843,41 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 /* No cadastro o botao entra direto na grade de duas colunas, entao ocupa a linha inteira. */
 .entrada > .acessibilidade { grid-column: 1 / -1; }
 
+/* Letra grande: com a letra aumentada nao cabe texto e selo lado a lado em tela de celular.
+   Aqui cada bloco que era uma linha vira uma coluna, pra nenhuma palavra quebrar no meio nem sair do cartao.
+   Ligado pelo acessibilidade.js. Fica tudo junto neste arquivo, mesmo o que e de uma tela so, pra ser facil de achar. */
+
+/* Cabecalho das telas internas: o botao Sair desce para a linha de baixo quando nao cabe */
+.letra-grande .topo-linha { flex-wrap: wrap; }
+
+/* Ficha de emergencia: a marca desce para baixo do titulo da faixa; nome em cima, tipo sanguineo embaixo;
+   alergia em cima, gravidade embaixo */
+.letra-grande .faixa { flex-wrap: wrap; gap: 0.2rem 1rem; }
+.letra-grande .identidade { flex-direction: column; }
+.letra-grande .sangue { grid-auto-flow: column; gap: 0.6rem; align-items: baseline; }
+.letra-grande .alergias li { grid-template-columns: 1fr; }
+.letra-grande .alergias .grau { justify-self: start; }
+
+/* Remedios: icone e selo na primeira linha, nome do remedio embaixo ocupando a largura toda */
+.letra-grande .remedio-topo { flex-wrap: wrap; justify-content: space-between; }
+.letra-grande .remedio-nome { order: 3; flex: 1 1 100%; }
+.letra-grande .remedio-rodape { flex-direction: column; align-items: flex-start; }
+
+/* Doses: o anel de adesao em cima e o texto embaixo */
+.letra-grande .adesao-principal { flex-direction: column; text-align: center; }
+.letra-grande .adesao-semana { grid-template-columns: 1fr; }
+
+/* Cuidador: nome do paciente em linha propria e os dois quadros um embaixo do outro */
+.letra-grande .paciente-topo { flex-wrap: wrap; }
+.letra-grande .paciente-topo h2 { flex: 1 1 60%; }
+.letra-grande .paciente-medidor .rotulo { flex-wrap: wrap; gap: 0 0.6rem; }
+.letra-grande .paciente-linhas { grid-template-columns: 1fr; }
+.letra-grande .paciente-acoes { justify-content: flex-start; }
+
+/* Ficha: as tres abas viram uma lista e o selo do QR desce para baixo do titulo */
+.letra-grande .abas { grid-template-columns: 1fr; }
+.letra-grande .qr-cabecalho { flex-direction: column; }
+
 /* Contraste reforcado: texto preto, bordas mais escuras e um coral mais fechado,
    para o texto branco em cima dele ficar mais facil de ler. Ligado pelo acessibilidade.js. */
 .alto-contraste {

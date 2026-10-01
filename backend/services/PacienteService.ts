@@ -166,18 +166,18 @@ export class PacienteService {
     return this.trocarToken(idPaciente);
   }
 
-  // GET /pacientes/:id/acessos. Historico da LGPD, mais recente primeiro. So o dono ve:
-  // o cuidador acompanha dose, mas nao recebe o log de quem abriu a ficha.
+  // GET /pacientes/:id/acessos. O historico da LGPD: quem andou olhando a minha ficha.
+  // So o dono ve. Cuidador nao entra aqui, porque isso e sobre a ficha, nao sobre as doses.
   async listarAcessos(idPaciente: number, idLogado: number | undefined): Promise<AcessoQrResponseDTO[]> {
     this.validarId(idPaciente);
     await autorizacaoService.garantirDono(idLogado, idPaciente);
 
     const acessos = await this.repositorio.listarAcessos(idPaciente);
-    return acessos.map((a) => ({
-      id: a.id,
-      acessadoEm: a.acessadoEm.toISOString(),
-      ip: a.ip,
-      userAgent: a.userAgent,
+    return acessos.map((acesso) => ({
+      id: acesso.id,
+      acessadoEm: acesso.acessadoEm.toISOString(),
+      ip: acesso.ip,
+      userAgent: acesso.userAgent,
     }));
   }
 

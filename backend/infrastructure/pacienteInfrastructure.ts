@@ -49,6 +49,9 @@ interface AcessoLinha extends RowDataPacket {
   user_agent: string | null;
 }
 
+// Teto do historico. Sem isso um QR muito escaneado devolveria uma lista sem fim para a tela.
+const LIMITE_ACESSOS = 100;
+
 export class PacienteInfrastructure implements PacienteRepository {
   // Ficha, alergias e contatos entram juntos ou nao entram. Ficha pela metade na emergencia e pior que ficha nenhuma.
   async criar(paciente: Paciente): Promise<void> {
@@ -206,8 +209,7 @@ export class PacienteInfrastructure implements PacienteRepository {
     }
   }
 
-  // Mais recente primeiro. O id desempata dois acessos no mesmo segundo, que o TIMESTAMP nao separa.
-  // O indice idx_acessos_paciente (id_paciente, acessado_em) cobre o filtro e a ordem.
+  // Mais recente primeiro. O id desempata duas leituras no mesmo segundo.
   async listarAcessos(idPaciente: number): Promise<AcessoQr[]> {
     const conexao = await pool.getConnection();
     try {
@@ -215,8 +217,9 @@ export class PacienteInfrastructure implements PacienteRepository {
         `SELECT id, acessado_em, ip, user_agent
            FROM acessos_qr
           WHERE id_paciente = ?
-          ORDER BY acessado_em DESC, id DESC`,
-        [idPaciente]
+          ORDER BY acessado_em DESC, id DESC
+          LIMIT ?`,
+        [idPaciente, LIMITE_ACESSOS]
       );
       return linhas.map((linha) => ({
         id: Number(linha.id),

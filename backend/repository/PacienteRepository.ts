@@ -16,7 +16,7 @@ export interface ListasAlteradas {
     contatos: boolean;
 }
 
-// Uma leitura do QR gravada em acessos_qr
+// Uma leitura do QR, como esta gravada em acessos_qr
 export interface AcessoQr {
     id: number;
     acessadoEm: Date;
@@ -40,6 +40,6 @@ export interface PacienteRepository {
     // Marca qr_ativo = FALSE e grava qr_cancelado_em, sem tocar no token.
     // Devolve false quando o QR ja estava cancelado.
     cancelarQR(idPaciente: number, canceladoEm: Date): Promise<boolean>;
-    // Historico da LGPD: quem abriu a ficha pelo QR, mais recente primeiro. Lista vazia quando ninguem abriu.
+    // Historico de leituras do QR dessa ficha, mais recente primeiro. Lista vazia quando ninguem escaneou.
     listarAcessos(idPaciente: number): Promise<AcessoQr[]>;
 }

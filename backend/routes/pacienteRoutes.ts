@@ -20,6 +20,7 @@ router.post("/pacientes/:id/qr/rotacionar", pacienteController.rotacionarQR);
 router.delete("/pacientes/:id/qr", pacienteController.cancelarQR);
 router.post("/pacientes/:id/qr/reativar", pacienteController.reativarQR);
 
+// Historico da LGPD: quem abriu a ficha publica pelo QR
 router.get("/pacientes/:id/acessos", pacienteController.listarAcessos);
 
 export default router;

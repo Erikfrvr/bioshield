@@ -1,5 +1,5 @@
-// Uma linha do historico da LGPD: quando alguem abriu a ficha pelo QR e de onde.
-// ip e userAgent podem vir null, porque o registro do acesso nao barra o socorro quando eles faltam.
+// Uma linha do historico da LGPD: quando a ficha publica foi aberta e por qual aparelho.
+// Campo por campo, igual ao GET /api/pacientes/:id/acessos do CONTRATO_API.md.
 export interface AcessoQrResponseDTO {
     id: number;
     acessadoEm: string;

@@ -6,7 +6,7 @@ import * as emergenciaController from "../controllers/emergenciaController";
 
 const router = Router();
 
-// Sem o autenticar de proposito: quem escaneia nao tem conta.
+// Sem o middleware autenticar, de proposito. Nao coloque router.use(autenticar) neste arquivo.
 router.get("/emergencia/:token", emergenciaController.buscarPorToken);
 
 export default router;
