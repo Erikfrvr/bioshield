@@ -11,8 +11,9 @@ export interface MedicamentoComProximaDose {
 }
 
 export interface MedicamentoRepository {
-    // Grava o remedio e devolve o id gerado dentro da entidade.
-    cadastrar(medicamento: Medicamento): Promise<void>;
+    // Grava o remedio e a agenda de doses numa transacao so e devolve o id gerado dentro da entidade.
+    // Os horarios chegam soltos porque a dose so pode existir depois que o remedio ganha id.
+    cadastrar(medicamento: Medicamento, horariosDasDoses: Date[]): Promise<void>;
     // Todos os remedios da ficha, ativos ou nao. Lista vazia quando o paciente nao tem nenhum.
     listarPorPaciente(idPaciente: number): Promise<MedicamentoComProximaDose[]>;
     // null quando o remedio nao existe. O service usa o idPaciente da entidade pra chamar o garantirDono.

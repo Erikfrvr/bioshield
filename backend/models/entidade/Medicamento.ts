@@ -7,6 +7,7 @@ import HorarioDose from "../valueObjects/HorarioDose";
 export class Medicamento {
 	// O nome corresponde a medicamentos.nome, que aceita ate 100 caracteres.
 	private static readonly NOME_TAMANHO_MAXIMO = 100;
+	private static readonly MS_POR_HORA = 60 * 60 * 1000;
 
 	private id: number | null;
 	private idPaciente: number;
@@ -198,6 +199,37 @@ export class Medicamento {
 
 	public getCriadoEm(): Date | null {
 		return this.criadoEm;
+	}
+
+	// Horarios das doses de agora ate `dias` a frente, ou ate o ultimo dia do tratamento, o que vier antes.
+	// Anda de frequencia em frequencia a partir de dataInicio + horarioInicial, na hora local do servidor.
+	// So gera do agora pra frente: dose antiga entraria como prevista, viraria perdida
+	// e derrubaria a adesao sem motivo.
+	public gerarHorariosDaAgenda(agora: Date, dias: number): Date[] {
+		if (!this.ativo) {
+			return [];
+		}
+
+		const [ano, mes, dia] = this.dataInicio.split("-").map(Number);
+		const [hora, minuto] = this.horarioDose.getHorarioInicial().split(":").map(Number);
+		const primeira = new Date(ano, mes - 1, dia, hora, minuto).getTime();
+		const passo = this.horarioDose.getFrequenciaHoras() * Medicamento.MS_POR_HORA;
+
+		let limite = agora.getTime() + dias * 24 * Medicamento.MS_POR_HORA;
+		if (this.dataFim !== null) {
+			// O dia do fim ainda tem dose: o limite e a meia-noite do dia seguinte.
+			const [anoFim, mesFim, diaFim] = this.dataFim.split("-").map(Number);
+			limite = Math.min(limite, new Date(anoFim, mesFim - 1, diaFim + 1).getTime());
+		}
+
+		// Pula direto pra primeira dose que cai de agora em diante, sem andar desde o inicio do tratamento.
+		const pulos = Math.max(0, Math.ceil((agora.getTime() - primeira) / passo));
+		const horarios: Date[] = [];
+		for (let horario = primeira + pulos * passo; horario < limite; horario += passo) {
+			horarios.push(new Date(horario));
+		}
+
+		return horarios;
 	}
 }
 

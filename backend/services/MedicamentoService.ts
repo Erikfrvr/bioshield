@@ -1,8 +1,6 @@
 // Regra de negocio dos remedios.
 // Trato o nome, valido a dosagem e a frequencia e, quando cadastro um remedio novo,
 // ja gero as doses da agenda a partir do horario inicial e do intervalo.
-// A geracao da agenda entra na Fase 8, junto com o DoseService. Ate la o remedio e gravado sem doses
-// e a proximaDose sai null.
 import medicamentoInfrastructure from "../infrastructure/medicamentoInfrastructure";
 import Medicamento from "../models/entidade/Medicamento";
 import Dosagem from "../models/valueObjects/Dosagem";
@@ -12,6 +10,10 @@ import { CadastrarMedicamentoDTO } from "../models/dto/medicamento/CadastrarMedi
 import { MedicamentoResponseDTO } from "../models/dto/medicamento/MedicamentoResponseDTO";
 import { MedicamentoComProximaDose, MedicamentoRepository } from "../repository/MedicamentoRepository";
 import autorizacaoService from "./AutorizacaoService";
+
+// Quantos dias de agenda eu gero no cadastro (proposta da duvida 3 do docs/DUVIDAS_CONTRATO.md).
+// Remedio sem data de fim nao acaba, e nao da pra inserir dose infinita.
+const DIAS_DE_AGENDA = 7;
 
 // Mesmo esquema do PacienteService: o service diz o tipo, o controller escolhe o status code.
 export type TipoErroMedicamento = "validacao" | "nao_encontrado";
@@ -57,7 +59,8 @@ export class MedicamentoService {
       dados.dataFim ?? null
     ));
 
-    await this.repositorio.cadastrar(medicamento);
+    const horarios = medicamento.gerarHorariosDaAgenda(new Date(), DIAS_DE_AGENDA);
+    await this.repositorio.cadastrar(medicamento, horarios);
 
     // Leio de novo pra devolver no mesmo formato do GET, com o que o banco preencheu
     return this.lerMedicamento(medicamento.getId() as number);

@@ -41,9 +41,12 @@ const SELECT_MEDICAMENTO = `
 
 export class MedicamentoInfrastructure implements MedicamentoRepository {
   // ativo e criado_em ficam com o DEFAULT do banco. O id gerado volta pra dentro da entidade.
-  async cadastrar(medicamento: Medicamento): Promise<void> {
+  // Remedio e agenda entram juntos ou nao entram: remedio sem dose nenhuma nunca lembraria ninguem de nada.
+  async cadastrar(medicamento: Medicamento, horariosDasDoses: Date[]): Promise<void> {
     const conexao = await pool.getConnection();
     try {
+      await conexao.beginTransaction();
+
       const [resultado] = await conexao.query<ResultSetHeader>(
         `INSERT INTO medicamentos
            (id_paciente, nome, dosagem, unidade, frequencia_horas, horario_inicial, data_inicio, data_fim)
@@ -60,6 +63,20 @@ export class MedicamentoInfrastructure implements MedicamentoRepository {
         ]
       );
       medicamento.setId(resultado.insertId);
+
+      // Um INSERT so com todas as linhas: o "VALUES ?" do mysql2 abre a lista de [id, horario].
+      // status e horario_confirmado ficam com o DEFAULT do banco ('prevista' e NULL).
+      if (horariosDasDoses.length > 0) {
+        await conexao.query(
+          "INSERT INTO doses (id_medicamento, horario_previsto) VALUES ?",
+          [horariosDasDoses.map((horario) => [resultado.insertId, horario])]
+        );
+      }
+
+      await conexao.commit();
+    } catch (erro) {
+      await conexao.rollback();
+      throw erro;
     } finally {
       conexao.release();
     }
