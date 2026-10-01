@@ -316,6 +316,19 @@ Oito telas, trinta e um arquivos. Passou por bateria automatizada no Chromium: 4
 - [ ] Documentar no README que o front cai em modo demonstração se a API não responder · **Daiane**
 - [x] Deixar o repositório público · **Erik**
 
+### Acessibilidade  ·  **Erik**
+
+Dois recursos pensados para idoso e baixa visão, só no front, sem mexer no backend.
+
+- [x] `frontEnd/js/acessibilidade.js` com o botão de acessibilidade, carregado em todas as telas menos a de imprimir
+- [x] Botão pequeno e redondo com o símbolo de acessibilidade, que abre as opções ao toque
+- [x] Botões A− e A+ com quatro tamanhos de letra, guardando a escolha no navegador
+- [x] Botão de contraste reforçado: texto preto, bordas mais escuras e coral mais fechado
+- [ ] Passar por todas as telas com a letra no tamanho máximo e ver se algum texto fica apertado
+- [ ] Passar por todas as telas com o contraste ligado e ver se alguma cor ficou estranha
+
+A leitura em voz alta foi testada e retirada. Ficou só o que o usuário controla com um toque.
+
 ---
 
 ## Fase 12 — Demonstração
@@ -346,7 +359,7 @@ Depende do Marco 6. Sem a rota de emergência, o QR abre a página e a ficha nã
 
 ---
 
-## Fase 13 — Testes com Jest  ·  **Daiane**
+## Fase 13 — Testes com Jest  ·  **Daiane e Erik**
 
 Poucos testes, no mesmo formato do que foi feito em aula: `describe`, `test` e `expect`, testando value object e entidade. Esses arquivos não falam com o banco, então não precisa de nada falso.
 

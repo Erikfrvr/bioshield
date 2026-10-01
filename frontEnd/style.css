@@ -772,6 +772,98 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 
 .pular:focus { left: 0; top: 0; }
 
+/* ===== Acessibilidade: tamanho da letra e contraste reforcado ===== */
+
+/* Um botao pequeno e redondo no canto. As opcoes so aparecem quando a pessoa toca nele. */
+.acessibilidade {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.acessibilidade-caixa {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem;
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: 999px;
+  box-shadow: var(--sombra);
+}
+
+.acessibilidade-opcoes {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.acessibilidade-botao {
+  display: inline-grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  padding: 0;
+  font-family: var(--fonte-titulo);
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--teal);
+  background: var(--menta);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.15s var(--curva), color 0.15s var(--curva);
+}
+
+.acessibilidade-botao small { font-size: 0.8em; margin-left: 0.05em; }
+.acessibilidade-botao { grid-auto-flow: column; }
+.acessibilidade-maior { font-size: 1.2rem; }
+
+.acessibilidade-botao svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.acessibilidade-botao:hover { background: var(--borda); }
+
+.acessibilidade-botao:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.acessibilidade-abrir,
+.acessibilidade-botao[aria-pressed="true"] {
+  color: var(--branco);
+  background: var(--teal);
+}
+
+.acessibilidade-abrir:hover,
+.acessibilidade-botao[aria-pressed="true"]:hover { background: var(--teal-medio); }
+
+/* No cadastro o botao entra direto na grade de duas colunas, entao ocupa a linha inteira. */
+.entrada > .acessibilidade { grid-column: 1 / -1; }
+
+/* Contraste reforcado: texto preto, bordas mais escuras e um coral mais fechado,
+   para o texto branco em cima dele ficar mais facil de ler. Ligado pelo acessibilidade.js. */
+.alto-contraste {
+  --teal: #06201e;
+  --teal-medio: #0e3c39;
+  --teal-claro: #1b5c57;
+  --coral: #b8321f;
+  --coral-escuro: #8f2414;
+  --menta-claro: #ffffff;
+  --texto: #000000;
+  --texto-suave: #1f2d2b;
+  --borda: #4a6660;
+  --borda-forte: #0e3c39;
+  --ambar: #6e3f04;
+  --sucesso: #0d5236;
+}
+
+@media print {
+  .acessibilidade { display: none; }
+}
+
 @media (max-width: 24rem) {
   html { font-size: 16px; }
   .linha-botoes, .grade-dupla { grid-template-columns: 1fr; }

@@ -25,8 +25,7 @@ O teste que tira a dúvida: com o celular no 4G, com o wifi desligado, abrir o e
 2. O endereço é fixo? Ele pode mudar entre hoje e o dia do evento?
 3. Tem HTTPS?
 4. Dá para rodar Node.js e MySQL nele, e publicar a pasta do front?
-5. O servidor fica ligado durante todo o evento? Quem religa se cair?
-6. Em qual porta a API vai responder?
+5. Em qual porta a API vai responder?
 
 ## As pegadinhas
 
