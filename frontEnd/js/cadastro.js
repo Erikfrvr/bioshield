@@ -16,11 +16,25 @@
   campoSenha.addEventListener("input", function () {
     var valor = campoSenha.value;
     var nivel = 0;
-    if (valor.length >= 6) nivel = 1;
-    if (valor.length >= 8 && /\d/.test(valor) && /[a-zA-Z]/.test(valor)) nivel = 2;
-    if (valor.length >= 10 && /\d/.test(valor) && /[a-zA-Z]/.test(valor) && /[^a-zA-Z0-9]/.test(valor)) nivel = 3;
+    if (valor.length >= 8) nivel = 1;
+    if (valor.length >= 8 && TEM_MAIUSCULA.test(valor) && TEM_MINUSCULA.test(valor) && TEM_NUMERO.test(valor)) nivel = 2;
+    if (senhaValida(valor)) nivel = 3;
     forca.dataset.nivel = String(nivel);
   });
+
+  // Mesma regra do value object Senha do backend. Se mudar la, muda aqui.
+  var TEM_MAIUSCULA = /\p{Lu}/u;
+  var TEM_MINUSCULA = /\p{Ll}/u;
+  var TEM_NUMERO = /\d/;
+  var TEM_ESPECIAL = /[@$!%*?&#]/;
+
+  function senhaValida(senha) {
+    return senha.length >= 8
+      && TEM_MAIUSCULA.test(senha)
+      && TEM_MINUSCULA.test(senha)
+      && TEM_NUMERO.test(senha)
+      && TEM_ESPECIAL.test(senha);
+  }
 
   formulario.addEventListener("submit", async function (evento) {
     evento.preventDefault();
@@ -38,8 +52,12 @@
       UI.mostrarErro(caixaErro, "Esse email não parece válido. Confira o endereço.");
       return;
     }
-    if (senha.length < 6) {
-      UI.mostrarErro(caixaErro, "A senha precisa ter no mínimo 6 caracteres.");
+    if (senha.length < 8) {
+      UI.mostrarErro(caixaErro, "A senha precisa ter no mínimo 8 caracteres.");
+      return;
+    }
+    if (!senhaValida(senha)) {
+      UI.mostrarErro(caixaErro, "A senha precisa ter letra maiúscula, letra minúscula, número e um destes símbolos: @ $ ! % * ? & #");
       return;
     }
     if (senha !== campoSenha2.value) {

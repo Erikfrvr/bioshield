@@ -122,7 +122,7 @@ Para testar as rotas sem o front, use o arquivo `backend/requests.http` com a ex
 | `POST` | `/api/usuarios` | Cadastra uma conta com nome, email e senha | `201`, `400` dado inválido, `409` email já cadastrado |
 | `GET` | `/api/usuarios/:id` | Busca uma conta pelo id | `200`, `400` id inválido, `404` não encontrado |
 
-A senha precisa ter pelo menos 8 caracteres, com pelo menos uma letra e um número. Ela é gravada só como hash bcrypt e nunca volta em nenhuma resposta. O email é guardado em minúsculo, então `Maria@Exemplo.com` e `maria@exemplo.com` são a mesma conta.
+A senha precisa ter pelo menos 8 caracteres, com letra maiúscula, letra minúscula, número e um caractere especial (`@ $ ! % * ? & #`). Ela é gravada só como hash bcrypt e nunca volta em nenhuma resposta. O email é guardado em minúsculo, então `Maria@Exemplo.com` e `maria@exemplo.com` são a mesma conta.
 
 O contrato completo, incluindo as rotas que ainda vão ser feitas, está em [`frontEnd/CONTRATO_API.md`](frontEnd/CONTRATO_API.md).
 

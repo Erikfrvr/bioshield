@@ -8,8 +8,11 @@ export class Senha {
   // Conto em bytes e nao em letras porque acento e emoji ocupam mais de um byte.
   private static readonly TAMANHO_MAXIMO_BYTES = 72;
 
-  private static readonly TEM_LETRA = /\p{L}/u;
+  // Mesma regra do professor: maiuscula, minuscula, numero e um caractere especial da lista dele.
+  private static readonly TEM_MAIUSCULA = /\p{Lu}/u;
+  private static readonly TEM_MINUSCULA = /\p{Ll}/u;
   private static readonly TEM_NUMERO = /\d/;
+  private static readonly TEM_ESPECIAL = /[@$!%*?&#]/;
 
   private readonly valor: string;
 
@@ -37,8 +40,15 @@ export class Senha {
       throw new Error("A senha é longa demais. Use no máximo 72 caracteres.");
     }
 
-    if (!Senha.TEM_LETRA.test(senha) || !Senha.TEM_NUMERO.test(senha)) {
-      throw new Error("A senha precisa ter pelo menos uma letra e um número.");
+    if (
+      !Senha.TEM_MAIUSCULA.test(senha) ||
+      !Senha.TEM_MINUSCULA.test(senha) ||
+      !Senha.TEM_NUMERO.test(senha) ||
+      !Senha.TEM_ESPECIAL.test(senha)
+    ) {
+      throw new Error(
+        "A senha precisa ter letra maiúscula, letra minúscula, número e um caractere especial (@ $ ! % * ? & #)."
+      );
     }
 
     return new Senha(senha, false);

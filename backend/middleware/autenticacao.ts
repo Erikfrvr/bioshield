@@ -3,7 +3,7 @@
 // Se o token for valido, o id do usuario fica em req.idUsuario para o controller usar.
 // Qualquer problema com o token vira 401, sem dizer o motivo exato para quem esta tentando entrar.
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import jwtService from "../infrastructure/security/JwtService";
 
 // Ensina o TypeScript que o Request do Express agora carrega o id do usuario logado.
 declare global {
@@ -27,27 +27,22 @@ export function autenticar(req: Request, res: Response, next: NextFunction): voi
 
   const token = cabecalho.slice("Bearer ".length).trim();
 
-  const segredo = process.env.JWT_SECRET;
-  if (!segredo) {
-    // Erro de configuracao do servidor, nao culpa de quem chamou.
-    console.error("JWT_SECRET não está definido no .env.");
+  let conteudo;
+  try {
+    // O verifyToken confere a assinatura e a validade. Token vencido ou adulterado volta null.
+    conteudo = jwtService.verifyToken(token);
+  } catch (erro) {
+    // So cai aqui quando falta o JWT_SECRET. Erro de configuracao do servidor, nao culpa de quem chamou.
+    console.error((erro as Error)?.message);
     res.status(500).json({ mensagem: "Erro interno ao processar a requisição. Tente novamente." });
     return;
   }
 
-  try {
-    // O verify confere a assinatura e a validade. Token vencido ou adulterado cai no catch.
-    const conteudo = jwt.verify(token, segredo);
-    const id = typeof conteudo === "object" ? Number(conteudo.id) : NaN;
-
-    if (!Number.isInteger(id) || id <= 0) {
-      res.status(401).json({ mensagem: MENSAGEM_TOKEN_INVALIDO });
-      return;
-    }
-
-    req.idUsuario = id;
-    next();
-  } catch {
+  if (!conteudo) {
     res.status(401).json({ mensagem: MENSAGEM_TOKEN_INVALIDO });
+    return;
   }
+
+  req.idUsuario = conteudo.id;
+  next();
 }

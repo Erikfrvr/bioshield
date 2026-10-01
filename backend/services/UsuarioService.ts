@@ -2,9 +2,9 @@
 // Aqui eu verifico se o email ja existe, crio os value objects Email e Senha pra validar,
 // gero o hash da senha antes de mandar pro banco e monto o DTO de resposta sem a senha.
 // No login eu comparo a senha digitada com o hash do banco e gero o token JWT da sessao.
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import usuarioInfrastructure from "../infrastructure/usuarioInfrastructure";
+import passwordHasherPadrao, { PasswordHasher } from "../infrastructure/security/PasswordHasher";
+import jwtServicePadrao, { JwtService } from "../infrastructure/security/JwtService";
 import Usuario from "../models/entidade/Usuario";
 import Email from "../models/valueObjects/Email";
 import Senha from "../models/valueObjects/Senha";
@@ -15,19 +15,9 @@ import { LoginResponseDTO } from "../models/dto/usuario/LoginResponseDTO";
 import { UsuarioRepository } from "../repository/UsuarioRepository";
 import autorizacaoService from "./AutorizacaoService";
 
-const RODADAS_HASH = 10;
-
-// Quanto tempo o login vale antes de pedir senha de novo.
-// Sete dias porque o publico e idoso: pedir senha todo dia faz a pessoa desistir do app.
-const VALIDADE_TOKEN = "7d";
-
 // Mensagem unica para email que nao existe e senha errada. Se eu falasse "email nao cadastrado",
 // qualquer um descobriria quem tem conta no app so testando emails.
 const MENSAGEM_LOGIN_INVALIDO = "Email ou senha não conferem.";
-
-// Hash de uma senha que ninguem usa. Quando o email nao existe eu comparo com ele mesmo assim,
-// pra resposta demorar o mesmo tempo nos dois casos e o tempo nao entregar se o email tem conta.
-const HASH_FALSO = bcrypt.hashSync("senha_que_ninguem_usa_1", RODADAS_HASH);
 
 // Tipos de erro que o service conhece. O controller le esse tipo e escolhe o status code,
 // assim o service nunca precisa saber nada de HTTP.
@@ -47,8 +37,23 @@ export class UsuarioService {
   // O service conhece so a interface. A implementacao MySQL entra pelo construtor.
   private repositorio: UsuarioRepository;
 
-  constructor(repositorio: UsuarioRepository = usuarioInfrastructure) {
+  // Hash e JWT moram em infrastructure/security. O service so chama, nao conhece bcrypt nem jsonwebtoken.
+  private passwordHasher: PasswordHasher;
+  private jwtService: JwtService;
+
+  // Hash de uma senha que ninguem usa. Quando o email nao existe eu comparo com ele mesmo assim,
+  // pra resposta demorar o mesmo tempo nos dois casos e o tempo nao entregar se o email tem conta.
+  private hashFalso: Promise<string>;
+
+  constructor(
+    repositorio: UsuarioRepository = usuarioInfrastructure,
+    passwordHasher: PasswordHasher = passwordHasherPadrao,
+    jwtService: JwtService = jwtServicePadrao
+  ) {
     this.repositorio = repositorio;
+    this.passwordHasher = passwordHasher;
+    this.jwtService = jwtService;
+    this.hashFalso = this.passwordHasher.hashPassword("senha_que_ninguem_usa_1");
   }
 
   async cadastrar(dados: CadastrarUsuarioDTO): Promise<UsuarioResponseDTO> {
@@ -72,7 +77,7 @@ export class UsuarioService {
     }
 
     // A senha so vai pro banco como hash. A senha digitada nao sai deste metodo.
-    const hash = await bcrypt.hash(senhaDigitada.getValor(), RODADAS_HASH);
+    const hash = await this.passwordHasher.hashPassword(senhaDigitada.getValor());
     const usuario = new Usuario(dados.nome, email, Senha.aPartirDoHash(hash));
 
     try {
@@ -113,8 +118,8 @@ export class UsuarioService {
 
     const usuario: Usuario | null = email ? await this.repositorio.buscarPorEmail(email.getValor()) : null;
 
-    const hashGuardado = usuario ? usuario.getSenha().getValor() : HASH_FALSO;
-    const senhaConfere = await bcrypt.compare(senhaDigitada, hashGuardado);
+    const hashGuardado = usuario ? usuario.getSenha().getValor() : await this.hashFalso;
+    const senhaConfere = await this.passwordHasher.comparePasswords(senhaDigitada, hashGuardado);
 
     if (!usuario || !senhaConfere) {
       throw new ErroUsuario("nao_autorizado", MENSAGEM_LOGIN_INVALIDO);
@@ -124,7 +129,7 @@ export class UsuarioService {
     const idPaciente = await this.repositorio.buscarIdPaciente(idUsuario);
 
     return {
-      token: this.gerarToken(idUsuario),
+      token: this.jwtService.generateToken({ id: idUsuario }),
       usuario: this.paraResposta(usuario),
       idPaciente,
     };
@@ -144,16 +149,6 @@ export class UsuarioService {
     }
 
     return this.paraResposta(usuario);
-  }
-
-  // O token carrega so o id do usuario. Nada de email, nome ou dado de saude aqui dentro:
-  // o JWT e assinado, mas nao e criptografado, qualquer um consegue ler o conteudo dele.
-  private gerarToken(idUsuario: number): string {
-    const segredo = process.env.JWT_SECRET;
-    if (!segredo) {
-      throw new Error("JWT_SECRET não está definido no .env.");
-    }
-    return jwt.sign({ id: idUsuario }, segredo, { expiresIn: VALIDADE_TOKEN });
   }
 
   // Monta o que sai para o front. Escrevo campo por campo de proposito:
