@@ -200,11 +200,11 @@ O coração do produto. Sem isso o BioShield é só mais um app de lembrete.
 - [x] `entidade/FichaEmergencia.ts` (já ordena alergias e contatos e descarta remédio inativo)
 - [x] `models/dto/emergencia/FichaEmergenciaResponseDTO.ts` com o mínimo necessário
 - [x] `repository/EmergenciaRepository.ts`
-- [ ] `infrastructure/emergenciaInfrastructure.ts` com a busca por token e o log de acesso
-- [ ] `services/EmergenciaService.ts` montando a versão pública filtrada
-- [ ] Ordenar alergias por gravidade, grave primeiro
-- [ ] Trazer só medicamento com `ativo = TRUE`
-- [ ] Ordenar contatos por prioridade
+- [x] `infrastructure/emergenciaInfrastructure.ts` com a busca por token e o log de acesso
+- [x] `services/EmergenciaService.ts` montando a versão pública filtrada
+- [x] Ordenar alergias por gravidade, grave primeiro
+- [x] Trazer só medicamento com `ativo = TRUE`
+- [x] Ordenar contatos por prioridade
 - [ ] `controllers/emergenciaController.ts`
 - [ ] `routes/emergenciaRoutes.ts` sem o middleware de autenticação
 - [ ] **Devolver 404 para token que não existe e 410 para token cancelado.** O front tem tela diferente para cada um
@@ -328,6 +328,22 @@ Oito telas, trinta e um arquivos. Passou por bateria automatizada no Chromium: 4
 
 O corte do cancelamento é o melhor plano do vídeo inteiro. É o que mostra que existe produto pensado ali, e não só um CRUD com QR Code em cima.
 
+### Mesa de QR Codes no dia do evento  ·  **Erik e Daiane**
+
+A ideia é deixar QR Codes de pacientes fictícios na mesa para o visitante escanear com o próprio celular. As pegadinhas e a linha do tempo completa estão em `docs/DIA_DO_EVENTO.md`. Leiam antes de imprimir qualquer coisa.
+
+- [ ] Confirmar com o professor que o servidor tem endereço público, fora da rede do Senac
+- [ ] Subir backend, banco com dados fictícios e a pasta `frontEnd/` no servidor
+- [ ] Preencher `URL_API` e `URL_PUBLICA_EMERGENCIA` no `config.js`, com `MODO: "api"` e tempo limite maior
+- [ ] Abrir uma ficha com o celular no 4G, antes de gerar qualquer QR
+- [ ] **Só então** gerar e imprimir os QR Codes
+- [ ] Testar cada papel com dois celulares
+- [ ] Depois de impresso, não rotacionar, cancelar nem recriar paciente da mesa
+- [ ] Separar um paciente com QR cancelado para mostrar a tela de aviso
+- [ ] Deixar o plano B pronto: vídeo, modo demonstração no notebook e prints
+
+Depende do Marco 6. Sem a rota de emergência, o QR abre a página e a ficha não carrega.
+
 ---
 
 ## Fase 13 — Testes com Jest  ·  **Daiane**
@@ -351,8 +367,8 @@ Use o mesmo começo de arquivo da aula, `import { describe, expect, test } from 
   - [ ] Rejeita emails inválidos (`"semarroba"`, `"a@b.c"`, `"maria teste@exemplo.com"`)
   - [ ] `igualA` compara pelo valor
 - [ ] `tests/valueObjects/Senha.test.ts`
-  - [ ] Aceita senha com 8 caracteres, letra e número
-  - [ ] Rejeita senha curta, só letras e só números
+  - [ ] Aceita senha com 8 caracteres, maiúscula, minúscula, número e caractere especial
+  - [ ] Rejeita senha curta, sem maiúscula, sem minúscula, sem número e sem caractere especial
   - [ ] `String(senha)` mostra só `********`, nunca a senha
 - [ ] `tests/valueObjects/TipoSanguineo.test.ts`
   - [ ] Aceita os oito tipos e normaliza `" ab- "` para `"AB-"`

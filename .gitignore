@@ -81,3 +81,11 @@ node_modules/
 .env
 dist/
 *.log
+
+
+# ==========================================
+# Arquivos que ficam so na maquina
+# ==========================================
+
+CLAUDE.md
+docs/COMPARATIVO_PROFESSOR.md

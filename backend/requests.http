@@ -22,7 +22,7 @@ Content-Type: application/json
 {
   "nome": "Teste da Silva",
   "email": "teste.silva@exemplo.com",
-  "senha": "senhaForte123"
+  "senha": "SenhaForte123!"
 }
 
 ### Email repetido (esperado 409). Esse email ja existe nos dados ficticios
@@ -32,7 +32,7 @@ Content-Type: application/json
 {
   "nome": "Maria Repetida",
   "email": "maria.souza@exemplo.com",
-  "senha": "senhaForte123"
+  "senha": "SenhaForte123!"
 }
 
 ### Email repetido escrito em maiusculo e com espaco (esperado 409, o Email normaliza antes de buscar)
@@ -42,7 +42,7 @@ Content-Type: application/json
 {
   "nome": "Maria Repetida",
   "email": "  MARIA.SOUZA@EXEMPLO.COM ",
-  "senha": "senhaForte123"
+  "senha": "SenhaForte123!"
 }
 
 ### Email invalido (esperado 400)
@@ -52,7 +52,7 @@ Content-Type: application/json
 {
   "nome": "Teste Email Ruim",
   "email": "email_sem_arroba",
-  "senha": "senhaForte123"
+  "senha": "SenhaForte123!"
 }
 
 ### Senha curta (esperado 400, minimo de 8 caracteres)
@@ -65,7 +65,7 @@ Content-Type: application/json
   "senha": "abc12"
 }
 
-### Senha sem numero (esperado 400, precisa de letra e numero)
+### Senha sem numero (esperado 400, precisa de maiuscula, minuscula, numero e caractere especial)
 POST {{baseUrl}}/usuarios
 Content-Type: application/json
 
@@ -75,6 +75,16 @@ Content-Type: application/json
   "senha": "somenteletras"
 }
 
+### Senha sem caractere especial (esperado 400). Era a senha valida da regra antiga
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nome": "Teste Senha Sem Especial",
+  "email": "senha.semespecial@exemplo.com",
+  "senha": "SenhaForte123"
+}
+
 ### Nome vazio (esperado 400)
 POST {{baseUrl}}/usuarios
 Content-Type: application/json
@@ -82,7 +92,7 @@ Content-Type: application/json
 {
   "nome": "   ",
   "email": "sem.nome@exemplo.com",
-  "senha": "senhaForte123"
+  "senha": "SenhaForte123!"
 }
 
 ### Corpo vazio (esperado 400)
@@ -110,7 +120,7 @@ Content-Type: application/json
 
 {
   "email": "teste.silva@exemplo.com",
-  "senha": "senhaForte123"
+  "senha": "SenhaForte123!"
 }
 
 ### Senha errada (esperado 401, mensagem "Email ou senha não conferem.")
@@ -220,7 +230,7 @@ Content-Type: application/json
 
 {
   "email": "teste.silva@exemplo.com",
-  "senha": "senha1234"
+  "senha": "SenhaForte123!"
 }
 
 ### Criar a ficha (esperado 201, ficha inteira com tokenQr de 32 caracteres e qrAtivo true)
