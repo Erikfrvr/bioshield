@@ -254,6 +254,12 @@ Começa depois do Marco 4. Roda em paralelo com as Fases 5 e 6 do Erik.
 - [ ] Cadastrar um remédio, confirmar uma dose e conferir se a adesão mudou
 - [ ] Abrir a tela de doses no navegador e ver a barra de adesão mexendo
 
+As dúvidas 1, 2 e 7 do `DUVIDAS_CONTRATO.md` estão decididas e já entraram na entidade `Dose`, no contrato, no `demo.js` e na tela de doses. Para o `DoseService` sobra só usar o que está pronto:
+
+- Antes de listar e de contar: `marcarPerdidas(idPaciente, Dose.limiteDePerdidas(agora))`
+- Na adesão: `contarPorPeriodo` com `agora` como fim, nas duas janelas
+- Na confirmação: `dose.confirmar(horarioConfirmado, agora)`, que já recusa dose confirmada duas vezes e dose com mais de 60 minutos de antecedência
+
 **Marco 7:** lembrete de medicamento fechado de ponta a ponta.
 
 ---
@@ -327,7 +333,7 @@ Dois recursos pensados para idoso e baixa visão, só no front, sem mexer no bac
 - [x] Passar por todas as telas com a letra no tamanho máximo e ver se algum texto fica apertado
 - [x] Passar por todas as telas com o contraste ligado e ver se alguma cor ficou estranha
 - [x] Classe `letra-grande` no `style.css`: com a letra aumentada, os blocos lado a lado viram coluna
-- [ ] Conferir com a letra aumentada as janelas que abrem por cima da tela (adicionar remédio, editar ficha)
+- [x] Conferir com a letra aumentada as janelas que abrem por cima da tela (novo remédio e cancelar QR, que são as duas que existem) · na de novo remédio a data aparecia sem o fim do ano e os cartões de período passavam da borda; corrigido na classe `letra-grande`
 - [ ] Conferir em um celular de verdade, e não só por print
 
 O teste foi feito por print, em largura de celular (360 px), nas sete telas. Antes do ajuste, o nome do paciente e o nome da alergia quebravam letra por letra na ficha de emergência, e o botão Sair saía da tela.

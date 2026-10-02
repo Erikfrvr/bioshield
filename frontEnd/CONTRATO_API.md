@@ -357,6 +357,8 @@ Protegida. Só as doses de hoje, ordenadas por horário.
 
 `status` é `prevista`, `tomada` ou `perdida`.
 
+Ninguém marca dose como `perdida` na mão e não existe rotina rodando de tempo em tempo. A troca acontece na leitura: antes de responder esta rota e a de adesão, o backend passa para `perdida` toda dose `prevista` do paciente que já passou **60 minutos** do horário sem confirmação. Por isso a dose das 8h aparece como `prevista` até as 9h e como `perdida` depois disso.
+
 ### POST /api/doses/:id/confirmar
 
 Protegida. O front manda a hora real da confirmação:
@@ -373,18 +375,31 @@ Resposta:
 
 O front permite confirmar dose com status `perdida` também, com o botão "Tomei mesmo assim". Não bloqueie isso no backend.
 
+Confirmar adiantado tem limite: o backend aceita a partir de **60 minutos antes** do horário previsto. Mais cedo que isso devolve `400` com a mensagem "Ainda é cedo para confirmar essa dose. Dá para confirmar a partir de 1 hora antes do horário.". Quem decide se está cedo é o relógio do servidor, não o `horarioConfirmado` que veio no corpo. A tela de doses segue a mesma regra e só mostra o botão quando a dose já pode ser confirmada.
+
+Dose que já está `tomada` não pode ser confirmada de novo: `400`.
+
 ### GET /api/doses/adesao?idPaciente=1
 
 Protegida.
 
 ```json
 {
-  "hoje":   { "previstas": 6, "tomadas": 4, "perdidas": 0, "percentual": 67 },
-  "semana": { "previstas": 42, "tomadas": 36, "perdidas": 4, "percentual": 86 }
+  "hoje":   { "previstas": 4, "tomadas": 3, "perdidas": 1, "percentual": 75 },
+  "semana": { "previstas": 40, "tomadas": 36, "perdidas": 4, "percentual": 90 }
 }
 ```
 
 `percentual` é inteiro, já arredondado, de 0 a 100. `semana` são os últimos 7 dias até agora, não a semana do calendário. Dose no futuro não entra na conta, senão a adesão começa o dia em 0% e assusta o usuário à toa.
+
+Como a conta é feita, nas duas janelas:
+
+- `previstas` é o total de doses com horário previsto **até agora**, seja qual for o status. Não é a quantidade de doses com status `prevista`
+- `tomadas` e `perdidas` saem dessas mesmas doses
+- `percentual` é `tomadas / previstas`, arredondado. Janela sem nenhuma dose devolve `percentual: 0`
+- No exemplo, o paciente tem 6 doses hoje, mas só 4 já chegaram no horário: 3 de 4 dá 75%. As outras 2 entram na conta quando a hora delas chegar
+- Dose confirmada adiantado (dentro dos 60 minutos) também só entra na conta quando o horário previsto dela chega. Assim `tomadas` nunca passa de `previstas`
+- Dose atrasada há menos de 60 minutos ainda está `prevista`: ela já conta em `previstas`, mas não em `perdidas`. Então `tomadas + perdidas` pode ser menor que `previstas`
 
 ---
 
