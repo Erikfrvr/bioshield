@@ -11,9 +11,78 @@
   var caixaErro = UI.elemento("#erro");
   var botao = UI.elemento("#enviar");
 
-  Api.modo().then(function (modo) {
-    if (modo === "demo") UI.elemento("#cartaoDemo").hidden = false;
+  // ===== Servidor =====
+  // Mostra de onde os dados estao vindo e deixa a pessoa escrever o endereco do servidor.
+  // No app Android esse cartao aparece sempre, porque o app nao tem como adivinhar o endereco.
+  // No site ele so aparece quando nenhum servidor respondeu ou quando ja existe um endereco salvo.
+
+  var cartaoServidor = UI.elemento("#cartaoServidor");
+  var estadoServidor = UI.elemento("#estadoServidor");
+  var formularioServidor = UI.elemento("#formularioServidor");
+  var campoServidor = UI.elemento("#enderecoServidor");
+  var erroServidor = UI.elemento("#erroServidor");
+  var botaoAbrirServidor = UI.elemento("#abrirServidor");
+
+  function mostrarConexao(conexao) {
+    var ligado = conexao.modo === "api" && Boolean(conexao.origem);
+    UI.elemento("#cartaoDemo").hidden = conexao.modo !== "demo";
+
+    estadoServidor.dataset.estado = ligado ? "ligado" : "desligado";
+    estadoServidor.textContent = ligado
+      ? "Conectado ao servidor " + conexao.origem
+      : conexao.modo === "demo"
+        ? "Nenhum servidor respondeu. O app está no modo demonstração, com dados fictícios."
+        : "Nenhum servidor respondeu.";
+    botaoAbrirServidor.textContent = ligado ? "Trocar de servidor" : "Informar o endereço do servidor";
+
+    cartaoServidor.hidden = !(Api.noApp || !ligado || Boolean(Api.servidorSalvo()));
+  }
+
+  Api.conectar().then(mostrarConexao);
+
+  botaoAbrirServidor.addEventListener("click", function () {
+    UI.limparErro(erroServidor);
+    campoServidor.value = Api.servidorSalvo().replace("http://", "");
+    formularioServidor.hidden = false;
+    botaoAbrirServidor.hidden = true;
+    campoServidor.focus();
   });
+
+  formularioServidor.addEventListener("submit", async function (evento) {
+    evento.preventDefault();
+    UI.limparErro(erroServidor);
+
+    var botaoSalvar = UI.elemento("#salvarServidor");
+    botaoSalvar.disabled = true;
+    botaoSalvar.textContent = "Testando";
+    try {
+      await Api.salvarServidor(campoServidor.value);
+      // Conta de um servidor nao vale no outro.
+      Api.encerrarSessao();
+      formularioServidor.hidden = true;
+      botaoAbrirServidor.hidden = false;
+      mostrarConexao(await Api.conectar());
+      UI.recado("Servidor encontrado e salvo.");
+    } catch (erro) {
+      UI.mostrarErro(erroServidor, erro.message);
+    } finally {
+      botaoSalvar.disabled = false;
+      botaoSalvar.textContent = "Testar e salvar";
+    }
+  });
+
+  UI.elemento("#esquecerServidor").addEventListener("click", async function () {
+    Api.esquecerServidor();
+    formularioServidor.hidden = true;
+    botaoAbrirServidor.hidden = false;
+    estadoServidor.textContent = "Procurando o servidor.";
+    mostrarConexao(await Api.conectar());
+  });
+
+  // Quem foi mandado de volta pra ca porque o login venceu precisa saber o motivo.
+  if (location.search.indexOf("sessao=expirada") !== -1) {
+    UI.mostrarErro(caixaErro, "Sua sessão terminou. Entre de novo.");
+  }
 
   // No modo demonstracao, tocar numa conta de exemplo ja preenche o formulario.
   UI.todos(".lista-contas button").forEach(function (conta) {
@@ -24,7 +93,11 @@
     });
   });
 
-  if (Api.sessao()) location.replace("pages/perfil.html");
+  // Ja esta logado: vai direto pra ficha. Espero a procura do servidor porque ela pode descartar
+  // uma sessao de demonstracao que sobrou no aparelho.
+  Api.conectar().then(function () {
+    if (Api.sessao()) location.replace("pages/perfil.html");
+  });
 
   formulario.addEventListener("submit", async function (evento) {
     evento.preventDefault();
@@ -43,16 +116,19 @@
 
     try {
       await Api.entrar({ email: email, senha: senha });
-      location.href = "pages/perfil.html";
+      // replace e nao href: o botao de voltar do celular nao deve trazer a pessoa de volta pro login.
+      location.replace("pages/perfil.html");
     } catch (erro) {
       var mensagem = erro.status === 401
         ? "Email ou senha não conferem. Confira e tente de novo."
         : erro.status === 0
-          ? "Não consegui falar com o servidor. Verifique se a API está no ar."
+          ? "Não consegui falar com o servidor. Confira o endereço no quadro Servidor, aqui embaixo."
           : erro.message;
       UI.mostrarErro(caixaErro, mensagem);
       botao.disabled = false;
       botao.textContent = "Entrar";
+      // Sem servidor, o quadro tem que aparecer pra pessoa conseguir arrumar.
+      if (erro.status === 0) Api.conectar().then(mostrarConexao);
     }
   });
 })();

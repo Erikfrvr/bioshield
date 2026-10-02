@@ -6,40 +6,40 @@ Guia relacionado: `docs/GUIA_APK.md`.
 
 ## Decisão tomada
 
-O BioShield vai rodar no servidor do professor, que só funciona dentro do Senac. **Para o QR abrir, o celular do visitante precisa estar conectado no wifi "Senac Alunos".** No 4G não abre.
+O BioShield vai rodar em um computador com Linux Mint, ligado pelo professor a um roteador. **Para o QR abrir, o celular do visitante precisa estar conectado no wifi desse roteador.** No 4G não abre.
 
 Escolhemos esse caminho porque é o mais simples: não tem custo, não precisa de hospedagem externa e fica tudo em um lugar só. O preço é um passo a mais para o visitante, que precisa entrar no wifi antes de escanear.
 
+Como subir o servidor está em `docs/SERVIDOR_LINUX.md`.
+
 ## Como funciona, em resumo
 
-1. O backend, o MySQL e a pasta `frontEnd/` ficam no servidor do professor.
+1. O backend e o MySQL ficam no servidor. O backend entrega também as telas, tudo na porta 3000.
 2. Cada QR Code guarda um endereço completo, que aponta para a página `emergencia.html` desse servidor, com o token do paciente no final.
-3. O visitante conecta no wifi "Senac Alunos".
+3. O visitante conecta no wifi do roteador.
 4. Ele escaneia com a câmera, o navegador abre a página, a página pede a ficha para a API e mostra na tela.
 5. O visitante não instala nada.
 
 ## A condição que decide tudo
 
-**O celular conectado no wifi "Senac Alunos" precisa conseguir abrir o servidor do professor.**
+**O celular conectado no wifi do roteador precisa conseguir abrir o servidor.**
 
-Os computadores do Senac ficam na rede por cabo e os celulares ficam na rede sem fio dos alunos. Antes de qualquer outra coisa, é preciso confirmar que uma rede enxerga a outra.
-
-O teste que tira a dúvida: conectar o celular no wifi dos alunos e abrir no navegador o endereço do servidor que o professor passar. Se abrir, o plano funciona. Se não abrir, nenhum QR vai abrir, e aí é preciso hospedagem externa.
+O teste que tira a dúvida: conectar o celular no wifi e abrir no navegador o endereço que o terminal do servidor mostra na subida, por exemplo `http://192.168.0.10:3000`. Se abrir, o plano funciona. Se não abrir, nenhum QR vai abrir: confira a lista "Se o celular não abrir" do `docs/SERVIDOR_LINUX.md`.
 
 ## Perguntas para o professor
 
-1. Qual é o endereço do servidor e em qual porta a API vai responder?
-2. O endereço é fixo? Ele pode mudar entre hoje e o dia do evento?
-3. Dá para rodar Node.js e MySQL nele, e publicar a pasta do front?
-4. O wifi "Senac Alunos" pede só uma senha, ou pede login com usuário de aluno?
-5. Visitante de fora pode usar esse wifi no dia do evento?
+1. O roteador vai ser o mesmo no dia do evento? Trocar de roteador troca o endereço, e os QR impressos param de abrir.
+2. Dá para fixar o IP do servidor no roteador, para ele não mudar de um dia para o outro?
+3. Qual é o nome e a senha do wifi do roteador? O visitante vai precisar dos dois.
+4. Quantos aparelhos o roteador aguenta ao mesmo tempo?
+5. O roteador tem isolamento entre os aparelhos do wifi? Se tiver, precisa estar desligado.
 6. O servidor fica ligado durante todo o evento?
 
-As perguntas 4 e 5 são as mais importantes. Se o wifi pedir login individual de aluno, o visitante não consegue entrar e a mesa não funciona para ele.
+As perguntas 1 e 2 são as mais importantes. O QR Code guarda o endereço do servidor, então ele só pode ser impresso depois que esse endereço estiver decidido.
 
 ## O que colocar na mesa
 
-1. **Uma placa bem visível** com o passo a passo: "1. Conecte no wifi Senac Alunos. 2. Senha: (a senha). 3. Aponte a câmera para o QR Code."
+1. **Uma placa bem visível** com o passo a passo: "1. Conecte no wifi (nome da rede). 2. Senha: (a senha). 3. Aponte a câmera para o QR Code."
 2. **Um celular de vocês já conectado,** para emprestar a quem não quiser ou não conseguir entrar no wifi. É o que salva a demonstração quando o visitante está com pressa.
 3. **Os QR Codes dos pacientes,** com um deles marcado como o do QR cancelado.
 
@@ -51,7 +51,9 @@ Se o wifi usar só senha, dá para imprimir também um QR Code de wifi, que cone
 
 O QR não guarda só o token. Ele guarda o endereço inteiro. Um QR gerado com o projeto rodando em localhost leva localhost dentro dele e nunca vai abrir no celular de outra pessoa.
 
-**Regra:** só gerar e imprimir os QR Codes depois que o `URL_PUBLICA_EMERGENCIA` do `frontEnd/js/config.js` estiver preenchido com o endereço definitivo do servidor do professor.
+O projeto já se protege disso: o servidor informa o endereço de rede dele e o front usa esse endereço no QR, mesmo com a tela aberta por `localhost`. Se ainda assim o endereço for local, a tela da ficha mostra um aviso em vermelho embaixo do QR.
+
+**Regra:** antes de imprimir, ler o endereço que aparece embaixo do QR Code na tela da ficha. Ele tem que começar com o IP do servidor, o mesmo que o terminal mostra.
 
 ### 2. Endereço que muda depois de impresso
 
@@ -83,13 +85,15 @@ Se a rede pedir login de aluno, ou se cair com muita gente conectada, o visitant
 
 O `config.js` tem o campo `MODO`. Em `"demo"` ou em `"auto"` com a API fora do ar, o front mostra os dados fictícios do `demo.js` e parece que está tudo funcionando, quando na verdade não está falando com o servidor.
 
-**Regra:** no evento, `MODO: "api"`. Assim, se o servidor cair, aparece erro de verdade e vocês ficam sabendo.
+O risco diminuiu: quem escaneia um QR nunca vê dado fictício, e quem está logado em uma conta de verdade também não. Sem servidor, aparece o aviso de erro. A demonstração só aparece para quem abre a tela de entrada sem servidor nenhum respondendo.
+
+**Regra:** no evento, olhar a tela de entrada antes de abrir a mesa. Se aparecer o quadro "Modo demonstração", o servidor não está respondendo.
 
 ### 7. Tempo limite curto
 
-O `config.js` tem `TEMPO_LIMITE_MS: 2500`. Se a API demorar mais que dois segundos e meio, o front desiste e mostra "Não consegui falar com o servidor". Com o wifi cheio no dia do evento, isso acontece.
+O `config.js` tem `TEMPO_LIMITE_MS`, que é quanto o front espera uma resposta antes de mostrar "Não consegui falar com o servidor". Ele já está em 8000, oito segundos.
 
-**Regra:** aumentar esse valor para o evento. Algo como 10000 dá folga.
+**Regra:** se no teste com o wifi cheio aparecer esse erro, aumentar o valor.
 
 ### 8. HTTPS misturado com HTTP
 
@@ -99,9 +103,9 @@ Se a página do front estiver em HTTPS e a API em HTTP, o navegador bloqueia a c
 
 ### 9. Porta bloqueada no wifi
 
-Algumas redes bloqueiam portas diferentes das comuns. Se a API responder na porta 3000, pode funcionar no computador por cabo e falhar no wifi dos alunos.
+Algumas redes bloqueiam portas diferentes das comuns. Se a API responder na porta 3000, pode funcionar no computador por cabo e falhar no wifi do roteador.
 
-**Regra:** testar pelo celular no wifi dos alunos, não só pelo computador.
+**Regra:** testar pelo celular no wifi do roteador, não só pelo computador.
 
 ### 10. Servidor sem o `.env` certo
 
@@ -123,31 +127,27 @@ QR pequeno demais, impressão clara, papel plastificado com reflexo ou dobrado n
 
 ## O que ajustar no projeto
 
-No `frontEnd/js/config.js` que vai para o servidor:
+No `frontEnd/js/config.js` não precisa mexer em nada. O front acha o servidor sozinho e monta o endereço do QR a partir dele.
 
-1. `URL_API`: endereço da API no servidor do professor.
-2. `URL_PUBLICA_EMERGENCIA`: endereço da página `emergencia.html` no servidor do professor.
-3. `MODO`: `"api"`.
-4. `TEMPO_LIMITE_MS`: valor maior.
-
-No servidor:
+No servidor, seguindo o `docs/SERVIDOR_LINUX.md`:
 
 1. Banco criado com o `database/bioshield.sql` e populado com o `database/dados_ficticios.sql`.
 2. `.env` do backend preenchido.
-3. Backend rodando e pasta `frontEnd/` publicada.
+3. IP do servidor fixado no roteador.
+4. Backend rodando com `npm start`. Ele entrega as telas junto, não tem pasta para publicar à parte.
 
 ## Linha do tempo
 
 ### Antes de tudo
 
 1. Fazer as perguntas ao professor.
-2. Fazer o teste do celular no wifi dos alunos abrindo o servidor.
+2. Fazer o teste do celular no wifi do roteador abrindo o servidor.
 
 ### Uma semana antes
 
 1. Subir backend, banco e front no servidor.
 2. Ajustar o `config.js` com os endereços definitivos.
-3. Com o celular no wifi dos alunos, abrir a ficha de um paciente pelo endereço completo.
+3. Com o celular no wifi do roteador, abrir a ficha de um paciente pelo endereço completo.
 4. Decidir quantos pacientes vão para a mesa e qual deles mostra o cancelamento.
 5. Se precisar de mais pacientes além dos três do script, criar agora.
 
@@ -155,7 +155,7 @@ No servidor:
 
 1. Gerar os QR Codes pelo app já apontando para o servidor.
 2. Imprimir os QR Codes e a placa do wifi.
-3. Testar cada papel com dois celulares diferentes, os dois no wifi dos alunos.
+3. Testar cada papel com dois celulares diferentes, os dois no wifi do roteador.
 4. A partir daqui, ninguém rotaciona, cancela ou recria paciente da mesa.
 
 ### Na véspera
@@ -188,7 +188,7 @@ O caminho é hospedagem externa: a pasta `frontEnd/` em um serviço de site est�
 
 Cada leitura do QR fica registrada em `acessos_qr`, com data, hora e o aparelho. A rota de histórico de acessos já existe, então dá para mostrar ao visitante, na tela do paciente, que a leitura dele acabou de aparecer. É a parte da LGPD funcionando ao vivo.
 
-Como o servidor é interno, o IP gravado vai ser o do celular dentro da rede do Senac.
+Como o servidor é interno, o IP gravado vai ser o do celular dentro da rede do roteador.
 
 ## Quem confere o quê
 

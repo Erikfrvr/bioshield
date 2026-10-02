@@ -139,7 +139,7 @@ Daiane não mexe nesta fase. Ela lê quando estiver pronta e copia o padrão.
 - [x] Testar rota protegida sem token (tem que dar 401) e com token (tem que passar)
 - [x] `services/AutorizacaoService.ts`: quem pode ver qual paciente, com `403` (dúvida 9 do `docs/DUVIDAS_CONTRATO.md`)
 - [x] Colunas `codigo_cuidador` e `codigo_valido_ate` em `pacientes` (dúvida 8)
-- [ ] Trocar o `config.js` do front para `MODO: "api"` e conferir que o login real funciona na tela
+- [x] Conferir que o login real funciona na tela · testado no navegador, contra o servidor, com o `MODO` em `auto`
 
 O `idPaciente` no login não é firula. Sem ele o front precisa de uma rota extra só para descobrir qual ficha é do usuário logado, o que é uma ida a mais no servidor em toda abertura de tela.
 
@@ -356,10 +356,10 @@ O corte do cancelamento é o melhor plano do vídeo inteiro. É o que mostra que
 
 A ideia é deixar QR Codes de pacientes fictícios na mesa para o visitante escanear com o próprio celular. As pegadinhas e a linha do tempo completa estão em `docs/DIA_DO_EVENTO.md`. Leiam antes de imprimir qualquer coisa.
 
-- [ ] Confirmar com o professor o endereço do servidor e como o visitante entra no wifi "Senac Alunos"
-- [ ] Subir backend, banco com dados fictícios e a pasta `frontEnd/` no servidor
-- [ ] Preencher `URL_API` e `URL_PUBLICA_EMERGENCIA` no `config.js`, com `MODO: "api"` e tempo limite maior
-- [ ] Abrir uma ficha com o celular no wifi "Senac Alunos", antes de gerar qualquer QR
+- [ ] Subir o servidor no Linux Mint do professor, seguindo o `docs/SERVIDOR_LINUX.md`
+- [ ] Fixar o IP do servidor no roteador, para o endereço não mudar depois de imprimir
+- [ ] Abrir uma ficha com o celular no wifi do roteador, antes de gerar qualquer QR
+- [x] Endereço do QR montado sozinho a partir do endereço de rede do servidor · não precisa mais preencher nada no `config.js`
 - [ ] **Só então** gerar e imprimir os QR Codes
 - [ ] Testar cada papel com dois celulares
 - [ ] Depois de impresso, não rotacionar, cancelar nem recriar paciente da mesa
@@ -445,3 +445,20 @@ Corte nesta ordem, de trás para frente: Fase 12, depois a Fase 9 (cuidador), de
 O que não pode ser cortado de jeito nenhum: Fases 1 a 6. Sem o QR de emergência funcionando não existe BioShield, existe um app de lembrete de remédio qualquer.
 
 E dentro das Fases 1 a 6, a mais perigosa é a 3. Ela não entrega nada visível, parece que o projeto não andou, e dá vontade de correr para a parte bonita. Se ela sair torta, as Fases 5 a 9 saem tortas junto, cada uma com um padrão diferente, e aí o retrabalho come o prazo.
+
+---
+
+## App Android  ·  **Erik e Daiane**
+
+O front empacotado com o Capacitor. Passo a passo em `docs/GUIA_APK.md`.
+
+- [x] Capacitor instalado na raiz, com `capacitor.config.json` e a pasta `android/`
+- [x] Ícone e tela de abertura do BioShield no projeto Android
+- [x] Backend entregando as telas e a API na mesma porta, para o site, o app e o QR usarem um endereço só
+- [x] Quadro Servidor na tela de entrada, para escrever o endereço do servidor dentro do app
+- [x] QR Code sempre com o endereço de rede do servidor, nunca com `localhost`
+- [x] Sessão vencida manda de volta para a tela de entrada, com aviso
+- [ ] Abrir a pasta `android/` no Android Studio e compilar · ainda não foi feito, o computador onde o projeto foi preparado não tem o Android Studio
+- [ ] Instalar o APK em um celular e passar por todas as telas
+- [ ] Testar o botão de voltar do celular em cada tela
+- [ ] Notificação na hora do remédio com o `@capacitor/local-notifications`

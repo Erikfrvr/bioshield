@@ -82,6 +82,29 @@
         </ul>
       </section>
 
+      <!-- De onde vem os dados. Aparece no app Android e sempre que nenhum servidor respondeu.
+           E aqui que a pessoa escreve o endereco do computador que roda o BioShield. -->
+      <section class="cartao entrada-servidor" id="cartaoServidor" hidden aria-labelledby="tituloServidor">
+        <h2 id="tituloServidor">Servidor</h2>
+        <p class="entrada-apoio" id="estadoServidor">Procurando o servidor.</p>
+        <button type="button" class="botao botao-secundario" id="abrirServidor">Informar o endereço do servidor</button>
+
+        <form id="formularioServidor" hidden novalidate>
+          <label class="campo">
+            <span>Endereço do servidor</span>
+            <input type="text" id="enderecoServidor" inputmode="url" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="192.168.0.10">
+          </label>
+          <p class="entrada-apoio">É o número que aparece no computador do servidor quando o BioShield é ligado. Este aparelho precisa estar no mesmo wifi.</p>
+
+          <p class="aviso aviso-erro" id="erroServidor" hidden></p>
+
+          <div class="linha-botoes">
+            <button type="button" class="botao botao-secundario" id="esquecerServidor">Procurar sozinho</button>
+            <button type="submit" class="botao" id="salvarServidor">Testar e salvar</button>
+          </div>
+        </form>
+      </section>
+
       <footer class="entrada-creditos">
         <p>BioShield. Projeto do Curso Técnico em Informática, Senac SP.</p>
       </footer>

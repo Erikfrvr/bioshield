@@ -1,0 +1,9 @@
+{
+  "appId": "br.com.bioshield.app",
+  "appName": "BioShield",
+  "webDir": "frontEnd",
+  "server": {
+    "androidScheme": "http",
+    "cleartext": true
+  }
+}

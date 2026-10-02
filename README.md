@@ -93,6 +93,7 @@ BioShield/
 │   ├── infrastructure/    implementações MySQL
 │   ├── models/            entidades, value objects e DTOs
 │   └── server.ts
+├── android/               projeto do app Android, gerado pelo Capacitor
 ├── database/              schema e dados fictícios
 ├── docs/                  roadmap, dicionário detalhado e imagens
 └── frontEnd/              telas do app
@@ -102,9 +103,11 @@ BioShield/
 
 ### O que você precisa ter instalado
 
-- Node.js 20 ou superior
+- Node.js 20 ou superior (22 ou superior para gerar o app Android)
 - MySQL 8.0.16 ou superior (o do XAMPP serve)
-- VS Code com as extensões Live Server e REST Client (a segunda é opcional)
+- VS Code com a extensão REST Client, que é opcional
+
+Estes passos são para o Windows. Para subir o servidor no Linux Mint, com os celulares acessando pelo roteador, o passo a passo está em [`docs/SERVIDOR_LINUX.md`](docs/SERVIDOR_LINUX.md).
 
 ### 1. Baixar o projeto
 
@@ -140,27 +143,38 @@ Abra o `.env` e preencha:
 
 | Variável | Para que serve | Valor de exemplo |
 |---|---|---|
-| `DB_HOST` | Endereço do MySQL | `localhost` |
+| `DB_HOST` | Endereço do MySQL | `127.0.0.1` |
 | `DB_USER` | Usuário do MySQL | `root` |
 | `DB_PASSWORD` | Senha do MySQL | vazio no XAMPP |
 | `DB_NAME` | Nome do banco | `bioshield` |
 | `DB_PORT` | Porta do MySQL | `3306` |
-| `PORT` | Porta da API | `3000` |
+| `PORT` | Porta do BioShield. Site, app e API usam a mesma | `3000` |
 | `JWT_SECRET` | Segredo que assina o token de sessão | um texto longo e só seu |
+| `URL_PUBLICA` | Opcional. Endereço de rede do servidor, o que vai dentro do QR Code. Vazio, o servidor descobre sozinho | vazio |
 
 No XAMPP o usuário `root` vem sem senha, então nesse caso deixe `DB_PASSWORD=` vazio. O `.env` real nunca vai para o Git.
 
-### 4. Subir a API
+### 4. Subir o servidor
 
 ```bash
 npm run dev
 ```
 
-A API responde em `http://localhost:3000/api`. Para conferir, abra `http://localhost:3000/api/status` no navegador.
+O mesmo servidor entrega a API e as telas, na mesma porta. O terminal mostra o endereço para usar neste computador e o endereço para os celulares da mesma rede:
 
-### 5. Abrir o front
+```
+Servidor rodando em http://localhost:3000
+Nos celulares e nos outros computadores da mesma rede, use:
+  http://192.168.0.10:3000
+```
 
-Abra `frontEnd/index.html` com a extensão Live Server do VS Code. O front é estático, não tem etapa de instalação.
+`npm run dev` reinicia sozinho quando um arquivo muda. Para deixar ligado sem isso, use `npm start`.
+
+### 5. Abrir o BioShield
+
+Abra `http://localhost:3000` no navegador. Não precisa de mais nada: o front é estático e quem entrega é o próprio backend.
+
+Abrir o `frontEnd/index.html` pelo Live Server do VS Code continua funcionando. Nesse caso o front procura a API em `http://localhost:3000`.
 
 Para testar as rotas sem o front, use o arquivo `backend/requests.http` com a extensão REST Client do VS Code. Cada bloco tem o status esperado escrito no comentário.
 
@@ -172,18 +186,35 @@ Quem decide é o campo `MODO` do arquivo `frontEnd/js/config.js`:
 
 | MODO | O que acontece |
 |---|---|
-| `auto` | Padrão. O front chama `GET /api/status` uma vez. Se a API responder, usa a API. Se não responder dentro do tempo limite (`TEMPO_LIMITE_MS`, hoje 2,5 segundos), cai no modo demonstração |
+| `auto` | Padrão. O front procura o servidor. Se achar, usa a API. Se nenhum responder, cai no modo demonstração |
 | `api` | Sempre a API. Se ela não responder, aparece erro na tela e o front não cai na demonstração |
 | `demo` | Sempre a demonstração, mesmo com a API no ar |
 
-O projeto vem com `MODO: "auto"`, então se a API cair ou não estiver ligada o front entra sozinho no modo demonstração. A checagem acontece uma vez por carregamento de página: se a API voltar, basta recarregar.
+O projeto vem com `MODO: "auto"`. O front procura o servidor nesta ordem: o endereço salvo no quadro Servidor da tela de entrada, o campo `SERVIDOR` do `config.js`, o endereço da própria página e, por último, `http://localhost:3000`. Só vale o endereço que responder em `GET /api/status`.
+
+Duas proteções para a demonstração não enganar ninguém:
+
+- Quem está logado em uma conta de verdade nunca cai nos dados fictícios. Se o servidor sumir, aparece o aviso de que não deu para falar com ele
+- A ficha de emergência aberta por quem escaneou o QR nunca mostra paciente inventado. Sem servidor, aparece o aviso para ligar para a emergência
 
 O que vale saber sobre o modo demonstração:
 
 - Na tela de entrada aparecem contas de exemplo. Tocar numa delas preenche o formulário
 - Tudo que você cadastra ou altera fica só no `sessionStorage` daquela aba do navegador e some quando ela é fechada. Nada vai para o banco
 - Os dados são os mesmos personagens inventados do `database/dados_ficticios.sql`
-- A página de emergência também funciona, então dá para mostrar a ficha aberta sem a API
+- A página de emergência também funciona para quem está dentro de uma sessão de demonstração, então dá para mostrar a ficha aberta sem a API
+
+## App Android
+
+O mesmo front vira app Android com o Capacitor. O projeto nativo está na pasta `android/` e o passo a passo para gerar o APK pelo Android Studio está em [`docs/GUIA_APK.md`](docs/GUIA_APK.md).
+
+```bash
+npm install
+npm run app:sync
+npm run app:abrir
+```
+
+O app não leva o backend junto. Na primeira vez, a pessoa escreve o endereço do servidor no quadro Servidor da tela de entrada, e o celular precisa estar no mesmo wifi dele.
 
 ## Rotas prontas
 
@@ -191,7 +222,7 @@ Tirando as marcadas como públicas, todas pedem o header `Authorization: Bearer 
 
 | Método | Rota | O que faz |
 |---|---|---|
-| `GET` | `/api/status` | Pública. Confirma que a API está de pé |
+| `GET` | `/api/status` | Pública. Confirma que a API está de pé e informa o endereço de rede do servidor |
 | `POST` | `/api/usuarios` | Pública. Cadastra uma conta com nome, email e senha |
 | `POST` | `/api/usuarios/login` | Pública. Confere email e senha e devolve o token de sessão |
 | `GET` | `/api/usuarios/:id` | Busca uma conta pelo id |

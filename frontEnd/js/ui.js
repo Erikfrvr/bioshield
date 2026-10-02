@@ -179,11 +179,27 @@
     return formatarData(valorIso) + " às " + formatarHora(valorIso);
   }
 
+  function ehEnderecoLocal(endereco) {
+    return /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/i.test(String(endereco || ""));
+  }
+
+  // O endereco que vai dentro do QR Code. Ele precisa abrir no celular de um estranho,
+  // entao nunca pode ser "localhost" nem o endereco interno do app.
   function urlDaFicha(tokenQr) {
     var configurada = (escopo.BioShieldConfig && escopo.BioShieldConfig.URL_PUBLICA_EMERGENCIA) || "";
     if (configurada) {
       return configurada.replace(/\/$/, "") + "?token=" + tokenQr;
     }
+
+    // Com servidor de verdade, a ficha publica mora nele. Se eu cheguei nele por "localhost"
+    // (estou no proprio servidor, ou no app pelo cabo), uso o endereco de rede que ele informou.
+    var conexao = escopo.Api && escopo.Api.conexao ? escopo.Api.conexao() : null;
+    if (conexao && conexao.modo === "api" && conexao.origem) {
+      var servidor = ehEnderecoLocal(conexao.origem) && conexao.urlPublica ? conexao.urlPublica : conexao.origem;
+      return servidor.replace(/\/$/, "") + "/pages/emergencia.html?token=" + tokenQr;
+    }
+
+    // Modo demonstracao: a ficha abre a partir da propria pasta das telas.
     var base = location.href.split("?")[0].split("#")[0].replace(/[^/]*$/, "");
     if (base.indexOf("/pages/") === -1) base += "pages/";
     return base + "emergencia.html?token=" + tokenQr;
@@ -218,6 +234,7 @@
     descreverFrequencia: descreverFrequencia,
     quandoFor: quandoFor,
     urlDaFicha: urlDaFicha,
+    ehEnderecoLocal: ehEnderecoLocal,
     mostrarErro: mostrarErro,
     limparErro: limparErro
   };
