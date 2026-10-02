@@ -269,7 +269,7 @@ As dúvidas 1, 2 e 7 do `DUVIDAS_CONTRATO.md` estão decididas e já entraram na
 - [x] `entidade/Cuidador.ts`
 - [x] Os dois DTOs de cuidador
 - [x] `repository/CuidadorRepository.ts`
-- [ ] `infrastructure/cuidadorInfrastructure.ts`
+- [x] `infrastructure/cuidadorInfrastructure.ts`
 - [ ] `services/CuidadorService.ts` com a checagem de autorização pelo código (`codigo_cuidador` válido até `codigo_valido_ate`), pegando o cuidador de `req.idUsuario`
 - [ ] O desvincular marca `ativo = FALSE`, não apaga a linha: quem teve acesso a dado de saúde fica registrado
 - [ ] `controllers/cuidadorController.ts`
