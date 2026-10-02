@@ -6,6 +6,15 @@
 export const STATUS_DOSE = ["prevista", "tomada", "perdida"] as const;
 export type StatusDose = (typeof STATUS_DOSE)[number];
 
+// As duas janelas de tempo da dose, decididas no docs/DUVIDAS_CONTRATO.md (duvidas 2 e 7).
+// Ficam aqui pra o service, a agenda e a adesao usarem o mesmo numero.
+// Dose 'prevista' que passou esse tanto do horario sem confirmacao vira 'perdida'.
+export const TOLERANCIA_ATRASO_MINUTOS = 60;
+// Da pra confirmar a dose ate esse tanto antes do horario. Mais cedo que isso e recusado.
+export const ANTECEDENCIA_CONFIRMACAO_MINUTOS = 60;
+
+const MINUTO_EM_MS = 60 * 1000;
+
 export class Dose {
 	private id: number | null;
 	private idMedicamento: number;
@@ -98,11 +107,35 @@ export class Dose {
 		return this.status === "perdida";
 	}
 
+	// O horario que o service passa pro marcarPerdidas do repository: agora menos a tolerancia.
+	// Dose 'prevista' com horario antes disso ja passou da janela.
+	public static limiteDePerdidas(agora: Date): Date {
+		return new Date(agora.getTime() - TOLERANCIA_ATRASO_MINUTOS * MINUTO_EM_MS);
+	}
+
+	// A mesma regra do limiteDePerdidas, pra uma dose so.
+	public passouDaTolerancia(agora: Date): boolean {
+		return this.status === "prevista"
+			&& this.horarioPrevisto.getTime() < Dose.limiteDePerdidas(agora).getTime();
+	}
+
+	// Falso quando ainda falta mais que a antecedencia pro horario da dose.
+	public podeSerConfirmadaEm(agora: Date): boolean {
+		return agora.getTime() >= this.horarioPrevisto.getTime() - ANTECEDENCIA_CONFIRMACAO_MINUTOS * MINUTO_EM_MS;
+	}
+
 	// Vale pra dose prevista e pra perdida tambem: o front tem o botao "Tomei mesmo assim".
 	// So nao deixo confirmar duas vezes, senao a segunda apagaria a hora real da primeira.
-	public confirmar(horarioConfirmado: Date): void {
+	// "agora" e o relogio do servidor, e e ele que decide se esta cedo demais. O horarioConfirmado
+	// vem do celular e so e gravado: se eu confiasse nele, bastava mandar uma hora inventada pra passar.
+	public confirmar(horarioConfirmado: Date, agora: Date = new Date()): void {
 		if (this.status === "tomada") {
 			throw new Error("Essa dose já foi confirmada.");
+		}
+
+		// Confirmar de manha a dose da noite deixaria a adesao bonita sem o remedio ter sido tomado.
+		if (!this.podeSerConfirmadaEm(agora)) {
+			throw new Error("Ainda é cedo para confirmar essa dose. Dá para confirmar a partir de 1 hora antes do horário.");
 		}
 
 		this.horarioConfirmado = Dose.validarHorario(horarioConfirmado, "horário confirmado");
@@ -110,7 +143,7 @@ export class Dose {
 	}
 
 	// So dose prevista vira perdida. Dose tomada e historico e nao volta atras.
-	// Quem decide se ja passou da tolerancia e o service.
+	// Quem decide a hora de chamar e o service, com o passouDaTolerancia.
 	public marcarComoPerdida(): void {
 		if (this.status !== "prevista") {
 			throw new Error("Só uma dose prevista pode ser marcada como perdida.");
