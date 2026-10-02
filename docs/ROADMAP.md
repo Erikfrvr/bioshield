@@ -234,7 +234,7 @@ Começa depois do Marco 4. Roda em paralelo com as Fases 5 e 6 do Erik.
 - [x] Campo `proximaDose` na resposta: primeira dose prevista com horário no futuro, ou `null`
 - [x] `controllers/medicamentoController.ts`
 - [x] `routes/medicamentoRoutes.ts`
-- [ ] Testar o CRUD inteiro pelo `requests.http`
+- [x] Testar o CRUD inteiro pelo `requests.http`
 - [ ] Abrir a tel de remédios no navegador e ver a lista real aparecendo
 
 ---
@@ -251,7 +251,7 @@ Começa depois do Marco 4. Roda em paralelo com as Fases 5 e 6 do Erik.
 - [x] Dose no futuro **não** entra no cálculo de adesão, senão o dia começa em 0% e assusta o usuário à toa
 - [x] `controllers/doseController.ts`
 - [x] `routes/doseRoutes.ts`
-- [ ] Cadastrar um remédio, confirmar uma dose e conferir se a adesão mudou
+- [x] Cadastrar um remédio, confirmar uma dose e conferir se a adesão mudou
 - [ ] Abrir a tela de doses no navegador e ver a barra de adesão mexendo
 
 As dúvidas 1, 2 e 7 do `DUVIDAS_CONTRATO.md` estão decididas e já entraram na entidade `Dose`, no contrato, no `demo.js` e na tela de doses. Para o `DoseService` sobra só usar o que está pronto:
@@ -270,12 +270,12 @@ As dúvidas 1, 2 e 7 do `DUVIDAS_CONTRATO.md` estão decididas e já entraram na
 - [x] Os dois DTOs de cuidador
 - [x] `repository/CuidadorRepository.ts`
 - [x] `infrastructure/cuidadorInfrastructure.ts`
-- [ ] `services/CuidadorService.ts` com a checagem de autorização pelo código (`codigo_cuidador` válido até `codigo_valido_ate`), pegando o cuidador de `req.idUsuario`
-- [ ] O desvincular marca `ativo = FALSE`, não apaga a linha: quem teve acesso a dado de saúde fica registrado
-- [ ] `controllers/cuidadorController.ts`
-- [ ] `routes/cuidadorRoutes.ts`
-- [ ] Testar se um cuidador sem vínculo consegue ver dados (não pode)
-- [ ] Conferir que o cuidador recebe adesão e próxima dose, mas **não** recebe a ficha médica nem o log de acessos
+- [x] `services/CuidadorService.ts` com a checagem de autorização pelo código (`codigo_cuidador` válido até `codigo_valido_ate`), pegando o cuidador de `req.idUsuario`
+- [x] O desvincular marca `ativo = FALSE`, não apaga a linha: quem teve acesso a dado de saúde fica registrado
+- [x] `controllers/cuidadorController.ts`
+- [x] `routes/cuidadorRoutes.ts`
+- [x] Testar se um cuidador sem vínculo consegue ver dados (não pode)
+- [x] Conferir que o cuidador recebe adesão e próxima dose, mas **não** recebe a ficha médica nem o log de acessos
 
 A geração do código de autorização saiu daqui e foi para a Fase 5, para não misturar dono de arquivo.
 

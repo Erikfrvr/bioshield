@@ -29,6 +29,7 @@ interface VinculoComPacienteLinha extends VinculoLinha {
 
 interface CodigoLinha extends RowDataPacket {
   id: number;
+  id_usuario: number;
   codigo_cuidador: string;
   codigo_valido_ate: Date;
 }
@@ -47,7 +48,7 @@ export class CuidadorInfrastructure implements CuidadorRepository {
     const conexao = await pool.getConnection();
     try {
       const [linhas] = await conexao.query<CodigoLinha[]>(
-        `SELECT id, codigo_cuidador, codigo_valido_ate
+        `SELECT id, id_usuario, codigo_cuidador, codigo_valido_ate
            FROM pacientes
           WHERE codigo_cuidador = ?
             AND codigo_valido_ate IS NOT NULL`,
@@ -58,6 +59,7 @@ export class CuidadorInfrastructure implements CuidadorRepository {
       }
       return {
         idPaciente: Number(linhas[0].id),
+        idDono: Number(linhas[0].id_usuario),
         codigo: CodigoCuidador.aPartirDoValor(linhas[0].codigo_cuidador, linhas[0].codigo_valido_ate),
       };
     } finally {
