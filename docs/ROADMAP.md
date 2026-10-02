@@ -249,8 +249,8 @@ Começa depois do Marco 4. Roda em paralelo com as Fases 5 e 6 do Erik.
 - [x] `services/DoseService.ts` com a janela de tolerância e o cálculo de adesão, chamando `autorizacaoService.garantirAcompanhamento`
 - [x] Deixar confirmar dose com status `perdida` também. O front tem o botão "Tomei mesmo assim"
 - [x] Dose no futuro **não** entra no cálculo de adesão, senão o dia começa em 0% e assusta o usuário à toa
-- [ ] `controllers/doseController.ts`
-- [ ] `routes/doseRoutes.ts`
+- [x] `controllers/doseController.ts`
+- [x] `routes/doseRoutes.ts`
 - [ ] Cadastrar um remédio, confirmar uma dose e conferir se a adesão mudou
 - [ ] Abrir a tela de doses no navegador e ver a barra de adesão mexendo
 

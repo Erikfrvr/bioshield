@@ -3,6 +3,7 @@
 // e calculo a adesao (doses confirmadas dividido pelas doses previstas no periodo).
 // Dose atrasada nao vira dose perdida na hora, tem uma janela de tolerancia.
 import doseInfrastructure from "../infrastructure/doseInfrastructure";
+import Dose from "../models/entidade/Dose";
 import { ConfirmarDoseDTO } from "../models/dto/dose/ConfirmarDoseDTO";
 import {
   AdesaoPeriodoDTO,
@@ -13,15 +14,10 @@ import {
 import { ContagemDoses, DoseComMedicamento, DoseRepository } from "../repository/DoseRepository";
 import autorizacaoService from "./AutorizacaoService";
 
-// Quanto tempo depois do horario a dose ainda conta como prevista (proposta da duvida 2 do docs/DUVIDAS_CONTRATO.md).
-// Passou disso sem confirmacao, vira perdida.
-const TOLERANCIA_MINUTOS = 60;
-
 // "semana" na adesao sao os ultimos 7 dias ate agora, nao a semana do calendario.
 const DIAS_DA_SEMANA = 7;
 
-const MS_POR_MINUTO = 60 * 1000;
-const MS_POR_DIA = 24 * 60 * MS_POR_MINUTO;
+const MS_POR_DIA = 24 * 60 * 60 * 1000;
 
 // Mesmo esquema do MedicamentoService: o service diz o tipo, o controller escolhe o status code.
 export type TipoErroDose = "validacao" | "nao_encontrado";
@@ -75,9 +71,10 @@ export class DoseService {
     const horarioConfirmado = this.lerHorarioConfirmado(dados);
     const dose = achada.dose;
 
-    // A entidade joga Error comum (dose ja confirmada). Aqui isso vira erro de validacao (400).
+    // A entidade joga Error comum (dose ja confirmada, ou cedo demais pelo relogio do servidor).
+    // Aqui isso vira erro de validacao (400).
     try {
-      dose.confirmar(horarioConfirmado);
+      dose.confirmar(horarioConfirmado, new Date());
     } catch (erro) {
       throw new ErroDose("validacao", (erro as Error).message);
     }
@@ -115,9 +112,9 @@ export class DoseService {
 
   // Nao existe job que mude 'prevista' pra 'perdida': a troca acontece aqui, na hora da leitura.
   // Dose atrasada dentro da tolerancia continua prevista e ainda pode ser confirmada sem virar perdida.
+  // O tamanho da tolerancia mora na entidade Dose (duvida 2 do docs/DUVIDAS_CONTRATO.md).
   private async aplicarTolerancia(idPaciente: number, agora: Date): Promise<void> {
-    const limite = new Date(agora.getTime() - TOLERANCIA_MINUTOS * MS_POR_MINUTO);
-    await this.repositorio.marcarPerdidas(idPaciente, limite);
+    await this.repositorio.marcarPerdidas(idPaciente, Dose.limiteDePerdidas(agora));
   }
 
   // Janela sem dose nenhuma dividiria por zero: devolvo 0, igual ao demo.js.
