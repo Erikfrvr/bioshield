@@ -11,7 +11,7 @@ router.use("/doses", autenticar);
 
 // Os dois GET recebem o paciente pela query: /doses/hoje?idPaciente=1
 router.get("/doses/hoje", doseController.listarDeHoje);
-router.get("/doses/adesao", doseController.adesao);
+router.get("/doses/adesao", doseController.calcularAdesao);
 router.post("/doses/:id/confirmar", doseController.confirmar);
 
 export default router;

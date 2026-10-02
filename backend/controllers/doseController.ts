@@ -16,7 +16,7 @@ function responderErro(res: Response, erro: unknown): void {
     return;
   }
 
-  // Logado, mas pedindo dose de paciente que nao e dele nem acompanha
+  // Logado, mas nao e o dono da ficha nem um cuidador com vinculo ativo
   if (erro instanceof ErroAcesso) {
     res.status(403).json({ mensagem: erro.message });
     return;
@@ -51,10 +51,10 @@ export async function confirmar(req: Request, res: Response): Promise<void> {
 }
 
 // GET /api/doses/adesao?idPaciente=1
-export async function adesao(req: Request, res: Response): Promise<void> {
+export async function calcularAdesao(req: Request, res: Response): Promise<void> {
   try {
-    const resumo = await doseService.calcularAdesao(Number(req.query.idPaciente), req.idUsuario);
-    res.status(200).json(resumo);
+    const adesao = await doseService.calcularAdesao(Number(req.query.idPaciente), req.idUsuario);
+    res.status(200).json(adesao);
   } catch (erro) {
     responderErro(res, erro);
   }
