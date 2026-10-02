@@ -99,3 +99,13 @@ export async function listarAcessos(req: Request, res: Response): Promise<void> 
     responderErro(res, erro);
   }
 }
+
+// POST /api/pacientes/:id/codigo
+export async function gerarCodigoCuidador(req: Request, res: Response): Promise<void> {
+  try {
+    const codigo = await pacienteService.gerarCodigoCuidador(Number(req.params.id), req.idUsuario);
+    res.status(200).json(codigo);
+  } catch (erro) {
+    responderErro(res, erro);
+  }
+}

@@ -6,6 +6,7 @@ import pool from "../config/db";
 import Alergia from "../models/entidade/Alergia";
 import ContatoEmergencia from "../models/entidade/ContatoEmergencia";
 import Paciente from "../models/entidade/Paciente";
+import CodigoCuidador from "../models/valueObjects/CodigoCuidador";
 import Telefone from "../models/valueObjects/Telefone";
 import TipoSanguineo from "../models/valueObjects/TipoSanguineo";
 import TokenQR from "../models/valueObjects/TokenQR";
@@ -227,6 +228,24 @@ export class PacienteInfrastructure implements PacienteRepository {
         ip: linha.ip,
         userAgent: linha.user_agent,
       }));
+    } finally {
+      conexao.release();
+    }
+  }
+
+  // Um UPDATE so: o codigo antigo deixa de valer na mesma hora em que o novo entra.
+  // atualizado_em = atualizado_em segura a data da ficha. Sem isso o ON UPDATE da coluna mudaria
+  // o "atualizada em" que aparece na emergencia, e gerar codigo nao e mexer na ficha medica.
+  async gravarCodigoCuidador(idPaciente: number, codigo: CodigoCuidador): Promise<boolean> {
+    const conexao = await pool.getConnection();
+    try {
+      const [resultado] = await conexao.query<ResultSetHeader>(
+        `UPDATE pacientes
+            SET codigo_cuidador = ?, codigo_valido_ate = ?, atualizado_em = atualizado_em
+          WHERE id = ?`,
+        [codigo.getValor(), codigo.getValidoAte(), idPaciente]
+      );
+      return resultado.affectedRows > 0;
     } finally {
       conexao.release();
     }

@@ -1,7 +1,7 @@
 // Rotas da ficha medica do usuario (tipo sanguineo, alergias, condicoes, contato de emergencia).
 // GET /pacientes/:id | POST /pacientes | PUT /pacientes/:id | PATCH /pacientes/:id
 // POST /pacientes/:id/qr/rotacionar | DELETE /pacientes/:id/qr | POST /pacientes/:id/qr/reativar
-// GET /pacientes/:id/acessos
+// GET /pacientes/:id/acessos | POST /pacientes/:id/codigo
 import { Router } from "express";
 import * as pacienteController from "../controllers/pacienteController";
 import { autenticar } from "../middleware/autenticacao";
@@ -22,5 +22,8 @@ router.post("/pacientes/:id/qr/reativar", pacienteController.reativarQR);
 
 // Historico da LGPD: quem abriu a ficha publica pelo QR
 router.get("/pacientes/:id/acessos", pacienteController.listarAcessos);
+
+// Codigo de autorizacao que o paciente entrega ao cuidador
+router.post("/pacientes/:id/codigo", pacienteController.gerarCodigoCuidador);
 
 export default router;

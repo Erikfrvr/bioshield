@@ -1,6 +1,7 @@
 // Contrato do banco pra ficha medica: criar, buscar por id, atualizar e a parte do QR.
 // Quem implementa e o pacienteInfrastructure. O service so conhece esta interface.
 import Paciente from "../models/entidade/Paciente";
+import CodigoCuidador from "../models/valueObjects/CodigoCuidador";
 import TokenQR from "../models/valueObjects/TokenQR";
 
 // A entidade Paciente nao guarda o nome: ele mora em usuarios.
@@ -42,4 +43,7 @@ export interface PacienteRepository {
     cancelarQR(idPaciente: number, canceladoEm: Date): Promise<boolean>;
     // Historico de leituras do QR dessa ficha, mais recente primeiro. Lista vazia quando ninguem escaneou.
     listarAcessos(idPaciente: number): Promise<AcessoQr[]>;
+    // Grava o codigo do cuidador e a validade por cima do anterior.
+    // Devolve false quando a ficha nao existe.
+    gravarCodigoCuidador(idPaciente: number, codigo: CodigoCuidador): Promise<boolean>;
 }

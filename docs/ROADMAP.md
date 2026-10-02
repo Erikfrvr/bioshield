@@ -175,7 +175,7 @@ Isto não depende da Fase 3 e economiza horas depois. Consulta testada no Workbe
 - [x] `services/PacienteService.ts`
 - [x] `controllers/pacienteController.ts`
 - [x] `routes/pacienteRoutes.ts`
-- [ ] **`POST /api/pacientes/:id/codigo`**, que gera o código de autorização do cuidador e grava em `codigo_cuidador` e `codigo_valido_ate`
+- [x] **`POST /api/pacientes/:id/codigo`**, que gera o código de autorização do cuidador e grava em `codigo_cuidador` e `codigo_valido_ate` · value object `CodigoCuidador`, validade de 24 horas, só o dono gera
 - [x] Chamar `autorizacaoService.garantirDono` em todas as rotas de paciente · GET, PUT e as três do QR. O POST usa o id do token como dono. `/codigo` e `/acessos` chamam quando forem criadas
 - [x] Tratar alergias e contatos como substituição completa no PUT, dentro de uma transação · lista que não vem no PUT fica intocada, com os mesmos ids
 - [x] Testar criar, ler e atualizar a ficha pelo `requests.http`
@@ -311,9 +311,9 @@ Oito telas, trinta e um arquivos. Passou por bateria automatizada no Chromium: 4
 - [x] Tela de emergência legível em três segundos, alergia em vermelho
 - [x] Revisar LGPD no backend: nada de logar corpo de ficha médica, log de acesso gravando · **Erik**
 - [x] Trocar todo dado de teste real por dado fictício antes de publicar
-- [ ] Corrigir o `README.md`: ele manda rodar `database/dados_teste.sql`, mas o arquivo chama `dados_ficticios.sql` · **Daiane**
-- [ ] `README.md` com print, descrição e instruções de instalação · **Daiane**
-- [ ] Documentar no README que o front cai em modo demonstração se a API não responder · **Daiane**
+- [x] Corrigir o `README.md`: ele manda rodar `database/dados_teste.sql`, mas o arquivo chama `dados_ficticios.sql` · **Erik**
+- [x] `README.md` com print, descrição e instruções de instalação · **Erik**
+- [x] Documentar no README que o front cai em modo demonstração se a API não responder · **Erik**
 - [x] Deixar o repositório público · **Erik**
 
 ### Acessibilidade  ·  **Erik**
@@ -322,7 +322,7 @@ Dois recursos pensados para idoso e baixa visão, só no front, sem mexer no bac
 
 - [x] `frontEnd/js/acessibilidade.js` com o botão de acessibilidade, carregado em todas as telas menos a de imprimir
 - [x] Botão pequeno e redondo com o símbolo de acessibilidade, que abre as opções ao toque
-- [x] Botões A− e A+ com quatro tamanhos de letra, guardando a escolha no navegador
+- [x] Botões A- e A+ com quatro tamanhos de letra, guardando a escolha no navegador
 - [x] Botão de contraste reforçado: texto preto, bordas mais escuras e coral mais fechado
 - [x] Passar por todas as telas com a letra no tamanho máximo e ver se algum texto fica apertado
 - [x] Passar por todas as telas com o contraste ligado e ver se alguma cor ficou estranha
