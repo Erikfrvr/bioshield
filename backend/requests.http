@@ -571,6 +571,45 @@ Content-Type: application/json
   "dosagem": 100
 }
 
+### Mudar o horario refaz a agenda (esperado 200, proximaDose no horario novo). DUVIDA 5
+### As doses 'prevista' do futuro sao apagadas e geradas de novo. As tomadas e perdidas ficam
+PUT {{baseUrl}}/medicamentos/{{cadastrarMedicamento.response.body.id}}
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "horarioInicial": "09:30",
+  "frequenciaHoras": 24
+}
+
+### Suspender o remedio (esperado 200, ativo false e proximaDose null). DUVIDA 6
+### Ele some da ficha de emergencia e as doses futuras sao apagadas. O historico fica
+PUT {{baseUrl}}/medicamentos/{{cadastrarMedicamento.response.body.id}}
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "ativo": false
+}
+
+### Suspender com texto no lugar de verdadeiro ou falso (esperado 400)
+PUT {{baseUrl}}/medicamentos/{{cadastrarMedicamento.response.body.id}}
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "ativo": "false"
+}
+
+### Reativar o remedio (esperado 200, ativo true e proximaDose preenchida de novo)
+PUT {{baseUrl}}/medicamentos/{{cadastrarMedicamento.response.body.id}}
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "ativo": true
+}
+
 ### Excluir o remedio cadastrado acima (esperado 204 ou 200). As doses dele somem junto pelo CASCADE
 DELETE {{baseUrl}}/medicamentos/{{cadastrarMedicamento.response.body.id}}
 Authorization: Bearer {{loginMaria.response.body.token}}

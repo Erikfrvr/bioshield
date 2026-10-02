@@ -101,7 +101,7 @@ CREATE TABLE doses (
     CONSTRAINT fk_doses_medicamento FOREIGN KEY (id_medicamento)
         REFERENCES medicamentos (id)
         ON DELETE CASCADE,
-    INDEX idx_doses_agenda (id_medicamento, horario_previsto)
+    CONSTRAINT uk_doses_agenda UNIQUE (id_medicamento, horario_previsto)
 );
 
 CREATE TABLE cuidador_paciente (

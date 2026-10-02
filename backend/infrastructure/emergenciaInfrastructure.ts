@@ -80,11 +80,16 @@ export class EmergenciaInfrastructure implements EmergenciaRepository {
         [idPaciente]
       );
 
-      // So remedio em uso. Remedio encerrado no meio da lista atrapalha quem esta socorrendo.
+      // So remedio em uso hoje (duvida 6): nao suspenso, ja comecado e ainda nao encerrado.
+      // Remedio que a pessoa nao esta tomando no meio da lista atrapalha quem esta socorrendo.
+      // CURDATE() e o dia de Brasilia, porque o config/db.ts acerta o fuso de cada conexao.
       const [medicamentos] = await conexao.query<MedicamentoLinha[]>(
         `SELECT nome, dosagem, unidade, frequencia_horas, ativo
            FROM medicamentos
-          WHERE id_paciente = ? AND ativo = TRUE
+          WHERE id_paciente = ?
+            AND ativo = TRUE
+            AND data_inicio <= CURDATE()
+            AND (data_fim IS NULL OR data_fim >= CURDATE())
           ORDER BY nome`,
         [idPaciente]
       );
