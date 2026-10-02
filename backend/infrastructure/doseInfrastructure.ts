@@ -30,6 +30,11 @@ interface DoseComPacienteLinha extends DoseLinha {
   id_paciente: number;
 }
 
+interface UltimaDoseLinha extends RowDataPacket {
+  id_medicamento: number;
+  ultimo_horario: Date;
+}
+
 // SUM tambem volta como texto no mysql2, e vem NULL quando a janela nao tem linha nenhuma
 interface ContagemLinha extends RowDataPacket {
   previstas: number;
@@ -40,6 +45,8 @@ interface ContagemLinha extends RowDataPacket {
 export class DoseInfrastructure implements DoseRepository {
   // Um INSERT so com todas as linhas: o "VALUES ?" do mysql2 abre a lista de [id, horario].
   // status e horario_confirmado ficam com o DEFAULT do banco ('prevista' e NULL).
+  // IGNORE por causa do indice unico uk_doses_agenda: duas telas completando a agenda ao mesmo tempo
+  // tentam inserir a mesma dose, e a segunda e so pulada.
   async registrar(doses: RegistrarDoseDTO[]): Promise<void> {
     if (doses.length === 0) {
       return;
@@ -48,9 +55,27 @@ export class DoseInfrastructure implements DoseRepository {
     const conexao = await pool.getConnection();
     try {
       await conexao.query(
-        "INSERT INTO doses (id_medicamento, horario_previsto) VALUES ?",
+        "INSERT IGNORE INTO doses (id_medicamento, horario_previsto) VALUES ?",
         [doses.map((dose) => [dose.idMedicamento, dose.horarioPrevisto])]
       );
+    } finally {
+      conexao.release();
+    }
+  }
+
+  // Um MAX por remedio. Entram todos os status: se a ultima dose ja foi tomada, a agenda continua depois dela.
+  async ultimoHorarioPorMedicamento(idPaciente: number): Promise<Map<number, Date>> {
+    const conexao = await pool.getConnection();
+    try {
+      const [linhas] = await conexao.query<UltimaDoseLinha[]>(
+        `SELECT d.id_medicamento, MAX(d.horario_previsto) AS ultimo_horario
+           FROM doses d
+           JOIN medicamentos m ON m.id = d.id_medicamento
+          WHERE m.id_paciente = ?
+          GROUP BY d.id_medicamento`,
+        [idPaciente]
+      );
+      return new Map(linhas.map((linha) => [Number(linha.id_medicamento), linha.ultimo_horario]));
     } finally {
       conexao.release();
     }
@@ -75,7 +100,7 @@ export class DoseInfrastructure implements DoseRepository {
   }
 
   // Uso intervalo em vez de DATE(d.horario_previsto) = ? porque funcao em cima da coluna
-  // impede o banco de usar o indice idx_doses_agenda. O id desempata duas doses no mesmo horario.
+  // impede o banco de usar o indice uk_doses_agenda. O id desempata duas doses no mesmo horario.
   async listarPorPeriodo(idPaciente: number, inicio: Date, fim: Date): Promise<DoseComMedicamento[]> {
     const conexao = await pool.getConnection();
     try {

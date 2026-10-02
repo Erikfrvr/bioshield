@@ -84,7 +84,7 @@ A dependência aponta sempre para dentro. O service conhece a interface do repos
 ```
 BioShield/
 ├── backend/
-│   ├── config/            conexão com o banco
+│   ├── config/            conexão com o banco e fuso horário
 │   ├── routes/            caminhos da API
 │   ├── middleware/        autenticação por token
 │   ├── controllers/       entrada e saída HTTP
@@ -206,8 +206,11 @@ Tirando as marcadas como públicas, todas pedem o header `Authorization: Bearer 
 | `GET` | `/api/emergencia/:token` | Pública. Devolve a ficha de emergência do QR |
 | `GET` | `/api/medicamentos` | Lista os medicamentos |
 | `POST` | `/api/medicamentos` | Cadastra um medicamento |
-| `PUT` | `/api/medicamentos/:id` | Atualiza um medicamento |
+| `PUT` | `/api/medicamentos/:id` | Atualiza um medicamento, suspende ou reativa, e refaz a agenda futura quando o horário muda |
 | `DELETE` | `/api/medicamentos/:id` | Apaga um medicamento |
+| `GET` | `/api/doses/hoje` | Lista as doses do dia, já marcando como perdida a que passou 60 minutos do horário |
+| `POST` | `/api/doses/:id/confirmar` | Confirma que a dose foi tomada |
+| `GET` | `/api/doses/adesao` | Percentual de adesão de hoje e dos últimos 7 dias |
 
 A senha precisa ter pelo menos 8 caracteres, com letra maiúscula, letra minúscula, número e um caractere especial (`@ $ ! % * ? & #`). Ela é gravada só como hash bcrypt e nunca volta em nenhuma resposta. O email é guardado em minúsculo, então `Maria@Exemplo.com` e `maria@exemplo.com` são a mesma conta.
 
@@ -247,7 +250,7 @@ Em desenvolvimento. O andamento por fase está em [`docs/ROADMAP.md`](docs/ROADM
 - [x] Ficha médica
 - [x] QR Code de emergência
 - [x] Medicamentos
-- [ ] Rotas de doses e adesão
+- [x] Doses e adesão
 - [ ] Rotas do modo cuidador
 - [x] Interface, navegável de ponta a ponta no modo demonstração
 

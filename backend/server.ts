@@ -3,6 +3,8 @@
 // e registro todas as rotas embaixo do prefixo /api.
 // Regra minha: server.ts nao tem regra de negocio, so liga as pecas.
 
+// Primeiro import de todos: acerta o fuso do Node antes de qualquer arquivo montar data.
+import "./config/fuso";
 import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";

@@ -2,7 +2,9 @@
 // Monto a agenda do dia, marco a dose como tomada com a hora real da confirmacao
 // e calculo a adesao (doses confirmadas dividido pelas doses previstas no periodo).
 // Dose atrasada nao vira dose perdida na hora, tem uma janela de tolerancia.
+// Antes de cada leitura eu completo a agenda, 7 dias pra frente (duvida 3 do docs/DUVIDAS_CONTRATO.md).
 import doseInfrastructure from "../infrastructure/doseInfrastructure";
+import medicamentoInfrastructure from "../infrastructure/medicamentoInfrastructure";
 import Dose from "../models/entidade/Dose";
 import { ConfirmarDoseDTO } from "../models/dto/dose/ConfirmarDoseDTO";
 import {
@@ -11,8 +13,11 @@ import {
   DoseConfirmadaResponseDTO,
   DoseResponseDTO,
 } from "../models/dto/dose/DoseResponseDTO";
+import { RegistrarDoseDTO } from "../models/dto/dose/RegistrarDoseDTO";
 import { ContagemDoses, DoseComMedicamento, DoseRepository } from "../repository/DoseRepository";
+import { MedicamentoRepository } from "../repository/MedicamentoRepository";
 import autorizacaoService from "./AutorizacaoService";
+import { DIAS_DE_AGENDA } from "./MedicamentoService";
 
 // "semana" na adesao sao os ultimos 7 dias ate agora, nao a semana do calendario.
 const DIAS_DA_SEMANA = 7;
@@ -34,9 +39,15 @@ export class ErroDose extends Error {
 
 export class DoseService {
   private repositorio: DoseRepository;
+  // Preciso dos remedios do paciente pra completar a agenda: e a entidade Medicamento que sabe gerar os horarios.
+  private medicamentos: MedicamentoRepository;
 
-  constructor(repositorio: DoseRepository = doseInfrastructure) {
+  constructor(
+    repositorio: DoseRepository = doseInfrastructure,
+    medicamentos: MedicamentoRepository = medicamentoInfrastructure
+  ) {
     this.repositorio = repositorio;
+    this.medicamentos = medicamentos;
   }
 
   // GET /doses/hoje?idPaciente=1. O dono ou um cuidador com vinculo ativo.
@@ -45,7 +56,7 @@ export class DoseService {
     await autorizacaoService.garantirAcompanhamento(idLogado, idPaciente);
 
     const agora = new Date();
-    await this.aplicarTolerancia(idPaciente, agora);
+    await this.prepararAgenda(idPaciente, agora);
 
     const inicio = this.inicioDoDia(agora);
     const doses = await this.repositorio.listarPorPeriodo(idPaciente, inicio, this.inicioDoDiaSeguinte(agora));
@@ -97,7 +108,7 @@ export class DoseService {
     await autorizacaoService.garantirAcompanhamento(idLogado, idPaciente);
 
     const agora = new Date();
-    await this.aplicarTolerancia(idPaciente, agora);
+    await this.prepararAgenda(idPaciente, agora);
 
     // As duas janelas terminam em agora: dose no futuro nao entra na conta,
     // senao o dia comeca em 0% e assusta o usuario a toa.
@@ -110,11 +121,55 @@ export class DoseService {
     return { hoje: this.paraAdesao(hoje), semana: this.paraAdesao(semana) };
   }
 
+  // Deixa as doses do paciente em dia antes de qualquer leitura: primeiro completa a agenda,
+  // depois aplica a tolerancia. Nessa ordem, porque a dose que acabou de nascer no passado
+  // (a pessoa ficou dias sem abrir o app) ja tem que sair daqui como perdida.
+  // E publico porque a lista do cuidador, na Fase 9, precisa chamar tambem: sem isso o familiar
+  // veria "em dia" justamente pra quem parou de abrir o app.
+  async prepararAgenda(idPaciente: number, agora: Date): Promise<void> {
+    await this.completarAgenda(idPaciente, agora);
+    await this.aplicarTolerancia(idPaciente, agora);
+  }
+
   // Nao existe job que mude 'prevista' pra 'perdida': a troca acontece aqui, na hora da leitura.
   // Dose atrasada dentro da tolerancia continua prevista e ainda pode ser confirmada sem virar perdida.
   // O tamanho da tolerancia mora na entidade Dose (duvida 2 do docs/DUVIDAS_CONTRATO.md).
   private async aplicarTolerancia(idPaciente: number, agora: Date): Promise<void> {
     await this.repositorio.marcarPerdidas(idPaciente, Dose.limiteDePerdidas(agora));
+  }
+
+  // Duvida 3. O cadastro gera 7 dias. Aqui eu continuo de onde a ultima dose parou ate agora mais 7 dias.
+  // Continuo da ultima dose, e nao de uma data fixa, por dois motivos: nao repito dose que ja existe,
+  // e nao invento dose de antes do remedio ser cadastrado ou de antes de uma troca de horario.
+  // Se a agenda acabou no passado, o buraco e preenchido, mas so ate 7 dias pra tras:
+  // a adesao nao olha mais longe que isso.
+  private async completarAgenda(idPaciente: number, agora: Date): Promise<void> {
+    const remedios = await this.medicamentos.listarPorPaciente(idPaciente);
+    if (remedios.length === 0) {
+      return;
+    }
+
+    const ultimos = await this.repositorio.ultimoHorarioPorMedicamento(idPaciente);
+    const fim = new Date(agora.getTime() + DIAS_DE_AGENDA * MS_POR_DIA);
+    const maisAntigo = agora.getTime() - DIAS_DA_SEMANA * MS_POR_DIA;
+
+    const novas: RegistrarDoseDTO[] = [];
+    for (const { medicamento } of remedios) {
+      const idMedicamento = medicamento.getId() as number;
+      const ultimo = ultimos.get(idMedicamento);
+
+      // Remedio sem dose nenhuma comeca de agora. Com dose, comeca logo depois da ultima.
+      const inicio = ultimo === undefined
+        ? agora
+        : new Date(Math.max(ultimo.getTime() + 1, maisAntigo));
+
+      // Remedio suspenso devolve lista vazia, e o que ja passou do dataFim tambem.
+      for (const horarioPrevisto of medicamento.gerarHorariosEntre(inicio, fim)) {
+        novas.push({ idMedicamento, horarioPrevisto });
+      }
+    }
+
+    await this.repositorio.registrar(novas);
   }
 
   // Janela sem dose nenhuma dividiria por zero: devolvo 0, igual ao demo.js.

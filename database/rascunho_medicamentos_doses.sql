@@ -114,7 +114,7 @@ WHERE m.id_paciente = @id_paciente
 
 -- "Hoje" e de CURDATE() 00:00 ate antes de amanha 00:00.
 -- Uso intervalo em vez de DATE(d.horario_previsto) = CURDATE() porque funcao em cima da coluna
--- impede o banco de usar o indice idx_doses_agenda.
+-- impede o banco de usar o indice uk_doses_agenda.
 -- DUVIDA 4: CURDATE() e o dia no fuso do MySQL (aqui America/Sao_Paulo).
 
 SELECT
