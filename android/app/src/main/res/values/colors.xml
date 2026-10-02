@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cores da identidade visual do BioShield, as mesmas do style.css. -->
+<resources>
+    <color name="bioshield_teal">#0E3C39</color>
+    <color name="bioshield_coral">#E8604C</color>
+
+    <!-- Cores que o tema do app usa na barra de cima do celular. -->
+    <color name="colorPrimary">#0E3C39</color>
+    <color name="colorPrimaryDark">#0E3C39</color>
+    <color name="colorAccent">#E8604C</color>
+</resources>

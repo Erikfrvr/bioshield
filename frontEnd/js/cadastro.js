@@ -71,12 +71,12 @@
     try {
       await Api.cadastrar({ nome: nome, email: email, senha: senha });
       await Api.entrar({ email: email, senha: senha });
-      location.href = "perfil.html";
+      location.replace("perfil.html");
     } catch (erro) {
       var mensagem = erro.status === 409
         ? "Esse email já tem conta. Entre com ele ou use outro."
         : erro.status === 0
-          ? "Não consegui falar com o servidor. Verifique se a API está no ar."
+          ? "Não consegui falar com o servidor. Volte para a tela de entrada e confira o endereço no quadro Servidor."
           : erro.message;
       UI.mostrarErro(caixaErro, mensagem);
       botao.disabled = false;

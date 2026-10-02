@@ -29,8 +29,10 @@ function responderErro(res: Response, erro: unknown): void {
     return;
   }
 
-  // Logo so a mensagem do erro, nunca o corpo da requisicao, porque ele pode ter a senha
-  console.error("Erro inesperado no usuarioController:", (erro as Error)?.message);
+  // So o codigo ou o nome do erro. Nada de req.body, que pode ter a senha, e nada de erro.message:
+  // a mensagem do MySQL as vezes repete o valor que deu problema, e aqui o valor pode ser o email de alguem.
+  const e = erro as { code?: string; name?: string };
+  console.error("Erro inesperado no usuarioController:", e?.code ?? e?.name ?? "desconhecido");
   res.status(500).json({ mensagem: "Erro interno ao processar a requisição. Tente novamente." });
 }
 

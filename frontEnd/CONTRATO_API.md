@@ -4,7 +4,7 @@ Este documento é o combinado entre o front e o backend. O front já foi escrito
 
 Enquanto o backend não sobe, o front roda em modo demonstração. Assim que a API responder em `GET /api/status`, ele passa a usar a API sozinho.
 
-Base: `http://localhost:3000/api` (configurável em `frontEnd/js/config.js`).
+Base: `/api` no mesmo endereço do servidor, por exemplo `http://localhost:3000/api`. O backend também entrega as telas, na mesma porta.
 
 ---
 
@@ -14,11 +14,20 @@ Base: `http://localhost:3000/api` (configurável em `frontEnd/js/config.js`).
 
 | MODO | O que acontece |
 |---|---|
-| `auto` | Padrão. Chama `GET /api/status` uma vez. Se responder, usa a API. Se não, cai na demonstração e mostra uma faixa amarela avisando |
+| `auto` | Padrão. Procura o servidor. Se achar, usa a API. Se nenhum responder, cai na demonstração e avisa na tela |
 | `api` | Sempre a API. Se ela cair, aparece erro na tela |
 | `demo` | Sempre a demonstração, mesmo com a API no ar. Serve para gravar vídeo |
 
-Se mudar a porta ou publicar o backend, o único arquivo a mexer é o `config.js`.
+O front não tem endereço de API fixo. O `js/api.js` procura o servidor nesta ordem e fica com o primeiro que responder em `GET /api/status`:
+
+1. o endereço que a pessoa salvou no quadro Servidor da tela de entrada (é assim que o app Android acha o servidor)
+2. o campo `SERVIDOR` do `config.js`, se estiver preenchido
+3. o endereço da própria página, quando as telas são entregues pelo backend
+4. `http://localhost:3000`
+
+Quem está logado em uma conta de verdade não cai na demonstração, e a ficha de emergência de quem escaneou o QR nunca mostra dado fictício.
+
+Um `401` em rota protegida apaga a sessão guardada e manda a pessoa de volta para a tela de entrada, com o aviso de que a sessão terminou.
 
 ---
 
@@ -114,8 +123,12 @@ Fora disso a resposta é `403`. Paciente que não existe também devolve `403`, 
 Rota pública, sem token. É ela que decide se o front usa a API ou a demonstração.
 
 ```json
-{ "status": "ok" }
+{ "status": "ok", "urlPublica": "http://192.168.0.10:3000" }
 ```
+
+`urlPublica` é o endereço pelo qual os outros aparelhos da rede enxergam o servidor. O front usa esse valor para montar o QR Code quando chegou ao servidor por `localhost`, assim o código nunca sai apontando para um endereço que só abre no próprio computador. Vem do `URL_PUBLICA` do `.env` ou, sem ele, do IP da placa de rede. Vem `null` quando o computador não está em rede nenhuma.
+
+Caminho de API que não existe devolve `404` com `{ "mensagem": "Rota não encontrada." }`.
 
 ---
 
@@ -508,7 +521,7 @@ Arquivos de apoio em `frontEnd/js/`:
 
 | Arquivo | O que é |
 |---|---|
-| `config.js` | URL da API e escolha do modo |
+| `config.js` | Modo (auto, api, demo), tempo limite e, se precisar travar, o endereço do servidor |
 | `api.js` | Todas as chamadas em um lugar só |
 | `ui.js` | Guarda de sessão, navegação, recados e formatação |
 | `qrcode.js` | Gerador de QR Code próprio, sem CDN |

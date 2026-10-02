@@ -1,9 +1,19 @@
 {
+  "name": "bioshield",
+  "private": true,
+  "description": "BioShield: empacotamento do front como app Android (Capacitor). O backend tem o package.json dele em backend/.",
+  "scripts": {
+    "app:sync": "cap sync android",
+    "app:abrir": "cap open android"
+  },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
     "bcryptjs": "^3.0.3",
     "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.2",
     "@types/jest": "^30.0.0",
     "jest": "^30.5.2"
   }

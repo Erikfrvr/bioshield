@@ -119,6 +119,8 @@
     var endereco = UI.urlDaFicha(ficha.tokenQr);
     enderecoQr.textContent = endereco;
     UI.elemento("#verFicha").href = endereco;
+    // O QR guarda o endereco inteiro. Com "localhost" dentro, ele so abriria neste computador.
+    UI.elemento("#avisoEndereco").hidden = !UI.ehEnderecoLocal(endereco);
 
     try {
       BioShieldQR.desenharNoCanvas(telaQr, endereco, { escala: 8, margem: 3, cor: "#0E3C39" });
@@ -137,6 +139,19 @@
       : "Cancelado em " + UI.formatarDataHora(ficha.qrCanceladoEm);
 
     UI.elemento("#baixarQr").disabled = !ativo;
+    // Dentro do app Android nao existe baixar arquivo nem imprimir pelo navegador.
+    // No lugar dos dois botoes fica o recado de onde fazer isso.
+    if (Api.noApp) {
+      var conexao = Api.conexao();
+      var ondeAbrir = "";
+      if (conexao && conexao.origem) {
+        ondeAbrir = UI.ehEnderecoLocal(conexao.origem) && conexao.urlPublica ? conexao.urlPublica : conexao.origem;
+      }
+      UI.elemento("#acoesQr").classList.add("oculto");
+      UI.elemento("#notaApp").hidden = !ativo;
+      UI.elemento("#notaApp").textContent = "Para baixar a imagem ou imprimir as etiquetas, abra o BioShield no navegador de um computador" +
+        (ondeAbrir ? ", no endereço " + ondeAbrir + "." : ".");
+    }
     UI.elemento("#rotacionarQr").disabled = !ativo;
     UI.elemento("#cancelarQr").classList.toggle("oculto", !ativo);
     UI.elemento("#irImprimir").classList.toggle("oculto", !ativo);

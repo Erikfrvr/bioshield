@@ -248,3 +248,23 @@
 
   .entrada-cartao { padding: 2rem 1.8rem; }
 }
+
+/* ===== Cartao do servidor ===== */
+
+.entrada-servidor h2 { font-size: 1.15rem; margin-bottom: 0.3rem; }
+.entrada-servidor .entrada-apoio { margin-bottom: 0.9rem; overflow-wrap: anywhere; }
+.entrada-servidor form { margin-top: 1rem; }
+.entrada-servidor .campo { margin-bottom: 0.5rem; }
+
+/* Bolinha de estado na frente da frase: verde com servidor, ambar sem. */
+.entrada-servidor .entrada-apoio[data-estado]::before {
+  content: "";
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  margin-right: 0.45rem;
+  background: #f5b54a;
+}
+
+.entrada-servidor .entrada-apoio[data-estado="ligado"]::before { background: var(--sucesso); }
