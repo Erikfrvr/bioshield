@@ -68,7 +68,7 @@ export class MedicamentoInfrastructure implements MedicamentoRepository {
       // status e horario_confirmado ficam com o DEFAULT do banco ('prevista' e NULL).
       if (horariosDasDoses.length > 0) {
         await conexao.query(
-          "INSERT INTO doses (id_medicamento, horario_previsto) VALUES ?",
+          "INSERT IGNORE INTO doses (id_medicamento, horario_previsto) VALUES ?",
           [horariosDasDoses.map((horario) => [resultado.insertId, horario])]
         );
       }
@@ -115,14 +115,19 @@ export class MedicamentoInfrastructure implements MedicamentoRepository {
   // id_paciente fica fora do SET: remedio nao troca de dono.
   // Busco a linha antes do UPDATE porque affectedRows vem 0 tanto pra "nao existe"
   // quanto pra "nada mudou", e o service precisa separar os dois pra devolver 404 so no primeiro.
-  async atualizar(medicamento: Medicamento): Promise<boolean> {
+  // Quando a agenda vem junto, remedio e doses mudam na mesma transacao: se a troca das doses falhar,
+  // o remedio nao fica com o horario novo e a agenda velha.
+  async atualizar(medicamento: Medicamento, novaAgenda: Date[] | null, agora: Date): Promise<boolean> {
     const conexao = await pool.getConnection();
     try {
+      await conexao.beginTransaction();
+
       const [linhas] = await conexao.query<RowDataPacket[]>(
         "SELECT id FROM medicamentos WHERE id = ?",
         [medicamento.getId()]
       );
       if (linhas.length === 0) {
+        await conexao.rollback();
         return false;
       }
 
@@ -143,7 +148,28 @@ export class MedicamentoInfrastructure implements MedicamentoRepository {
           medicamento.getId(),
         ]
       );
+
+      // So a 'prevista' do futuro sai. Tomada e perdida sao historico, e a prevista atrasada
+      // dentro da tolerancia ainda pode ser confirmada.
+      if (novaAgenda !== null) {
+        await conexao.query(
+          "DELETE FROM doses WHERE id_medicamento = ? AND status = 'prevista' AND horario_previsto > ?",
+          [medicamento.getId(), agora]
+        );
+        // IGNORE: se sobrou uma dose ja confirmada adiantado no mesmo horario, o indice unico segura a repetida.
+        if (novaAgenda.length > 0) {
+          await conexao.query(
+            "INSERT IGNORE INTO doses (id_medicamento, horario_previsto) VALUES ?",
+            [novaAgenda.map((horario) => [medicamento.getId(), horario])]
+          );
+        }
+      }
+
+      await conexao.commit();
       return true;
+    } catch (erro) {
+      await conexao.rollback();
+      throw erro;
     } finally {
       conexao.release();
     }

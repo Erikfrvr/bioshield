@@ -250,15 +250,15 @@ Começa depois do Marco 4. Roda em paralelo com as Fases 5 e 6 do Erik.
 - [x] Deixar confirmar dose com status `perdida` também. O front tem o botão "Tomei mesmo assim"
 - [x] Dose no futuro **não** entra no cálculo de adesão, senão o dia começa em 0% e assusta o usuário à toa
 - [x] `controllers/doseController.ts`
-- [x] `routes/doseRoutes.ts`
-- [x] Cadastrar um remédio, confirmar uma dose e conferir se a adesão mudou
+- [x] `routes/doseRoutes.ts` · `GET /doses/hoje`, `GET /doses/adesao` e `POST /doses/:id/confirmar`
+- [x] Cadastrar um remédio, confirmar uma dose e conferir se a adesão mudou · testado pela API em um banco separado
 - [ ] Abrir a tela de doses no navegador e ver a barra de adesão mexendo
 
-As dúvidas 1, 2 e 7 do `DUVIDAS_CONTRATO.md` estão decididas e já entraram na entidade `Dose`, no contrato, no `demo.js` e na tela de doses. Para o `DoseService` sobra só usar o que está pronto:
+As nove dúvidas do `DUVIDAS_CONTRATO.md` estão decididas e implementadas no backend. O que sobrou delas:
 
-- Antes de listar e de contar: `marcarPerdidas(idPaciente, Dose.limiteDePerdidas(agora))`
-- Na adesão: `contarPorPeriodo` com `agora` como fim, nas duas janelas
-- Na confirmação: `dose.confirmar(horarioConfirmado, agora)`, que já recusa dose confirmada duas vezes e dose com mais de 60 minutos de antecedência
+- [ ] Rodar no banco de quem já tem ele criado o `ALTER TABLE doses` que está no `CONTRATO_API.md` (índice único da agenda) · **Erik e Daiane**
+- [x] Na Fase 9, a lista do cuidador chama `doseService.prepararAgenda(idPaciente, agora)` antes de ler as doses de cada paciente · **Daiane**
+- [ ] Botão de suspender e reativar remédio na tela de remédios, usando o `ativo` do `PUT /medicamentos/:id`
 
 **Marco 7:** lembrete de medicamento fechado de ponta a ponta.
 

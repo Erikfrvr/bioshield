@@ -19,7 +19,9 @@ export interface MedicamentoRepository {
     // null quando o remedio nao existe. O service usa o idPaciente da entidade pra chamar o garantirDono.
     buscarPorId(id: number): Promise<MedicamentoComProximaDose | null>;
     // Grava todos os campos editaveis da entidade. Devolve false quando o remedio nao existe.
-    atualizar(medicamento: Medicamento): Promise<boolean>;
+    // novaAgenda null: nao mexe nas doses. novaAgenda com lista (mesmo vazia): na mesma transacao apaga as doses
+    // 'prevista' com horario depois de `agora` e insere essas. As 'tomada' e 'perdida' ficam, sao historico.
+    atualizar(medicamento: Medicamento, novaAgenda: Date[] | null, agora: Date): Promise<boolean>;
     // Apaga a linha, e o ON DELETE CASCADE leva as doses junto. Devolve false quando o remedio nao existe.
     apagar(id: number): Promise<boolean>;
 }

@@ -36,6 +36,12 @@ Erro devolve o status HTTP certo e um corpo com uma frase explicando. O front l�
 { "mensagem": "Email ou senha não conferem." }
 ```
 
+Datas e horas seguem uma regra só:
+
+- Todo momento exato (`horarioPrevisto`, `horarioConfirmado`, `proximaDose`, `acessadoEm`, `validoAte` e afins) vai e volta em ISO com `Z`, ou seja, em UTC. `"2026-09-18T23:00:00.000Z"` é 20h em Brasília. O front converte para a hora do aparelho na hora de mostrar
+- `horarioInicial` (`"08:00"`) e as datas sem hora (`dataInicio`, `dataFim`, como `"2026-09-18"`) são hora e dia de Brasília, e vão como texto, sem conversão
+- "Hoje" nas rotas de dose é o dia de Brasília. O backend inteiro trabalha nesse fuso
+
 Status que o front trata de forma diferente:
 
 | Status | Como o front reage |
@@ -74,6 +80,16 @@ ALTER TABLE pacientes
 ```
 
 As quatro colunas já estão no `database/bioshield.sql` e no `DICIONARIO_DADOS.md`. O ALTER serve só para quem já tem o banco criado.
+
+A agenda de doses precisa que o mesmo remédio não tenha duas doses no mesmo horário, então o índice de `doses` virou único:
+
+```sql
+ALTER TABLE doses
+  DROP INDEX idx_doses_agenda,
+  ADD CONSTRAINT uk_doses_agenda UNIQUE (id_medicamento, horario_previsto);
+```
+
+Também já está no `bioshield.sql`. Quem tem o banco criado roda só este ALTER.
 
 ---
 
@@ -278,7 +294,7 @@ Resposta `200`:
 Regras desta rota, que valem mais que a pressa de entregar:
 
 1. **Ordene as alergias por gravidade**, grave primeiro. O front confia nessa ordem e mostra na ordem que vier.
-2. **Só medicamentos com `ativo = TRUE`.** Remédio encerrado no meio da lista atrapalha quem está socorrendo.
+2. **Só medicamentos em uso hoje:** `ativo = TRUE`, `data_inicio` até hoje e `data_fim` nulo ou de hoje em diante. Remédio suspenso, encerrado ou que ainda vai começar no meio da lista atrapalha quem está socorrendo.
 3. **Ordene os contatos por `prioridade`.**
 4. **Nada de `id`, `email`, `senha`, `idUsuario` ou `tokenQr` na resposta.** Este DTO é o filtro de privacidade: se um campo não está escrito aqui, ele não sai.
 5. **Registre o acesso** em `acessos_qr` com ip e user agent antes de responder.
@@ -313,9 +329,13 @@ Protegida.
 
 `proximaDose` é a primeira dose com status `prevista` e horário no futuro. Pode vir `null`.
 
+`ativo` vem `false` em dois casos: remédio suspenso (alguém mandou parar) ou tratamento encerrado (o `dataFim` já passou). Remédio que ainda vai começar vem `true`.
+
 ### POST /api/medicamentos
 
 Protegida. Cadastra o remédio **e gera a agenda de doses** a partir do horário inicial e do intervalo.
+
+A agenda é gerada para os próximos **7 dias**, ou até o `dataFim`, o que vier antes, e só de agora para a frente. Os dias seguintes são completados pelo backend antes de cada leitura de dose (`/doses/hoje`, `/doses/adesao` e a lista do cuidador), então o front não precisa pedir nada.
 
 ```json
 {
@@ -329,7 +349,11 @@ Devolve o remédio criado no mesmo formato do `GET`.
 
 ### PUT /api/medicamentos/:id
 
-Protegida. Campos opcionais, atualização parcial.
+Protegida. Campos opcionais, atualização parcial. Devolve o remédio no mesmo formato do `GET`.
+
+Além dos campos do `POST` (menos `idPaciente`, remédio não troca de dono), aceita `ativo`: `false` suspende o remédio e `true` reativa. Suspender guarda o histórico de doses, diferente do `DELETE`.
+
+Quando muda `horarioInicial`, `frequenciaHoras`, `dataInicio`, `dataFim` ou `ativo`, a agenda futura é refeita: as doses `prevista` com horário no futuro são apagadas e geradas de novo com os dados novos. As `tomada` e `perdida` ficam, porque são histórico. Mudar só `nome`, `dosagem` ou `unidade` não mexe na agenda.
 
 ### DELETE /api/medicamentos/:id
 

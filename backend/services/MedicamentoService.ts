@@ -11,9 +11,10 @@ import { MedicamentoResponseDTO } from "../models/dto/medicamento/MedicamentoRes
 import { MedicamentoComProximaDose, MedicamentoRepository } from "../repository/MedicamentoRepository";
 import autorizacaoService from "./AutorizacaoService";
 
-// Quantos dias de agenda eu gero no cadastro (proposta da duvida 3 do docs/DUVIDAS_CONTRATO.md).
+// Quantos dias de agenda eu gero no cadastro (duvida 3 do docs/DUVIDAS_CONTRATO.md).
 // Remedio sem data de fim nao acaba, e nao da pra inserir dose infinita.
-const DIAS_DE_AGENDA = 7;
+// Os dias seguintes quem completa e o DoseService, antes de cada leitura de dose, com este mesmo numero.
+export const DIAS_DE_AGENDA = 7;
 
 // Mesmo esquema do PacienteService: o service diz o tipo, o controller escolhe o status code.
 export type TipoErroMedicamento = "validacao" | "nao_encontrado";
@@ -74,7 +75,25 @@ export class MedicamentoService {
   ): Promise<MedicamentoResponseDTO> {
     const medicamento = await this.buscarDoDono(id, idLogado);
 
+    // Guardo como estava o que desenha a agenda, pra saber no fim se ela precisa ser refeita.
+    const horarioAntes = medicamento.getHorarioDose();
+    const inicioAntes = medicamento.getDataInicio();
+    const fimAntes = medicamento.getDataFim();
+    const ativoAntes = medicamento.estaAtivo();
+
     this.validando(() => {
+      // Suspender e reativar (duvida 6). So aceito true ou false de verdade: "false" em texto
+      // seria lido como verdadeiro e reativaria o remedio sem ninguem pedir.
+      if (dados?.ativo !== undefined) {
+        if (typeof dados.ativo !== "boolean") {
+          throw new Error("O campo ativo precisa ser verdadeiro ou falso.");
+        }
+        if (dados.ativo) {
+          medicamento.reativar();
+        } else {
+          medicamento.suspender();
+        }
+      }
       if (dados?.nome !== undefined) {
         medicamento.setNome(dados.nome);
       }
@@ -104,7 +123,18 @@ export class MedicamentoService {
       }
     });
 
-    const achou = await this.repositorio.atualizar(medicamento);
+    // Duvida 5: se mudou horario, frequencia, periodo ou suspensao, a agenda futura acompanha.
+    // Nome e dosagem nao mexem na agenda: a dose busca esses dados no remedio na hora de listar.
+    // Remedio suspenso devolve agenda vazia, entao suspender so apaga as doses futuras.
+    const mudouAgenda = !medicamento.getHorarioDose().igualA(horarioAntes)
+      || medicamento.getDataInicio() !== inicioAntes
+      || medicamento.getDataFim() !== fimAntes
+      || medicamento.estaAtivo() !== ativoAntes;
+
+    const agora = new Date();
+    const novaAgenda = mudouAgenda ? medicamento.gerarHorariosDaAgenda(agora, DIAS_DE_AGENDA) : null;
+
+    const achou = await this.repositorio.atualizar(medicamento, novaAgenda, agora);
     if (!achou) {
       throw new ErroMedicamento("nao_encontrado", "Medicamento não encontrado.");
     }
@@ -170,7 +200,9 @@ export class MedicamentoService {
       horarioInicial: medicamento.getHorarioDose().getHorarioInicial(),
       dataInicio: medicamento.getDataInicio(),
       dataFim: medicamento.getDataFim(),
-      ativo: medicamento.estaAtivo(),
+      // false para remedio suspenso e tambem para tratamento que ja passou da data de fim (duvida 6).
+      // Assim a tela mostra "encerrado" nos dois casos, sem rotina nenhuma mudando a coluna.
+      ativo: medicamento.estaAtivo() && !medicamento.tratamentoEncerradoEm(new Date()),
       proximaDose: proximaDose ? proximaDose.toISOString() : null,
     };
   }

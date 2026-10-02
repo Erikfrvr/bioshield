@@ -30,7 +30,12 @@ export interface ContagemDoses {
 
 export interface DoseRepository {
     // Insere as doses da agenda, todas como 'prevista'. Lista vazia nao faz nada.
+    // Dose que ja existe no mesmo remedio e horario e pulada, nao da erro.
     registrar(doses: RegistrarDoseDTO[]): Promise<void>;
+    // Horario da ultima dose gerada de cada remedio do paciente, seja qual for o status.
+    // A chave e o id do remedio. Remedio sem dose nenhuma nao aparece no mapa.
+    // O service usa pra saber de onde continuar a agenda.
+    ultimoHorarioPorMedicamento(idPaciente: number): Promise<Map<number, Date>>;
     // Passa pra 'perdida' as doses 'prevista' do paciente com horario anterior ao limite (agora menos a tolerancia).
     // Sem isso nada no sistema vira 'perdida' sozinho. O service chama antes de listar e de contar.
     marcarPerdidas(idPaciente: number, limite: Date): Promise<void>;
