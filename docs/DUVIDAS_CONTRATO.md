@@ -41,7 +41,7 @@ O contrato diz que dose no futuro não entra na conta, mas o exemplo conta:
 - Dose atrasada há menos de 60 minutos (dúvida 2) já conta em `previstas`, mas ainda não em `perdidas`
 - Exemplo do `CONTRATO_API.md` corrigido: `hoje` com 4 previstas, 3 tomadas, 1 perdida, 75%. `semana` com 40 previstas, 36 tomadas, 4 perdidas, 90%. A seção ganhou a explicação da conta
 - `demo.js` corrigido: o problema não era o `contar`, era a lista do dia, que ia até 23:59. Agora ela para em agora, como a da semana já fazia
-- Na tela de doses, antes da primeira dose do dia não existe conta para mostrar. Em vez de `0%` aparece um traço e o texto "Nenhuma dose até agora"
+- Na tela de doses, antes da primeira dose do dia não existe conta para mostrar. Aparece `0%`, igual ao painel do cuidador, com o texto "Nenhuma dose até agora" explicando o motivo
 
 ### 2. Quem marca a dose como `perdida`
 

@@ -112,13 +112,20 @@ export class DoseService {
 
     // As duas janelas terminam em agora: dose no futuro nao entra na conta,
     // senao o dia comeca em 0% e assusta o usuario a toa.
-    const inicioSemana = new Date(agora.getTime() - DIAS_DA_SEMANA * MS_POR_DIA);
     const [hoje, semana] = await Promise.all([
       this.repositorio.contarPorPeriodo(idPaciente, this.inicioDoDia(agora), agora),
-      this.repositorio.contarPorPeriodo(idPaciente, inicioSemana, agora),
+      this.repositorio.contarPorPeriodo(idPaciente, this.inicioDaSemana(agora), agora),
     ]);
 
     return { hoje: this.paraAdesao(hoje), semana: this.paraAdesao(semana) };
+  }
+
+  // A adesao dos ultimos 7 dias, pro painel do cuidador (CuidadorService).
+  // Atencao: este metodo NAO confere permissao. Quem chama ja tem que ter garantido o vinculo.
+  // Prepara a agenda antes de contar, senao o familiar ve "em dia" pra quem nao abriu o app.
+  async resumirSemana(idPaciente: number, agora: Date): Promise<AdesaoPeriodoDTO> {
+    await this.prepararAgenda(idPaciente, agora);
+    return this.paraAdesao(await this.repositorio.contarPorPeriodo(idPaciente, this.inicioDaSemana(agora), agora));
   }
 
   // Deixa as doses do paciente em dia antes de qualquer leitura: primeiro completa a agenda,
@@ -204,6 +211,10 @@ export class DoseService {
   // Meia-noite de hoje na hora local do servidor, a mesma hora em que a agenda foi gerada.
   private inicioDoDia(agora: Date): Date {
     return new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+  }
+
+  private inicioDaSemana(agora: Date): Date {
+    return new Date(agora.getTime() - DIAS_DA_SEMANA * MS_POR_DIA);
   }
 
   private inicioDoDiaSeguinte(agora: Date): Date {

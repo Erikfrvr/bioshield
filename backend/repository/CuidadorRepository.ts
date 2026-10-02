@@ -8,6 +8,8 @@ import CodigoCuidador from "../models/valueObjects/CodigoCuidador";
 // e quem decide se ele venceu e o service, com o estaVencido do value object.
 export interface PacienteDoCodigo {
     idPaciente: number;
+    // O usuario dono da ficha. O service usa pra recusar quem tenta ser cuidador de si mesmo.
+    idDono: number;
     codigo: CodigoCuidador;
 }
 

@@ -103,9 +103,9 @@
     var hoje = dados.hoje || { previstas: 0, tomadas: 0, percentual: 0 };
     var semana = dados.semana || { previstas: 0, tomadas: 0, percentual: 0, perdidas: 0 };
 
-    // A adesao so conta dose com horario ate agora. De manha cedo, antes da primeira dose, nao tem conta
-    // nenhuma pra mostrar: um traco no lugar do numero evita o 0% que assusta a pessoa a toa.
-    UI.elemento("#percentualHoje").textContent = hoje.previstas ? hoje.percentual + "%" : "—";
+    // A adesao so conta dose com horario ate agora. De manha cedo, antes da primeira dose, a conta da 0%,
+    // igual ao painel do cuidador. O texto de baixo explica que ainda nao teve dose nenhuma.
+    UI.elemento("#percentualHoje").textContent = hoje.percentual + "%";
     UI.elemento("#resumoHoje").textContent = hoje.previstas
       ? hoje.tomadas + " de " + hoje.previstas + " doses confirmadas até agora"
       : "Nenhuma dose até agora";

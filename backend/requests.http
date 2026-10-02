@@ -756,6 +756,78 @@ Authorization: Bearer {{loginPatricia.response.body.token}}
 ### ==========================
 ### CUIDADOR
 ### ==========================
+### Rode antes os blocos "loginMaria" e "loginPatricia", mais acima neste arquivo.
+### A Patricia e o usuario 4 e nos dados ficticios ja acompanha os pacientes 1 e 3.
+
+### Painel da Patricia (esperado 200). Conferir: so idVinculo, idPaciente, nome, adesaoSemana, dosesPerdidas
+### e proximaDose. Nada de tipo sanguineo, alergia, contato, token do QR ou historico de acessos
+# @name painelPatricia
+GET {{baseUrl}}/cuidadores/4/pacientes
+Authorization: Bearer {{loginPatricia.response.body.token}}
+
+### Painel de outro cuidador (esperado 403). A Maria e o usuario 1 e pede a lista da Patricia
+GET {{baseUrl}}/cuidadores/4/pacientes
+Authorization: Bearer {{loginMaria.response.body.token}}
+
+### Painel sem token (esperado 401)
+GET {{baseUrl}}/cuidadores/4/pacientes
+
+### Cuidadora tentando ler a ficha medica de quem acompanha (esperado 403). Vinculo nao abre a ficha
+GET {{baseUrl}}/pacientes/1
+Authorization: Bearer {{loginPatricia.response.body.token}}
+
+### Cuidadora tentando ler o historico de acessos (esperado 403)
+GET {{baseUrl}}/pacientes/1/acessos
+Authorization: Bearer {{loginPatricia.response.body.token}}
+
+### Vincular com codigo que nao existe (esperado 404, "Esse código não corresponde a nenhum paciente.")
+POST {{baseUrl}}/cuidadores/vincular
+Authorization: Bearer {{loginPatricia.response.body.token}}
+Content-Type: application/json
+
+{
+  "codigo": "ZZZZZZZ"
+}
+
+### Vincular sem codigo (esperado 400)
+POST {{baseUrl}}/cuidadores/vincular
+Authorization: Bearer {{loginPatricia.response.body.token}}
+Content-Type: application/json
+
+{}
+
+### Vincular com codigo valido (esperado 201, volta idVinculo e idPaciente)
+### Gere antes o codigo no bloco "Gerar o codigo do cuidador da Maria", la embaixo, e cole aqui.
+### O idCuidador do corpo esta errado de proposito: o backend ignora e usa quem esta logado
+POST {{baseUrl}}/cuidadores/vincular
+Authorization: Bearer {{loginPatricia.response.body.token}}
+Content-Type: application/json
+
+{
+  "idCuidador": 999,
+  "codigo": "TROQUE_PELO_CODIGO"
+}
+
+### A Maria tentando usar o proprio codigo (esperado 400, nao da pra ser cuidador da propria ficha)
+POST {{baseUrl}}/cuidadores/vincular
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "codigo": "TROQUE_PELO_CODIGO"
+}
+
+### Desvincular o primeiro paciente do painel (esperado 204)
+### Conferir no banco: a linha de cuidador_paciente continua la, com ativo = 0
+DELETE {{baseUrl}}/cuidadores/vinculo/{{painelPatricia.response.body.$[0].idVinculo}}
+Authorization: Bearer {{loginPatricia.response.body.token}}
+
+### Depois de desvincular, o paciente some do painel e as doses dele dao 403.
+### Rode de novo o bloco "painelPatricia" e o "Cuidadora vendo as doses de hoje" da secao de doses
+
+### Desvincular vinculo que nao existe (esperado 404)
+DELETE {{baseUrl}}/cuidadores/vinculo/99999
+Authorization: Bearer {{loginPatricia.response.body.token}}
 
 ### ==========================
 ### EMERGENCIA (rota publica do QR)
