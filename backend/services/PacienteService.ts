@@ -6,6 +6,7 @@ import pacienteInfrastructure from "../infrastructure/pacienteInfrastructure";
 import Alergia from "../models/entidade/Alergia";
 import ContatoEmergencia from "../models/entidade/ContatoEmergencia";
 import Paciente from "../models/entidade/Paciente";
+import CodigoCuidador from "../models/valueObjects/CodigoCuidador";
 import Telefone from "../models/valueObjects/Telefone";
 import TipoSanguineo from "../models/valueObjects/TipoSanguineo";
 import TokenQR from "../models/valueObjects/TokenQR";
@@ -14,6 +15,7 @@ import { AtualizarPacienteDTO } from "../models/dto/paciente/AtualizarPacienteDT
 import { PacienteResponseDTO } from "../models/dto/paciente/PacienteResponseDTO";
 import { QrResponseDTO } from "../models/dto/paciente/QrResponseDTO";
 import { AcessoQrResponseDTO } from "../models/dto/paciente/AcessoQrResponseDTO";
+import { CodigoCuidadorResponseDTO } from "../models/dto/paciente/CodigoCuidadorResponseDTO";
 import { PacienteRepository } from "../repository/PacienteRepository";
 import autorizacaoService, { ErroAcesso } from "./AutorizacaoService";
 
@@ -179,6 +181,29 @@ export class PacienteService {
       ip: acesso.ip,
       userAgent: acesso.userAgent,
     }));
+  }
+
+  // POST /pacientes/:id/codigo. O paciente gera o codigo e entrega ao cuidador: e essa a autorizacao do vinculo.
+  // So o dono gera. Gerar de novo substitui o anterior, entao o codigo antigo para de valer.
+  async gerarCodigoCuidador(idPaciente: number, idLogado: number | undefined): Promise<CodigoCuidadorResponseDTO> {
+    this.validarId(idPaciente);
+    await autorizacaoService.garantirDono(idLogado, idPaciente);
+
+    // Mesmo esquema do gerarTokenQR: se sortear um codigo que outra ficha ja tem, o indice unico barra e eu sorteio outro.
+    for (let tentativa = 1; ; tentativa++) {
+      const codigo = CodigoCuidador.gerar();
+      try {
+        const achou = await this.repositorio.gravarCodigoCuidador(idPaciente, codigo);
+        if (!achou) {
+          throw new ErroPaciente("nao_encontrado", "Ficha médica não encontrada.");
+        }
+        return { codigo: codigo.getValor(), validoAte: codigo.getValidoAte().toISOString() };
+      } catch (erro) {
+        if (!this.duplicou(erro, "uk_pacientes_codigo") || tentativa >= TENTATIVAS_TOKEN) {
+          throw erro;
+        }
+      }
+    }
   }
 
   private async trocarToken(idPaciente: number): Promise<QrResponseDTO> {

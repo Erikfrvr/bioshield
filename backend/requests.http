@@ -729,6 +729,22 @@ Authorization: Bearer {{token}}
 ### Historico sem token (esperado 401)
 GET {{baseUrl}}/pacientes/1/acessos
 
+### Gerar o codigo do cuidador da Maria (esperado 200, codigo com 7 letras e numeros e validoAte daqui a 24 horas)
+### Rodar duas vezes: o codigo tem que mudar, e no banco so fica o ultimo
+POST {{baseUrl}}/pacientes/1/codigo
+Authorization: Bearer {{token}}
+
+### Gerar codigo de ficha que nao e da Maria (esperado 403)
+POST {{baseUrl}}/pacientes/2/codigo
+Authorization: Bearer {{token}}
+
+### Gerar codigo sem token (esperado 401)
+POST {{baseUrl}}/pacientes/1/codigo
+
+### Gerar codigo com id invalido (esperado 400)
+POST {{baseUrl}}/pacientes/abc/codigo
+Authorization: Bearer {{token}}
+
 ### JSON quebrado (esperado 400, "O corpo da requisição não é um JSON válido.")
 ### Conferir no terminal do servidor: nao pode aparecer nenhum pedaco do corpo
 POST {{baseUrl}}/pacientes
