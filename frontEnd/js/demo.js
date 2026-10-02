@@ -197,6 +197,29 @@
       });
   }
 
+  // As duas janelas de tempo da dose, iguais as da entidade Dose do backend.
+  var TOLERANCIA_ATRASO_MS = 60 * 60 * 1000;
+  var ANTECEDENCIA_CONFIRMACAO_MS = 60 * 60 * 1000;
+
+  // Dose prevista que passou 60 minutos do horario sem confirmacao vira perdida.
+  // Roda antes de listar e de contar, igual ao marcarPerdidas do backend. Devolve true se mudou alguma.
+  function marcarPerdidas(banco, idPaciente) {
+    var limite = Date.now() - TOLERANCIA_ATRASO_MS;
+    var ids = banco.medicamentos
+      .filter(function (m) { return m.idPaciente === idPaciente; })
+      .map(function (m) { return m.id; });
+    var mudou = false;
+    banco.doses.forEach(function (d) {
+      if (ids.indexOf(d.idMedicamento) !== -1 && d.status === "prevista" && new Date(d.horarioPrevisto).getTime() < limite) {
+        d.status = "perdida";
+        mudou = true;
+      }
+    });
+    if (mudou) salvar(banco);
+    return mudou;
+  }
+
+  // Quem chama ja entrega a lista so com as doses de horario ate agora: dose do futuro nao entra na adesao.
   function contar(lista) {
     var previstas = lista.length;
     var tomadas = lista.filter(function (d) { return d.status === "tomada"; }).length;
@@ -423,6 +446,7 @@
 
     dosesDeHoje: function (idPaciente) {
       var banco = carregar();
+      marcarPerdidas(banco, Number(idPaciente));
       var inicio = new Date(); inicio.setHours(0, 0, 0, 0);
       var fim = new Date(); fim.setHours(23, 59, 59, 999);
       return pronto(
@@ -439,6 +463,9 @@
       var banco = carregar();
       var dose = banco.doses.find(function (d) { return d.id === Number(id); });
       if (!dose) return falhar("Dose não encontrada.", 404);
+      if (Date.now() < new Date(dose.horarioPrevisto).getTime() - ANTECEDENCIA_CONFIRMACAO_MS) {
+        return falhar("Ainda é cedo para confirmar essa dose. Dá para confirmar a partir de 1 hora antes do horário.", 400);
+      }
       dose.status = "tomada";
       dose.horarioConfirmado = new Date().toISOString();
       salvar(banco);
@@ -447,14 +474,16 @@
 
     adesao: function (idPaciente) {
       var banco = carregar();
+      marcarPerdidas(banco, Number(idPaciente));
       var todas = dosesDoPaciente(banco, Number(idPaciente));
       var inicioDia = new Date(); inicioDia.setHours(0, 0, 0, 0);
       var inicioSemana = new Date(); inicioSemana.setDate(inicioSemana.getDate() - 6); inicioSemana.setHours(0, 0, 0, 0);
       var agora = new Date();
 
+      // As duas janelas param em agora: a dose das 20h so entra na conta quando der 20h.
       var doDia = todas.filter(function (d) {
         var marca = new Date(d.horarioPrevisto);
-        return marca >= inicioDia && marca <= new Date(inicioDia.getTime() + 86399999);
+        return marca >= inicioDia && marca <= agora;
       });
       var daSemana = todas.filter(function (d) {
         var marca = new Date(d.horarioPrevisto);
@@ -492,6 +521,7 @@
         .map(function (v) {
           var paciente = banco.pacientes.find(function (p) { return p.id === v.idPaciente; });
           var usuario = banco.usuarios.find(function (u) { return u.id === paciente.idUsuario; });
+          marcarPerdidas(banco, paciente.id);
           var doses = dosesDoPaciente(banco, paciente.id);
           var inicioSemana = new Date(); inicioSemana.setDate(inicioSemana.getDate() - 6); inicioSemana.setHours(0, 0, 0, 0);
           var semana = doses.filter(function (d) {

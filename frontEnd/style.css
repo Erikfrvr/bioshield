@@ -878,6 +878,22 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 .letra-grande .abas { grid-template-columns: 1fr; }
 .letra-grande .qr-cabecalho { flex-direction: column; }
 
+/* Janelas (novo remedio, cancelar QR): menos margem dos lados, pra sobrar largura para o conteudo.
+   Sem isso a data aparecia sem o ultimo numero do ano e os cartoes de periodo passavam da borda do quadro. */
+.letra-grande .janela { padding-left: 1rem; padding-right: 1rem; }
+.letra-grande .periodo { padding-left: 0.55rem; padding-right: 0.55rem; }
+.letra-grande .periodo legend { padding: 0 0.3rem; margin-left: 0; }
+.letra-grande .janela input[type="date"],
+.letra-grande .janela input[type="time"] { padding-left: 0.5rem; padding-right: 0.4rem; letter-spacing: 0; }
+/* Em celular bem estreito (320 px) o texto do cartao de periodo desce para baixo do icone quando nao cabe ao lado */
+.letra-grande .opcao-periodo { flex-wrap: wrap; gap: 0.55rem; padding-left: 0.6rem; padding-right: 0.6rem; }
+.letra-grande .opcao-texto { flex: 1 1 4.6rem; }
+.letra-grande .periodo-resumo { padding-left: 0.6rem; padding-right: 0.6rem; }
+
+@media (max-width: 21rem) {
+  .letra-grande .periodo-resumo::before { display: none; }
+}
+
 /* Contraste reforcado: texto preto, bordas mais escuras e um coral mais fechado,
    para o texto branco em cima dele ficar mais facil de ler. Ligado pelo acessibilidade.js. */
 .alto-contraste {

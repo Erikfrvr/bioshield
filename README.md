@@ -181,7 +181,7 @@ O projeto vem com `MODO: "auto"`, então se a API cair ou não estiver ligada o 
 O que vale saber sobre o modo demonstração:
 
 - Na tela de entrada aparecem contas de exemplo. Tocar numa delas preenche o formulário
-- Tudo que você cadastra ou altera fica só no `localStorage` daquele navegador. Nada vai para o banco
+- Tudo que você cadastra ou altera fica só no `sessionStorage` daquela aba do navegador e some quando ela é fechada. Nada vai para o banco
 - Os dados são os mesmos personagens inventados do `database/dados_ficticios.sql`
 - A página de emergência também funciona, então dá para mostrar a ficha aberta sem a API
 

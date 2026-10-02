@@ -626,6 +626,26 @@ Content-Type: application/json
   "horarioConfirmado": "2026-09-23T19:40:00.000Z"
 }
 
+### Confirmar dose cedo demais (esperado 400, "Ainda é cedo para confirmar essa dose..."). DUVIDA 7
+### Troque o id pelo de uma dose de hoje ou de amanha que ainda falte mais de 1 hora (pegue no bloco "dosesHoje").
+### Faltando menos de 1 hora a mesma chamada tem que dar 200
+POST {{baseUrl}}/doses/TROQUE_PELO_ID/confirmar
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "horarioConfirmado": "2026-09-28T11:03:00.000Z"
+}
+
+### Confirmar de novo a dose que ja foi confirmada (esperado 400, "Essa dose já foi confirmada.")
+POST {{baseUrl}}/doses/{{dosesHoje.response.body.$[0].id}}/confirmar
+Authorization: Bearer {{loginMaria.response.body.token}}
+Content-Type: application/json
+
+{
+  "horarioConfirmado": "2026-09-28T11:10:00.000Z"
+}
+
 ### Confirmar sem horarioConfirmado (esperado 400)
 POST {{baseUrl}}/doses/4/confirmar
 Authorization: Bearer {{loginMaria.response.body.token}}

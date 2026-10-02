@@ -33,6 +33,18 @@
     return distancia <= 60 * 60 * 1000;
   }
 
+  // O backend so aceita a confirmacao a partir de 1 hora antes do horario da dose.
+  // A tela segue a mesma regra, pra nao oferecer um botao que vai dar erro.
+  var ANTECEDENCIA_CONFIRMACAO_MS = 60 * 60 * 1000;
+
+  function liberaEm(dose) {
+    return new Date(new Date(dose.horarioPrevisto).getTime() - ANTECEDENCIA_CONFIRMACAO_MS);
+  }
+
+  function aindaCedo(dose) {
+    return dose.status === "prevista" && Date.now() < liberaEm(dose).getTime();
+  }
+
   function cartaoDose(dose) {
     var bloco = document.createElement("article");
     var classe = "dose";
@@ -48,6 +60,8 @@
       selo = '<span class="dose-selo dose-selo-perdida">' + UI.icone("alerta") + "Passou do horário sem confirmação</span>";
     } else if (ehAgora(dose)) {
       selo = '<span class="dose-selo dose-selo-agora">' + UI.icone("relogio") + "Está na hora</span>";
+    } else if (aindaCedo(dose)) {
+      selo = '<span class="dose-selo">' + UI.icone("relogio") + "Dá para confirmar a partir das " + UI.formatarHora(liberaEm(dose).toISOString()) + "</span>";
     }
 
     bloco.innerHTML =
@@ -58,7 +72,7 @@
         selo +
       "</div>";
 
-    if (dose.status !== "tomada") {
+    if (dose.status !== "tomada" && !aindaCedo(dose)) {
       var acao = document.createElement("div");
       acao.className = "dose-acao";
       var botao = document.createElement("button");
@@ -89,10 +103,12 @@
     var hoje = dados.hoje || { previstas: 0, tomadas: 0, percentual: 0 };
     var semana = dados.semana || { previstas: 0, tomadas: 0, percentual: 0, perdidas: 0 };
 
-    UI.elemento("#percentualHoje").textContent = hoje.percentual + "%";
+    // A adesao so conta dose com horario ate agora. De manha cedo, antes da primeira dose, nao tem conta
+    // nenhuma pra mostrar: um traco no lugar do numero evita o 0% que assusta a pessoa a toa.
+    UI.elemento("#percentualHoje").textContent = hoje.previstas ? hoje.percentual + "%" : "—";
     UI.elemento("#resumoHoje").textContent = hoje.previstas
-      ? hoje.tomadas + " de " + hoje.previstas + " doses confirmadas hoje"
-      : "Nenhuma dose prevista para hoje";
+      ? hoje.tomadas + " de " + hoje.previstas + " doses confirmadas até agora"
+      : "Nenhuma dose até agora";
 
     var barra = UI.elemento("#barraHoje");
     var anel = UI.elemento("#anelHoje");

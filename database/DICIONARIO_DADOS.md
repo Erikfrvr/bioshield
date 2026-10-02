@@ -148,7 +148,7 @@ Cada linha é uma tomada específica. A agenda é gerada quando o medicamento é
 
 Chaves: PK `id` | FK `id_medicamento` → `medicamentos(id)` ON DELETE CASCADE | INDEX `id_medicamento, horario_previsto`
 
-Regras: guardar o horário previsto e o confirmado separados é o que permite saber se a pessoa tomou no horário ou atrasou duas horas. A dose só vira `perdida` depois da janela de tolerância definida no `DoseService`, nunca no minuto seguinte. Adesão é a contagem de `tomada` dividida pelo total de doses do período.
+Regras: guardar o horário previsto e o confirmado separados é o que permite saber se a pessoa tomou no horário ou atrasou duas horas. A dose só vira `perdida` depois da janela de tolerância de 60 minutos (constante `TOLERANCIA_ATRASO_MINUTOS` da entidade `Dose`), nunca no minuto seguinte. Essa troca acontece na leitura, não existe rotina agendada. Adesão é a contagem de `tomada` dividida pelo total de doses do período com horário previsto até agora: dose do futuro não entra na conta.
 
 ---
 

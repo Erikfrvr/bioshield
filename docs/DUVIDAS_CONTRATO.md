@@ -5,6 +5,8 @@ Cada item tem uma proposta. Onde estiver **Decisão**, preencham juntos e depois
 
 As que travam código: **1, 2, 3 e 8**. Resolver antes de começar as Fases 7 e 8.
 
+Situação: **1, 2, 7, 8 e 9 decididas**. Faltam 3, 4, 5 e 6.
+
 ---
 
 ## Medicamentos e doses (fatia da Daiane)
@@ -19,7 +21,15 @@ O contrato diz que dose no futuro não entra na conta, mas o exemplo conta:
 
 **Proposta:** seguir a regra escrita. `previstas` e `percentual` contam só dose com `horario_previsto <= NOW()`. Corrigir o exemplo do contrato e o `contar` do `demo.js`.
 
-**Decisão:**
+**Decisão (Erik):** aceita como proposto. Vale a regra escrita, o exemplo é que estava errado.
+
+- `previstas` é o total de doses com horário previsto até agora, seja qual for o status. `tomadas` e `perdidas` saem dessas mesmas doses, e `percentual` é `tomadas / previstas`. Vale igual para `hoje` e para `semana`
+- No backend não precisa de SQL novo: o `contarPorPeriodo` do `DoseRepository` já recebe início e fim por parâmetro, com o fim inclusive. O `DoseService` passa `agora` como fim nas duas janelas (início do dia até agora, e sete dias atrás até agora)
+- Dose confirmada adiantado (dúvida 7) só entra na conta quando o horário dela chega, senão `tomadas` passaria de `previstas`
+- Dose atrasada há menos de 60 minutos (dúvida 2) já conta em `previstas`, mas ainda não em `perdidas`
+- Exemplo do `CONTRATO_API.md` corrigido: `hoje` com 4 previstas, 3 tomadas, 1 perdida, 75%. `semana` com 40 previstas, 36 tomadas, 4 perdidas, 90%. A seção ganhou a explicação da conta
+- `demo.js` corrigido: o problema não era o `contar`, era a lista do dia, que ia até 23:59. Agora ela para em agora, como a da semana já fazia
+- Na tela de doses, antes da primeira dose do dia não existe conta para mostrar. Em vez de `0%` aparece um traço e o texto "Nenhuma dose até agora"
 
 ### 2. Quem marca a dose como `perdida`
 
@@ -36,7 +46,14 @@ WHERE m.id_paciente = ?
   AND d.horario_previsto < NOW() - INTERVAL 60 MINUTE;
 ```
 
-**Decisão:**
+**Decisão (Erik):** aceita como proposto, 60 minutos, aplicada na hora da leitura. Sem job e sem rotina agendada.
+
+- O número mora em um lugar só: a constante `TOLERANCIA_ATRASO_MINUTOS` da entidade `Dose`
+- A única diferença para o SQL de cima é o `NOW()`. O `DoseRepository` já combinou que quem manda a hora é o service, então o `marcarPerdidas(idPaciente, limite)` recebe o limite pronto. O service calcula com `Dose.limiteDePerdidas(agora)`
+- O `DoseService` chama o `marcarPerdidas` antes de `GET /doses/hoje` e de `GET /doses/adesao`. Na Fase 9, antes de montar a lista do cuidador também, senão o familiar vê "em dia" para quem não abriu o app
+- Confirmar uma dose `perdida` continua liberado, é o "Tomei mesmo assim"
+- O `demo.js` agora faz a mesma coisa (função `marcarPerdidas`), então a demonstração se comporta igual à API
+- Regra descrita no `CONTRATO_API.md`, em `GET /api/doses/hoje`
 
 ### 3. Quantos dias de agenda gerar
 
@@ -80,7 +97,14 @@ O contrato libera confirmar dose `perdida`, mas não diz nada sobre confirmar um
 
 **Proposta:** aceitar até 60 minutos antes do horário e devolver `400` fora disso.
 
-**Decisão:**
+**Decisão (Erik):** aceita como proposto. Dá para confirmar a partir de 60 minutos antes do horário previsto. Mais cedo que isso, `400`.
+
+- A regra está na entidade `Dose`: constante `ANTECEDENCIA_CONFIRMACAO_MINUTOS`, método `podeSerConfirmadaEm(agora)` e a checagem dentro do `confirmar(horarioConfirmado, agora)`, que joga `Error` com a mensagem "Ainda é cedo para confirmar essa dose. Dá para confirmar a partir de 1 hora antes do horário."
+- Quem decide se está cedo é o relógio do servidor (`agora`), não o `horarioConfirmado` do corpo. Se valesse o que vem do celular, bastava mandar uma hora inventada. O `horarioConfirmado` continua sendo gravado como a hora real da tomada
+- O `DoseService` só precisa chamar `dose.confirmar(...)` e traduzir o `Error` para erro de validação, como os outros services fazem
+- Para o lado do atraso não tem limite: dose `perdida` pode ser confirmada a qualquer hora
+- Na tela de doses, a dose que ainda não pode ser confirmada aparece sem botão, com o aviso "Dá para confirmar a partir das 19:00". O `demo.js` recusa igual à API
+- Regra descrita no `CONTRATO_API.md`, em `POST /api/doses/:id/confirmar`
 
 ---
 
