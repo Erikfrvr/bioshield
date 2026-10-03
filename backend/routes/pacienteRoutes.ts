@@ -1,5 +1,5 @@
 // Rotas da ficha medica do usuario (tipo sanguineo, alergias, condicoes, contato de emergencia).
-// GET /pacientes/:id | POST /pacientes | PUT /pacientes/:id | PATCH /pacientes/:id
+// GET /pacientes/:id | POST /pacientes | PUT /pacientes/:id
 // POST /pacientes/:id/qr/rotacionar | DELETE /pacientes/:id/qr | POST /pacientes/:id/qr/reativar
 // GET /pacientes/:id/acessos | POST /pacientes/:id/codigo
 import { Router } from "express";

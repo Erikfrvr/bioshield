@@ -69,6 +69,7 @@
     try {
       var pacientes = await Api.pacientesDoCuidador(sessao.usuario.id);
       carregando.hidden = true;
+      UI.limparErro(caixaErro);
       lista.innerHTML = "";
       pacientes.forEach(function (paciente) { lista.appendChild(cartaoPaciente(paciente)); });
       vazio.hidden = pacientes.length > 0;
@@ -82,9 +83,10 @@
     evento.preventDefault();
     UI.limparErro(erroVinculo);
 
-    var codigo = UI.elemento("#codigo").value.trim().toUpperCase();
-    if (codigo.length < 4) {
-      UI.mostrarErro(erroVinculo, "Digite o código completo que a pessoa gerou na ficha dela.");
+    // O codigo tem 7 letras e numeros (CodigoCuidador do backend). Espaco e traco no meio sao so jeito de digitar.
+    var codigo = UI.elemento("#codigo").value.replace(/[\s-]/g, "").toUpperCase();
+    if (!/^[A-Z0-9]{7}$/.test(codigo)) {
+      UI.mostrarErro(erroVinculo, "O código tem 7 letras e números. Digite ele inteiro, do jeito que aparece na ficha da pessoa.");
       return;
     }
 

@@ -6,6 +6,7 @@
 import doseInfrastructure from "../infrastructure/doseInfrastructure";
 import medicamentoInfrastructure from "../infrastructure/medicamentoInfrastructure";
 import Dose from "../models/entidade/Dose";
+import { DIAS_DE_AGENDA } from "../models/entidade/Medicamento";
 import { ConfirmarDoseDTO } from "../models/dto/dose/ConfirmarDoseDTO";
 import {
   AdesaoPeriodoDTO,
@@ -17,7 +18,6 @@ import { RegistrarDoseDTO } from "../models/dto/dose/RegistrarDoseDTO";
 import { ContagemDoses, DoseComMedicamento, DoseRepository } from "../repository/DoseRepository";
 import { MedicamentoRepository } from "../repository/MedicamentoRepository";
 import autorizacaoService from "./AutorizacaoService";
-import { DIAS_DE_AGENDA } from "./MedicamentoService";
 
 // "semana" na adesao sao os ultimos 7 dias ate agora, nao a semana do calendario.
 const DIAS_DA_SEMANA = 7;
@@ -131,7 +131,7 @@ export class DoseService {
   // Deixa as doses do paciente em dia antes de qualquer leitura: primeiro completa a agenda,
   // depois aplica a tolerancia. Nessa ordem, porque a dose que acabou de nascer no passado
   // (a pessoa ficou dias sem abrir o app) ja tem que sair daqui como perdida.
-  // E publico porque a lista do cuidador, na Fase 9, precisa chamar tambem: sem isso o familiar
+  // E publico porque a lista do cuidador (Fase 9) e a lista de remedios tambem chamam: sem isso o familiar
   // veria "em dia" justamente pra quem parou de abrir o app.
   async prepararAgenda(idPaciente: number, agora: Date): Promise<void> {
     await this.completarAgenda(idPaciente, agora);

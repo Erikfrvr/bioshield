@@ -40,7 +40,9 @@
 .remedio h2 {
   font-size: 1.25rem;
   line-height: 1.2;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  /* Nome comprido como "acetilsalicílico" quebra com hífen na sílaba, e não numa letra qualquer. */
+  hyphens: auto;
 }
 
 .remedio-dose {
@@ -90,7 +92,17 @@
   color: var(--texto-suave);
 }
 
-.remedio-rodape .botao-texto { flex: none; }
+.remedio-acoes {
+  flex: none;
+  display: flex;
+  gap: 0.15rem;
+}
+
+/* Em tela estreita os botoes descem pra baixo do texto em vez de espremer ele. */
+@media (max-width: 26rem) {
+  .remedio-rodape { flex-wrap: wrap; }
+  .remedio-acoes { width: 100%; justify-content: flex-end; }
+}
 
 .janela form { margin-top: 0.4rem; }
 .janela .linha-botoes { margin-top: 1.3rem; }

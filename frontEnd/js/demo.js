@@ -20,10 +20,23 @@
     return data.toISOString();
   }
 
+  // aaaa-mm-dd no fuso do aparelho. O toISOString daria o dia em UTC, que depois das 21h ja e amanha no Brasil.
   function dataSimples(dias) {
     var data = new Date();
-    data.setDate(data.getDate() + dias);
-    return data.toISOString().slice(0, 10);
+    data.setDate(data.getDate() + (dias || 0));
+    return data.getFullYear() + "-" + String(data.getMonth() + 1).padStart(2, "0") + "-" + String(data.getDate()).padStart(2, "0");
+  }
+
+  // Igual ao backend: ativo sai false para remedio suspenso e para tratamento que ja passou do dataFim.
+  function emUso(remedio) {
+    return remedio.ativo !== false && !(remedio.dataFim && remedio.dataFim < dataSimples(0));
+  }
+
+  function remedioParaResposta(banco, remedio) {
+    var copia = Object.assign({}, remedio);
+    copia.ativo = emUso(remedio);
+    copia.proximaDose = proximaDoseDe(banco, remedio.id);
+    return copia;
   }
 
   function token() {
@@ -243,6 +256,10 @@
     while (marca < Date.now() - passo) marca += passo;
 
     while (marca <= limite.getTime()) {
+      // Ao reativar um remedio a dose mais recente pode ja existir (tomada ou perdida). Nao duplico.
+      var horario = new Date(marca).toISOString();
+      var jaTem = banco.doses.some(function (d) { return d.idMedicamento === remedio.id && d.horarioPrevisto === horario; });
+      if (jaTem) { marca += passo; continue; }
       banco.doses.push({
         id: proximoId(banco),
         idMedicamento: remedio.id,
@@ -395,11 +412,7 @@
       return pronto(
         banco.medicamentos
           .filter(function (m) { return m.idPaciente === Number(idPaciente); })
-          .map(function (m) {
-            var copia = Object.assign({}, m);
-            copia.proximaDose = proximaDoseDe(banco, m.id);
-            return copia;
-          })
+          .map(function (m) { return remedioParaResposta(banco, m); })
       );
     },
 
@@ -420,20 +433,28 @@
       banco.medicamentos.push(remedio);
       gerarAgenda(banco, remedio, 3);
       salvar(banco);
-      var copia = Object.assign({}, remedio);
-      copia.proximaDose = proximaDoseDe(banco, remedio.id);
-      return pronto(copia);
+      return pronto(remedioParaResposta(banco, remedio));
     },
 
     atualizarMedicamento: function (id, dados) {
       var banco = carregar();
       var remedio = banco.medicamentos.find(function (m) { return m.id === Number(id); });
       if (!remedio) return falhar("Remédio não encontrado.", 404);
+      var ativoAntes = remedio.ativo !== false;
       Object.keys(dados).forEach(function (chave) {
         if (dados[chave] !== undefined && chave !== "id" && chave !== "idPaciente") remedio[chave] = dados[chave];
       });
+      // Igual ao backend: suspender tira as doses futuras e reativar monta a agenda de novo.
+      var ativoAgora = remedio.ativo !== false;
+      if (ativoAntes !== ativoAgora) {
+        var agora = Date.now();
+        banco.doses = banco.doses.filter(function (d) {
+          return !(d.idMedicamento === remedio.id && d.status === "prevista" && new Date(d.horarioPrevisto).getTime() >= agora);
+        });
+        if (ativoAgora) gerarAgenda(banco, remedio, 3);
+      }
       salvar(banco);
-      return pronto(remedio);
+      return pronto(remedioParaResposta(banco, remedio));
     },
 
     apagarMedicamento: function (id) {
@@ -463,6 +484,7 @@
       var banco = carregar();
       var dose = banco.doses.find(function (d) { return d.id === Number(id); });
       if (!dose) return falhar("Dose não encontrada.", 404);
+      if (dose.status === "tomada") return falhar("Essa dose já foi confirmada.", 400);
       if (Date.now() < new Date(dose.horarioPrevisto).getTime() - ANTECEDENCIA_CONFIRMACAO_MS) {
         return falhar("Ainda é cedo para confirmar essa dose. Dá para confirmar a partir de 1 hora antes do horário.", 400);
       }
@@ -499,6 +521,7 @@
         return p.codigoCuidador && p.codigoCuidador.toUpperCase() === String(dados.codigo || "").toUpperCase();
       });
       if (!paciente) return falhar("Esse código não corresponde a nenhum paciente.", 404);
+      if (paciente.idUsuario === Number(dados.idCuidador)) return falhar("Você não pode ser cuidador da sua própria ficha.", 400);
       var jaExiste = banco.vinculos.find(function (v) {
         return v.idCuidador === Number(dados.idCuidador) && v.idPaciente === paciente.id;
       });
@@ -580,7 +603,7 @@
           .filter(function (a) { return a.idPaciente === paciente.id; })
           .sort(function (a, b) { return ordem[a.gravidade] - ordem[b.gravidade]; }),
         medicamentos: banco.medicamentos
-          .filter(function (m) { return m.idPaciente === paciente.id && m.ativo; })
+          .filter(function (m) { return m.idPaciente === paciente.id && emUso(m) && m.dataInicio <= dataSimples(0); })
           .map(function (m) { return { nome: m.nome, dosagem: m.dosagem, unidade: m.unidade, frequenciaHoras: m.frequenciaHoras }; }),
         contatos: banco.contatos
           .filter(function (c) { return c.idPaciente === paciente.id; })

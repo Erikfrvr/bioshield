@@ -32,7 +32,7 @@ O BioShield resolve por software. O usuário gera o próprio QR Code, atualiza o
 
 **QR Code de emergência.** Quem escaneia vê alergias a medicamento, remédios em uso, tipo sanguíneo, condições de saúde e o contato de emergência com botão de ligar. Abre no navegador, sem login e sem instalar nada, porque quem escaneia é um estranho no meio de uma emergência.
 
-**Lembrete de medicamentos.** Cadastro de remédio com dosagem e frequência, agenda de doses gerada automaticamente e confirmação de cada tomada, com percentual de adesão.
+**Lembrete de medicamentos.** Cadastro de remédio com dosagem e frequência, agenda de doses gerada automaticamente e confirmação de cada tomada, com percentual de adesão. O remédio pode ser suspenso e reativado sem perder o histórico de doses.
 
 **Modo cuidador.** O familiar acompanha de longe se as doses estão sendo tomadas. O vínculo só existe depois de autorização explícita do paciente, e o cuidador vê acompanhamento sem editar a ficha médica.
 
@@ -47,7 +47,7 @@ Isso define as escolhas de interface: fonte grande, contraste alto, poucos passo
 | Camada | Tecnologia |
 |---|---|
 | Backend | Node.js, Express, TypeScript |
-| Banco | MySQL 8 com mysql2 e pool de conexão |
+| Banco | MySQL 8 ou MariaDB 10.4 (a do XAMPP), com mysql2 e pool de conexão |
 | Segurança | bcryptjs para o hash da senha e jsonwebtoken para a sessão |
 | Front | HTML, CSS e JavaScript |
 | Execução | tsx |
@@ -104,7 +104,7 @@ BioShield/
 ### O que você precisa ter instalado
 
 - Node.js 20 ou superior (22 ou superior para gerar o app Android)
-- MySQL 8.0.16 ou superior (o do XAMPP serve)
+- MySQL 8.0.16 ou superior, ou o MariaDB que vem no XAMPP
 - VS Code com a extensão REST Client, que é opcional
 
 Estes passos são para o Windows. Para subir o servidor no Linux Mint, com os celulares acessando pelo roteador, o passo a passo está em [`docs/SERVIDOR_LINUX.md`](docs/SERVIDOR_LINUX.md).
@@ -122,14 +122,20 @@ npm install
 Com o MySQL ligado, execute os dois scripts nesta ordem:
 
 1. `database/bioshield.sql`, que cria o banco e as tabelas
-2. `database/dados_ficticios.sql`, que preenche com pessoas inventadas para teste
+2. `database/dados_ficticios.sql`, que preenche com pessoas inventadas para teste e para a apresentação
 
-Pode ser pelo phpMyAdmin, pelo MySQL Workbench ou pelo terminal:
+Pode ser pelo phpMyAdmin (aba Importar), pelo MySQL Workbench ou pelo terminal:
 
 ```bash
-mysql -u root -p < ../database/bioshield.sql
-mysql -u root -p < ../database/dados_ficticios.sql
+mysql -u root -p --default-character-set=utf8mb4 < ../database/bioshield.sql
+mysql -u root -p --default-character-set=utf8mb4 < ../database/dados_ficticios.sql
 ```
+
+No XAMPP o `root` vem sem senha: quando o terminal pedir, só aperte Enter. O `--default-character-set=utf8mb4` garante que os acentos dos nomes entrem certos.
+
+O `bioshield.sql` só roda num banco que ainda não existe. Se o `bioshield` já estiver criado, apague ele antes ou rode só o `dados_ficticios.sql`.
+
+O `dados_ficticios.sql` pode ser rodado de novo quando quiser: ele apaga todos os dados e recria do zero. As doses são montadas em volta da hora em que o script roda, então rode de novo no dia da apresentação para o histórico ficar com cara de hoje.
 
 ### 3. Configurar o ambiente
 
@@ -177,6 +183,20 @@ Abra `http://localhost:3000` no navegador. Não precisa de mais nada: o front é
 Abrir o `frontEnd/index.html` pelo Live Server do VS Code continua funcionando. Nesse caso o front procura a API em `http://localhost:3000`.
 
 Para testar as rotas sem o front, use o arquivo `backend/requests.http` com a extensão REST Client do VS Code. Cada bloco tem o status esperado escrito no comentário.
+
+### Contas de teste
+
+Criadas pelo `dados_ficticios.sql`. A senha de todas é `123456`.
+
+| Conta | O que dá para mostrar com ela |
+|---|---|
+| `maria.souza@exemplo.com` | Paciente principal. Ficha completa, uma semana de doses em dia e acessos ao QR no histórico. Na tela de remédios tem um em uso, um suspenso e um encerrado |
+| `patricia.martins@exemplo.com` | Cuidadora. Acompanha a Maria, que está em dia, e o Lucas, que tem doses perdidas. Não tem ficha própria |
+| `joana.lima@exemplo.com` | Duas alergias graves em destaque na ficha de emergência. Ninguém acompanha a Joana, então dá para criar o vínculo com a Patrícia ao vivo |
+| `lucas.andrade@exemplo.com` | Tratamento com data para acabar e adesão baixa |
+| `roberto.nunes@exemplo.com` | QR Code cancelado. Escanear o código dele mostra a tela de aviso de código cancelado |
+
+A senha `123456` só funciona porque essas contas foram criadas direto no banco. Uma conta nova, criada pela tela de cadastro, precisa seguir a regra de senha forte.
 
 ## Modo demonstração
 
@@ -231,21 +251,26 @@ Tirando as marcadas como públicas, todas pedem o header `Authorization: Bearer 
 | `PUT` | `/api/pacientes/:id` | Atualiza a ficha médica |
 | `POST` | `/api/pacientes/:id/qr/rotacionar` | Gera um token novo de QR e invalida o anterior |
 | `DELETE` | `/api/pacientes/:id/qr` | Cancela o QR |
-| `POST` | `/api/pacientes/:id/qr/reativar` | Reativa o QR |
+| `POST` | `/api/pacientes/:id/qr/reativar` | Reativa o QR com um token novo. O código cancelado continua sem abrir a ficha |
 | `GET` | `/api/pacientes/:id/acessos` | Lista quem abriu a ficha pública |
 | `POST` | `/api/pacientes/:id/codigo` | Gera o código de 7 caracteres que o paciente entrega ao cuidador, válido por 24 horas |
 | `GET` | `/api/emergencia/:token` | Pública. Devolve a ficha de emergência do QR |
-| `GET` | `/api/medicamentos` | Lista os medicamentos |
+| `GET` | `/api/medicamentos` | Lista os medicamentos com a próxima dose de cada um |
 | `POST` | `/api/medicamentos` | Cadastra um medicamento |
-| `PUT` | `/api/medicamentos/:id` | Atualiza um medicamento, suspende ou reativa, e refaz a agenda futura quando o horário muda |
+| `PUT` | `/api/medicamentos/:id` | Atualiza um medicamento. Com `ativo` suspende ou reativa. Refaz a agenda futura quando o horário, o período ou o `ativo` mudam |
 | `DELETE` | `/api/medicamentos/:id` | Apaga um medicamento |
 | `GET` | `/api/doses/hoje` | Lista as doses do dia, já marcando como perdida a que passou 60 minutos do horário |
 | `POST` | `/api/doses/:id/confirmar` | Confirma que a dose foi tomada |
 | `GET` | `/api/doses/adesao` | Percentual de adesão de hoje e dos últimos 7 dias |
+| `POST` | `/api/cuidadores/vincular` | Cria o vínculo de cuidador a partir do código que o paciente gerou |
+| `GET` | `/api/cuidadores/:id/pacientes` | Lista quem o cuidador acompanha, com adesão da semana, doses perdidas e próxima dose |
+| `DELETE` | `/api/cuidadores/vinculo/:id` | Desfaz o vínculo. A linha fica no banco como inativa, para registro de quem teve acesso |
+
+As rotas de dose, de adesão, de medicamentos e a lista do cuidador completam a agenda antes de responder. Por isso a agenda não depende de nenhuma rotina rodando no servidor.
 
 A senha precisa ter pelo menos 8 caracteres, com letra maiúscula, letra minúscula, número e um caractere especial (`@ $ ! % * ? & #`). Ela é gravada só como hash bcrypt e nunca volta em nenhuma resposta. O email é guardado em minúsculo, então `Maria@Exemplo.com` e `maria@exemplo.com` são a mesma conta.
 
-O contrato completo, com corpo de requisição, respostas e as rotas que ainda vão ser feitas, está em [`frontEnd/CONTRATO_API.md`](frontEnd/CONTRATO_API.md).
+O contrato completo, com corpo de requisição e respostas, está em [`frontEnd/CONTRATO_API.md`](frontEnd/CONTRATO_API.md).
 
 ## Banco de dados
 
@@ -282,8 +307,11 @@ Em desenvolvimento. O andamento por fase está em [`docs/ROADMAP.md`](docs/ROADM
 - [x] QR Code de emergência
 - [x] Medicamentos
 - [x] Doses e adesão
-- [ ] Rotas do modo cuidador
-- [x] Interface, navegável de ponta a ponta no modo demonstração
+- [x] Rotas do modo cuidador
+- [x] Interface, navegável de ponta a ponta com o banco e no modo demonstração
+- [x] Dados fictícios prontos para a apresentação
+- [ ] Testes automatizados com Jest
+- [ ] APK do app Android testado num celular
 
 ## Contexto
 

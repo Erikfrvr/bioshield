@@ -16,8 +16,10 @@
   UI.montarNavegacao("doses");
   UI.marcarModo();
 
-  var dataHoje = new Date().toLocaleDateString("pt-BR", { day: "numeric", month: "long" });
-  UI.elemento("#dataHoje").textContent = dataHoje;
+  // Fica numa funcao porque a tela pode atravessar a meia-noite aberta (ver o recarregar no fim do arquivo).
+  function mostrarDataDeHoje() {
+    UI.elemento("#dataHoje").textContent = new Date().toLocaleDateString("pt-BR", { day: "numeric", month: "long" });
+  }
 
   // Comprimento da volta do anel de adesao (2 x pi x raio 52 do SVG).
   var VOLTA_DO_ANEL = 2 * Math.PI * 52;
@@ -78,7 +80,8 @@
       var botao = document.createElement("button");
       botao.type = "button";
       botao.className = "botao" + (dose.status === "perdida" ? " botao-secundario" : "");
-      botao.innerHTML = UI.icone("certo") + (dose.status === "perdida" ? "Tomei mesmo assim" : "Confirmar que tomei");
+      var rotulo = UI.icone("certo") + (dose.status === "perdida" ? "Tomei mesmo assim" : "Confirmar que tomei");
+      botao.innerHTML = rotulo;
       botao.addEventListener("click", async function () {
         botao.disabled = true;
         botao.textContent = "Confirmando";
@@ -89,7 +92,7 @@
         } catch (erro) {
           UI.recado("Não consegui confirmar. " + erro.message, "erro");
           botao.disabled = false;
-          botao.textContent = "Confirmar que tomei";
+          botao.innerHTML = rotulo;
         }
       });
       acao.appendChild(botao);
@@ -123,6 +126,7 @@
   }
 
   async function carregar() {
+    mostrarDataDeHoje();
     if (!sessao.idPaciente) {
       carregando.hidden = true;
       UI.mostrarErro(caixaErro, "Preencha a ficha médica antes de acompanhar as doses.");
@@ -132,6 +136,7 @@
     try {
       var doses = await Api.dosesDeHoje(sessao.idPaciente);
       carregando.hidden = true;
+      UI.limparErro(caixaErro);
       agenda.innerHTML = "";
       doses.forEach(function (dose) { agenda.appendChild(cartaoDose(dose)); });
       vazio.hidden = doses.length > 0;
@@ -146,6 +151,20 @@
       preencherAdesao({});
     }
   }
+
+  // A tela fica aberta no celular por horas. Sem recarregar, o "Está na hora" e o botao de confirmar
+  // ficariam presos no horario em que ela abriu, e a dose atrasada nunca apareceria como perdida.
+  // Recarrego a cada minuto e quando a pessoa volta pro app, mas nunca no meio de uma confirmacao.
+  var UM_MINUTO_MS = 60 * 1000;
+
+  function recarregarSePuder() {
+    if (document.hidden) return;
+    if (agenda.querySelector("button:disabled")) return;
+    carregar();
+  }
+
+  setInterval(recarregarSePuder, UM_MINUTO_MS);
+  document.addEventListener("visibilitychange", recarregarSePuder);
 
   carregar();
 })();
