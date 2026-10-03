@@ -124,7 +124,7 @@ Daiane não mexe nesta fase. Ela lê quando estiver pronta e copia o padrão.
 - [x] Cadastrar um usuário e conferir no Workbench se a senha gravou como hash
 - [x] Tentar cadastrar o mesmo email duas vezes e ver se o erro sobe com status 409
 
-**Marco 3:** consigo criar conta pela API. O molde das camadas está fechado. É aqui que a Daiane destrava.
+**Marco 3:** consigo criar conta pela API. O molde das camadas está fechado. É aqui que a Daiane destrava. **Feito.**
  
 ---
 
@@ -143,7 +143,7 @@ Daiane não mexe nesta fase. Ela lê quando estiver pronta e copia o padrão.
 
 O `idPaciente` no login não é firula. Sem ele o front precisa de uma rota extra só para descobrir qual ficha é do usuário logado, o que é uma ida a mais no servidor em toda abertura de tela.
 
-**Marco 4:** login funcionando e rotas protegidas.
+**Marco 4:** login funcionando e rotas protegidas. **Feito.**
 
 ---
 
@@ -380,27 +380,27 @@ Use o mesmo começo de arquivo da aula, `import { describe, expect, test } from 
 
 ### Preparar
 
-- [ ] Instalar junto com o Erik, num commit só, por causa do `package-lock.json`: `npm install -D jest @types/jest` e o mesmo transformador de TypeScript usado em aula. Se o `ts-jest` der erro com o TypeScript 7 do projeto, troque por `@swc/core @swc/jest`
-- [ ] Script `"test": "jest"` no `backend/package.json`
-- [ ] Criar a pasta `backend/tests/` e rodar `npm test` com o primeiro arquivo
+- [x] Instalar junto com o Erik, num commit só, por causa do `package-lock.json`: `npm install -D jest @types/jest` e o mesmo transformador de TypeScript usado em aula. Se o `ts-jest` der erro com o TypeScript 7 do projeto, troque por `@swc/core @swc/jest` · o `ts-jest` não aceitou o TypeScript 7, então ficou `jest`, `@types/jest`, `@swc/core` e `@swc/jest` no backend
+- [x] Script `"test": "jest"` no `backend/package.json`
+- [x] Criar a pasta `backend/tests/` e rodar `npm test` com o primeiro arquivo
 
 ### Os testes
 
-- [ ] `tests/valueObjects/Email.test.ts` · **Erik**,
-  - [ ] Aceita emails válidos e guarda em minúsculo (`" Maria@Exemplo.COM "` vira `"maria@exemplo.com"`) **Erik**
-  - [ ] Rejeita emails inválidos (`"semarroba"`, `"a@b.c"`, `"maria teste@exemplo.com"`) **Erik**
-  - [ ] `igualA` compara pelo valor **Erik**
-- [ ] `tests/valueObjects/Senha.test.ts` · **Erik**,
-  - [ ] Aceita senha com 8 caracteres, maiúscula, minúscula, número e caractere especial **Erik**,
-  - [ ] Rejeita senha curta, sem maiúscula, sem minúscula, sem número e sem caractere especial **Erik**,
-  - [ ] `String(senha)` mostra só `********`, nunca a senha **Erik**,
-- [ ] `tests/valueObjects/TipoSanguineo.test.ts` ·**Erik**,
-  - [ ] Aceita os oito tipos e normaliza `" ab- "` para `"AB-"` **Erik**,
-  - [ ] Rejeita `"0+"` com zero, `"C+"` e `"A"` **Erik**,
-  - [ ] `TipoSanguineo.opcional("")` devolve `null` **Erik**,
-- [ ] `tests/valueObjects/Telefone.test.ts` · **Erik**, 
-  - [ ] `"(11) 98765-4321"` vira `"11987654321"` **Erik**,
-  - [ ] Rejeita número curto, DDD `01` e celular sem o 9
+- [x] `tests/valueObjects/Email.test.ts` · **Erik**,
+  - [x] Aceita emails válidos e guarda em minúsculo (`" Maria@Exemplo.COM "` vira `"maria@exemplo.com"`) **Erik**
+  - [x] Rejeita emails inválidos (`"semarroba"`, `"a@b.c"`, `"maria teste@exemplo.com"`) **Erik**
+  - [x] `igualA` compara pelo valor **Erik**
+- [x] `tests/valueObjects/Senha.test.ts` · **Erik**,
+  - [x] Aceita senha com 8 caracteres, maiúscula, minúscula, número e caractere especial **Erik**,
+  - [x] Rejeita senha curta, sem maiúscula, sem minúscula, sem número e sem caractere especial **Erik**,
+  - [x] `String(senha)` mostra só `********`, nunca a senha **Erik**,
+- [x] `tests/valueObjects/TipoSanguineo.test.ts` ·**Erik**,
+  - [x] Aceita os oito tipos e normaliza `" ab- "` para `"AB-"` **Erik**,
+  - [x] Rejeita `"0+"` com zero, `"C+"` e `"A"` **Erik**,
+  - [x] `TipoSanguineo.opcional("")` devolve `null` **Erik**,
+- [x] `tests/valueObjects/Telefone.test.ts` · **Erik**, 
+  - [x] `"(11) 98765-4321"` vira `"11987654321"` **Erik**,
+  - [x] Rejeita número curto, DDD `01` e celular sem o 9
 - [ ] `tests/valueObjects/TokenQR.test.ts` · **Daiane**,
   - [ ] `gerar()` devolve 32 caracteres hexadecimais **Daiane**,
   - [ ] Dois tokens gerados são diferentes **Daiane**,
@@ -427,8 +427,8 @@ Use o mesmo começo de arquivo da aula, `import { describe, expect, test } from 
 | 1 | Banco criado | os dois | [x] |
 | 2 | API de pé | Erik | [x] |
 | 2.5 | Banco pronto para o cancelamento | Daiane | [x] |
-| 3 | Cadastro funcionando | Erik | [ ] |
-| 4 | Login e rotas protegidas | Erik | [ ] |
+| 3 | Cadastro funcionando | Erik | [x] |
+| 4 | Login e rotas protegidas | Erik | [x] |
 | 5 | Ficha médica salvando | Erik | [ ] |
 | 6 | QR abrindo a ficha | Erik | [ ] |
 | 7 | Lembrete de dose fechado | Daiane | [ ] |
