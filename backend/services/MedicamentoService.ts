@@ -2,7 +2,7 @@
 // Trato o nome, valido a dosagem e a frequencia e, quando cadastro um remedio novo,
 // ja gero as doses da agenda a partir do horario inicial e do intervalo.
 import medicamentoInfrastructure from "../infrastructure/medicamentoInfrastructure";
-import Medicamento from "../models/entidade/Medicamento";
+import Medicamento, { DIAS_DE_AGENDA } from "../models/entidade/Medicamento";
 import Dosagem from "../models/valueObjects/Dosagem";
 import HorarioDose from "../models/valueObjects/HorarioDose";
 import { AtualizarMedicamentoDTO } from "../models/dto/medicamento/AtualizarMedicamentoDTO";
@@ -10,11 +10,10 @@ import { CadastrarMedicamentoDTO } from "../models/dto/medicamento/CadastrarMedi
 import { MedicamentoResponseDTO } from "../models/dto/medicamento/MedicamentoResponseDTO";
 import { MedicamentoComProximaDose, MedicamentoRepository } from "../repository/MedicamentoRepository";
 import autorizacaoService from "./AutorizacaoService";
+import doseService from "./DoseService";
 
-// Quantos dias de agenda eu gero no cadastro (duvida 3 do docs/DUVIDAS_CONTRATO.md).
-// Remedio sem data de fim nao acaba, e nao da pra inserir dose infinita.
-// Os dias seguintes quem completa e o DoseService, antes de cada leitura de dose, com este mesmo numero.
-export const DIAS_DE_AGENDA = 7;
+// Continua exportado daqui pra quem ja importava deste arquivo. O valor mora na entidade Medicamento.
+export { DIAS_DE_AGENDA };
 
 // Mesmo esquema do PacienteService: o service diz o tipo, o controller escolhe o status code.
 export type TipoErroMedicamento = "validacao" | "nao_encontrado";
@@ -40,6 +39,10 @@ export class MedicamentoService {
   async listarPorPaciente(idPaciente: number, idLogado: number | undefined): Promise<MedicamentoResponseDTO[]> {
     this.validarId(idPaciente, "paciente");
     await autorizacaoService.garantirDono(idLogado, idPaciente);
+
+    // A proxima dose de cada remedio sai da tabela doses. Sem completar a agenda antes,
+    // quem abre Remedios sem ter passado por Doses ve "sem proxima dose" num remedio em uso.
+    await doseService.prepararAgenda(idPaciente, new Date());
 
     const medicamentos = await this.repositorio.listarPorPaciente(idPaciente);
     return medicamentos.map((m) => this.paraResposta(m));

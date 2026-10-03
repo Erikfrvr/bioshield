@@ -384,6 +384,13 @@
   background: var(--menta-claro);
 }
 
+.codigo-validade {
+  margin: -0.4rem 0 0.9rem;
+  text-align: center;
+  font-size: 0.92rem;
+  color: var(--texto-suave);
+}
+
 .lista-acessos { gap: 0; }
 
 .lista-acessos li {

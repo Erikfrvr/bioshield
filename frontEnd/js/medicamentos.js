@@ -24,8 +24,48 @@
     return Number.isInteger(numero) ? String(numero) : numero.toFixed(2).replace(".", ",");
   }
 
+  // O backend manda ativo false tanto pra remedio suspenso quanto pra tratamento que passou da data de fim.
+  // Separo os dois pela data: so o suspenso tem como reativar, o encerrado precisaria de outra data de fim.
+  function passouDoFim(remedio) {
+    return Boolean(remedio.dataFim) && String(remedio.dataFim).slice(0, 10) < dataDoInput(new Date());
+  }
+
+  function situacao(remedio) {
+    if (remedio.ativo !== false) return "uso";
+    return passouDoFim(remedio) ? "encerrado" : "suspenso";
+  }
+
+  var ETIQUETAS = {
+    uso: '<span class="etiqueta etiqueta-sucesso">Em uso</span>',
+    suspenso: '<span class="etiqueta etiqueta-moderada">Suspenso</span>',
+    encerrado: '<span class="etiqueta">Encerrado</span>'
+  };
+
+  function botaoSituacao(estado) {
+    if (estado === "uso") return '<button type="button" class="botao-texto" data-acao="suspender">' + UI.icone("pausa") + "Suspender</button>";
+    if (estado === "suspenso") return '<button type="button" class="botao-texto" data-acao="reativar">' + UI.icone("retomar") + "Reativar</button>";
+    return "";
+  }
+
+  async function trocarSituacao(remedio, ativar, botao) {
+    if (!ativar) {
+      var certeza = confirm("Suspender " + remedio.nome + "? As doses futuras saem da agenda até você reativar. O histórico continua.");
+      if (!certeza) return;
+    }
+    botao.disabled = true;
+    try {
+      await Api.atualizarMedicamento(remedio.id, { ativo: ativar });
+      UI.recado(ativar ? "Remédio reativado e agenda de doses refeita." : "Remédio suspenso.");
+      carregar();
+    } catch (erro) {
+      botao.disabled = false;
+      UI.recado("Não consegui " + (ativar ? "reativar" : "suspender") + ". " + erro.message, "erro");
+    }
+  }
+
   function cartaoRemedio(remedio) {
-    var encerrado = remedio.ativo === false;
+    var estado = situacao(remedio);
+    var encerrado = estado !== "uso";
     var bloco = document.createElement("article");
     bloco.className = "remedio" + (encerrado ? " encerrado" : "");
     // A proxima dose e o que a pessoa mais procura, entao ela fica em destaque.
@@ -37,19 +77,29 @@
           "<h2>" + UI.escapar(remedio.nome) + "</h2>" +
           '<p class="remedio-dose">' + formatarDosagem(remedio.dosagem) + " " + UI.escapar(remedio.unidade) + ", " + UI.escapar(UI.descreverFrequencia(remedio.frequenciaHoras)) + "</p>" +
         "</div>" +
-        '<span class="etiqueta ' + (encerrado ? "" : "etiqueta-sucesso") + '">' + (encerrado ? "Encerrado" : "Em uso") + "</span>" +
+        ETIQUETAS[estado] +
       "</div>" +
       '<div class="remedio-proxima">' + UI.icone("relogio") +
-        "<span>Próxima dose</span><strong>" + UI.escapar(UI.quandoFor(remedio.proximaDose)) + "</strong>" +
+        "<span>Próxima dose</span><strong>" + UI.escapar(estado === "suspenso" ? "pausada" : estado === "encerrado" ? "tratamento terminou" : UI.quandoFor(remedio.proximaDose)) + "</strong>" +
       "</div>" +
       '<div class="remedio-rodape">' +
         '<p class="remedio-detalhe">Primeira dose às ' + UI.escapar(String(remedio.horarioInicial).slice(0, 5)) +
           ". Desde " + UI.escapar(UI.formatarData(remedio.dataInicio)) +
           (remedio.dataFim ? " até " + UI.escapar(UI.formatarData(remedio.dataFim)) : ", uso contínuo") + ".</p>" +
-        '<button type="button" class="botao-texto perigo">' + UI.icone("lixo") + "Remover</button>" +
+        '<div class="remedio-acoes">' +
+          botaoSituacao(estado) +
+          '<button type="button" class="botao-texto perigo" data-acao="remover">' + UI.icone("lixo") + "Remover</button>" +
+        "</div>" +
       "</div>";
 
-    bloco.querySelector("button").addEventListener("click", async function () {
+    var botaoTroca = bloco.querySelector('[data-acao="suspender"], [data-acao="reativar"]');
+    if (botaoTroca) {
+      botaoTroca.addEventListener("click", function () {
+        trocarSituacao(remedio, estado === "suspenso", botaoTroca);
+      });
+    }
+
+    bloco.querySelector('[data-acao="remover"]').addEventListener("click", async function () {
       var certeza = confirm("Remover " + remedio.nome + "? O histórico de doses desse remédio sai junto.");
       if (!certeza) return;
       try {
@@ -75,9 +125,15 @@
     try {
       var remedios = await Api.listarMedicamentos(sessao.idPaciente);
       carregando.hidden = true;
+      UI.limparErro(caixaErro);
       lista.innerHTML = "";
+      // Os que estao em uso vem primeiro. Suspenso e encerrado descem pro fim da lista.
       remedios
-        .sort(function (a, b) { return String(a.horarioInicial).localeCompare(String(b.horarioInicial)); })
+        .sort(function (a, b) {
+          var foraA = situacao(a) !== "uso" ? 1 : 0;
+          var foraB = situacao(b) !== "uso" ? 1 : 0;
+          return foraA - foraB || String(a.horarioInicial).localeCompare(String(b.horarioInicial));
+        })
         .forEach(function (remedio) { lista.appendChild(cartaoRemedio(remedio)); });
       vazio.hidden = remedios.length > 0;
     } catch (erro) {

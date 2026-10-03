@@ -246,12 +246,26 @@
     };
   }
 
+  // O backend guarda o user agent inteiro ("Mozilla/5.0 (Linux; Android 13) ..."), que nao diz nada pra pessoa.
+  // Aqui vira o tipo de aparelho. Quando nao da pra reconhecer, sobra o ip.
+  function descreverAparelho(acesso) {
+    var agente = String(acesso.userAgent || "");
+    if (/iPhone/i.test(agente)) return "iPhone";
+    if (/iPad/i.test(agente)) return "iPad";
+    if (/Android/i.test(agente)) return /Mobile/i.test(agente) || !/Tablet/i.test(agente) ? "Celular Android" : "Tablet Android";
+    if (/Windows/i.test(agente)) return "Computador Windows";
+    if (/Macintosh|Mac OS X/i.test(agente)) return "Computador Mac";
+    if (/Linux/i.test(agente)) return "Computador Linux";
+    if (agente) return "Outro aparelho";
+    return acesso.ip ? "Endereço " + acesso.ip : "Origem desconhecida";
+  }
+
   async function carregarAcessos() {
     try {
       var acessos = await Api.listarAcessos(ficha.id);
       var lista = UI.elemento("#listaAcessos");
       lista.innerHTML = acessos.map(function (acesso) {
-        return "<li><i aria-hidden=\"true\"></i><strong>" + UI.formatarDataHora(acesso.acessadoEm) + "</strong><span>" + UI.escapar(acesso.userAgent || acesso.ip || "origem desconhecida") + "</span></li>";
+        return "<li><i aria-hidden=\"true\"></i><strong>" + UI.formatarDataHora(acesso.acessadoEm) + "</strong><span>" + UI.escapar(descreverAparelho(acesso)) + "</span></li>";
       }).join("");
       UI.elemento("#vazioAcessos").hidden = acessos.length > 0;
     } catch (erro) {
@@ -420,6 +434,10 @@
       var alvo = UI.elemento("#valorCodigo");
       alvo.textContent = resposta.codigo;
       alvo.classList.remove("vazio-codigo");
+      // O codigo vence em 24 horas. Sem a data, o familiar tenta usar no dia seguinte e nao entende o erro.
+      var validade = UI.elemento("#validadeCodigo");
+      validade.textContent = resposta.validoAte ? "Vale até " + UI.formatarDataHora(resposta.validoAte) + ". Gerar outro cancela este." : "";
+      validade.hidden = !resposta.validoAte;
       UI.recado("Código gerado. Entregue apenas a quem você autoriza.");
     } catch (erro) {
       UI.recado("Não consegui gerar o código. " + erro.message, "erro");

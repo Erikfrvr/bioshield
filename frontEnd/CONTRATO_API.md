@@ -348,7 +348,7 @@ Protegida.
 
 Protegida. Cadastra o remédio **e gera a agenda de doses** a partir do horário inicial e do intervalo.
 
-A agenda é gerada para os próximos **7 dias**, ou até o `dataFim`, o que vier antes, e só de agora para a frente. Os dias seguintes são completados pelo backend antes de cada leitura de dose (`/doses/hoje`, `/doses/adesao` e a lista do cuidador), então o front não precisa pedir nada.
+A agenda é gerada para os próximos **7 dias**, ou até o `dataFim`, o que vier antes, e só de agora para a frente. Os dias seguintes são completados pelo backend antes de cada leitura de dose (`/doses/hoje`, `/doses/adesao`, `GET /medicamentos` e a lista do cuidador), então o front não precisa pedir nada.
 
 ```json
 {

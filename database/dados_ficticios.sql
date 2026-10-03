@@ -1,73 +1,127 @@
+-- Dados ficticios do BioShield, para teste e para a apresentacao.
+-- Rode depois do bioshield.sql. Pode rodar de novo quando quiser: ele apaga tudo e recria do zero.
+--
+-- Senha de todas as contas: 123456
+--
+-- | Conta                          | Para mostrar                                                        |
+-- |--------------------------------|---------------------------------------------------------------------|
+-- | maria.souza@exemplo.com        | Paciente principal: ficha completa, remedio em uso, suspenso e encerrado, |
+-- |                                | uma semana de doses quase toda em dia e acessos ao QR no historico  |
+-- | patricia.martins@exemplo.com   | Cuidadora da Maria (em dia) e do Lucas (com doses perdidas)         |
+-- | joana.lima@exemplo.com         | Alergia grave em destaque na ficha de emergencia                    |
+-- | lucas.andrade@exemplo.com      | Tratamento com data para acabar e adesao baixa                      |
+-- | roberto.nunes@exemplo.com      | QR Code cancelado: mostra a tela de aviso de codigo cancelado       |
+--
+-- As doses sao montadas em volta da hora em que o script roda:
+-- os ultimos 6 dias inteiros e o que ja passou de hoje entram como historico.
+-- O resto de hoje e os proximos dias o proprio backend gera na primeira vez que a tela de doses abre.
+
 USE bioshield;
 
-SET FOREIGN_KEY_CHECKS = 0;
-TRUNCATE TABLE acessos_qr;
-TRUNCATE TABLE cuidador_paciente;
-TRUNCATE TABLE doses;
-TRUNCATE TABLE medicamentos;
-TRUNCATE TABLE contatos_emergencia;
-TRUNCATE TABLE alergias;
-TRUNCATE TABLE pacientes;
-TRUNCATE TABLE usuarios;
-SET FOREIGN_KEY_CHECKS = 1;
+SET NAMES utf8mb4;
+-- Mesmo fuso do backend (config/fuso.ts). Sem isso CURDATE() e NOW() seguem o fuso do MySQL.
+SET time_zone = '-03:00';
 
+-- DELETE e nao TRUNCATE: o MariaDB nao deixa dar TRUNCATE em tabela que outra aponta por chave estrangeira,
+-- nem com FOREIGN_KEY_CHECKS = 0. A ordem e dos filhos para os pais.
+DELETE FROM acessos_qr;
+DELETE FROM cuidador_paciente;
+DELETE FROM doses;
+DELETE FROM medicamentos;
+DELETE FROM contatos_emergencia;
+DELETE FROM alergias;
+DELETE FROM pacientes;
+DELETE FROM usuarios;
+
+ALTER TABLE acessos_qr AUTO_INCREMENT = 1;
+ALTER TABLE cuidador_paciente AUTO_INCREMENT = 1;
+ALTER TABLE doses AUTO_INCREMENT = 1;
+ALTER TABLE medicamentos AUTO_INCREMENT = 1;
+ALTER TABLE contatos_emergencia AUTO_INCREMENT = 1;
+ALTER TABLE alergias AUTO_INCREMENT = 1;
+ALTER TABLE pacientes AUTO_INCREMENT = 1;
+ALTER TABLE usuarios AUTO_INCREMENT = 1;
+
+-- O hash e de "123456". O login nao aplica a regra de senha forte, so o cadastro.
 INSERT INTO usuarios (id, nome, email, senha) VALUES
 (1, 'Maria Aparecida Souza', 'maria.souza@exemplo.com', '$2b$10$PGmXy.0R8ZT7yyhxw3jDQOSgiuKj.eOk2Lhh0PORxJW/hgwWIs1w2'),
 (2, 'Joana Beatriz Lima', 'joana.lima@exemplo.com', '$2b$10$PGmXy.0R8ZT7yyhxw3jDQOSgiuKj.eOk2Lhh0PORxJW/hgwWIs1w2'),
 (3, 'Lucas Andrade Ferraz', 'lucas.andrade@exemplo.com', '$2b$10$PGmXy.0R8ZT7yyhxw3jDQOSgiuKj.eOk2Lhh0PORxJW/hgwWIs1w2'),
-(4, 'Patricia Souza Martins', 'patricia.martins@exemplo.com', '$2b$10$PGmXy.0R8ZT7yyhxw3jDQOSgiuKj.eOk2Lhh0PORxJW/hgwWIs1w2');
+(4, 'Patrícia Souza Martins', 'patricia.martins@exemplo.com', '$2b$10$PGmXy.0R8ZT7yyhxw3jDQOSgiuKj.eOk2Lhh0PORxJW/hgwWIs1w2'),
+(5, 'Roberto Carlos Nunes', 'roberto.nunes@exemplo.com', '$2b$10$PGmXy.0R8ZT7yyhxw3jDQOSgiuKj.eOk2Lhh0PORxJW/hgwWIs1w2');
 
-INSERT INTO pacientes (id, id_usuario, tipo_sanguineo, condicoes, observacoes, token_qr) VALUES
-(1, 1, 'O+', 'Hipertensao e diabetes tipo 2', 'Usa aparelho auditivo no ouvido direito. Mora sozinha.', 'a3f81c2d94be47a0b6e15d7c0f29b834'),
-(2, 2, 'A-', 'Alergia severa a anti inflamatorios', 'Carrega caneta de adrenalina na bolsa.', '7d2e9b4a16cf43d8a95e0c73b18f26ad'),
-(3, 3, 'AB+', 'Transtorno do espectro autista, nivel 2 de suporte', 'Nao verbal em situacao de estresse. Pode se afastar sozinho.', 'c51a70e8d3b94f26a8017ce4b9d3628f');
+-- A Patricia (4) nao tem ficha: ela entra so como cuidadora.
+INSERT INTO pacientes (id, id_usuario, tipo_sanguineo, condicoes, observacoes, token_qr, token_gerado_em, qr_ativo, qr_cancelado_em) VALUES
+(1, 1, 'O+', 'Hipertensão e diabetes tipo 2.', 'Usa aparelho auditivo no ouvido direito. Mora sozinha. Fala devagar quando a glicose está baixa.', 'a3f81c2d94be47a0b6e15d7c0f29b834', DATE_SUB(NOW(), INTERVAL 30 DAY), TRUE, NULL),
+(2, 2, 'A-', 'Asma leve.', 'Carrega caneta de adrenalina na bolsa, no bolso da frente.', '7d2e9b4a16cf43d8a95e0c73b18f26ad', DATE_SUB(NOW(), INTERVAL 60 DAY), TRUE, NULL),
+(3, 3, 'AB+', 'Transtorno do espectro autista, nível 2 de suporte.', 'Não verbal em situação de estresse. Pode se afastar sozinho. Fale baixo e evite tocar sem avisar.', 'c51a70e8d3b94f26a8017ce4b9d3628f', DATE_SUB(NOW(), INTERVAL 10 DAY), TRUE, NULL),
+(4, 5, 'B+', 'Epilepsia.', 'Em crise, deite de lado e não coloque nada na boca.', 'e94b27c0a1d846f3b5c08d2e7a61f93c', DATE_SUB(NOW(), INTERVAL 40 DAY), FALSE, DATE_SUB(NOW(), INTERVAL 2 DAY));
 
 INSERT INTO alergias (id_paciente, substancia, gravidade, observacao) VALUES
-(1, 'Dipirona', 'grave', 'Inchaco no rosto e falta de ar'),
+(1, 'Dipirona', 'grave', 'Inchaço no rosto e falta de ar'),
 (1, 'Penicilina', 'moderada', 'Manchas vermelhas pelo corpo'),
-(2, 'Ibuprofeno', 'grave', 'Risco de choque anafilatico'),
-(2, 'Camarao', 'moderada', 'Coceira e vomito'),
-(3, 'Latex', 'leve', 'Vermelhidao no contato');
+(2, 'Ibuprofeno', 'grave', 'Risco de choque anafilático'),
+(2, 'Camarão', 'grave', 'Fecha a garganta em poucos minutos'),
+(2, 'Poeira', 'leve', 'Espirros e coceira nos olhos'),
+(3, 'Látex', 'leve', 'Vermelhidão no contato'),
+(4, 'Carbamazepina', 'moderada', 'Manchas e febre');
 
 INSERT INTO contatos_emergencia (id_paciente, nome, telefone, parentesco, prioridade) VALUES
-(1, 'Patricia Souza Martins', '11987654321', 'Filha', 1),
-(1, 'Antonio Souza', '11976543210', 'Irmao', 2),
-(2, 'Rodrigo Lima', '11965432109', 'Esposo', 1),
-(3, 'Silvia Andrade', '11954321098', 'Mae', 1),
-(3, 'Marcos Ferraz', '11943210987', 'Pai', 2);
+(1, 'Patrícia Souza Martins', '11987654321', 'Filha', 1),
+(1, 'Antônio Souza', '11976543210', 'Irmão', 2),
+(2, 'Rodrigo Lima', '11965432109', 'Marido', 1),
+(3, 'Sílvia Andrade', '11954321098', 'Mãe', 1),
+(3, 'Marcos Ferraz', '11943210987', 'Pai', 2),
+(4, 'Helena Nunes', '11932109876', 'Esposa', 1);
 
+-- Maria tem os tres estados que a tela de remedios mostra:
+-- em uso (1, 2 e 3), suspenso pelo medico (6) e encerrado porque o tratamento acabou (7).
+-- So os em uso aparecem na ficha de emergencia.
 INSERT INTO medicamentos (id, id_paciente, nome, dosagem, unidade, frequencia_horas, horario_inicial, data_inicio, data_fim, ativo) VALUES
 (1, 1, 'Losartana', 50.00, 'mg', 12, '08:00:00', DATE_SUB(CURDATE(), INTERVAL 30 DAY), NULL, TRUE),
 (2, 1, 'Metformina', 850.00, 'mg', 8, '07:00:00', DATE_SUB(CURDATE(), INTERVAL 30 DAY), NULL, TRUE),
 (3, 1, 'Sinvastatina', 20.00, 'mg', 24, '21:00:00', DATE_SUB(CURDATE(), INTERVAL 15 DAY), NULL, TRUE),
 (4, 2, 'Levotiroxina', 75.00, 'mg', 24, '06:30:00', DATE_SUB(CURDATE(), INTERVAL 60 DAY), NULL, TRUE),
 (5, 3, 'Risperidona', 1.00, 'mg', 24, '20:00:00', DATE_SUB(CURDATE(), INTERVAL 10 DAY), DATE_ADD(CURDATE(), INTERVAL 80 DAY), TRUE),
-(6, 1, 'Amoxicilina', 500.00, 'mg', 8, '09:00:00', DATE_SUB(CURDATE(), INTERVAL 45 DAY), DATE_SUB(CURDATE(), INTERVAL 38 DAY), FALSE);
+(6, 1, 'AAS', 100.00, 'mg', 24, '12:00:00', DATE_SUB(CURDATE(), INTERVAL 60 DAY), NULL, FALSE),
+(7, 1, 'Amoxicilina', 500.00, 'mg', 8, '09:00:00', DATE_SUB(CURDATE(), INTERVAL 45 DAY), DATE_SUB(CURDATE(), INTERVAL 38 DAY), TRUE),
+(8, 4, 'Ácido valproico', 500.00, 'mg', 12, '08:00:00', DATE_SUB(CURDATE(), INTERVAL 40 DAY), NULL, TRUE);
 
-INSERT INTO doses (id_medicamento, horario_previsto, horario_confirmado, status) VALUES
-(1, TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '08:00:00'), TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '08:12:00'), 'tomada'),
-(1, TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '20:00:00'), TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '20:40:00'), 'tomada'),
-(2, TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '07:00:00'), TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '07:05:00'), 'tomada'),
-(2, TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '15:00:00'), NULL, 'perdida'),
-(2, TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '23:00:00'), TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '23:20:00'), 'tomada'),
-(3, TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '21:00:00'), NULL, 'perdida'),
-(1, TIMESTAMP(CURDATE(), '08:00:00'), TIMESTAMP(CURDATE(), '08:03:00'), 'tomada'),
-(1, TIMESTAMP(CURDATE(), '20:00:00'), NULL, 'prevista'),
-(2, TIMESTAMP(CURDATE(), '07:00:00'), TIMESTAMP(CURDATE(), '07:18:00'), 'tomada'),
-(2, TIMESTAMP(CURDATE(), '15:00:00'), NULL, 'prevista'),
-(2, TIMESTAMP(CURDATE(), '23:00:00'), NULL, 'prevista'),
-(3, TIMESTAMP(CURDATE(), '21:00:00'), NULL, 'prevista'),
-(4, TIMESTAMP(CURDATE(), '06:30:00'), TIMESTAMP(CURDATE(), '06:35:00'), 'tomada'),
-(5, TIMESTAMP(CURDATE(), '20:00:00'), NULL, 'prevista'),
-(1, TIMESTAMP(DATE_ADD(CURDATE(), INTERVAL 1 DAY), '08:00:00'), NULL, 'prevista'),
-(2, TIMESTAMP(DATE_ADD(CURDATE(), INTERVAL 1 DAY), '07:00:00'), NULL, 'prevista'),
-(4, TIMESTAMP(DATE_ADD(CURDATE(), INTERVAL 1 DAY), '06:30:00'), NULL, 'prevista');
+-- Historico de doses dos remedios em uso: os ultimos 6 dias inteiros e o que ja passou de hoje.
+-- dias: 6 = seis dias atras ... 0 = hoje. passos: a 1a, a 2a e a 3a dose do dia (cabe ate de 8 em 8 horas).
+-- Dose que caiu ha menos de 30 minutos fica de fora: o backend gera ela como prevista e a tela mostra "Está na hora".
+-- Perdidas escolhidas a dedo: a Maria esta em dia, o Lucas esqueceu duas vezes e a Joana uma.
+-- A hora da confirmacao varia uns minutos pra nao ficar tudo cravado no horario.
+INSERT INTO doses (id_medicamento, horario_previsto, horario_confirmado, status)
+SELECT grade.id_medicamento,
+       grade.horario,
+       CASE WHEN grade.perdida THEN NULL
+            ELSE grade.horario + INTERVAL MOD(grade.dia * 7 + grade.passo * 11 + grade.id_medicamento * 5, 25) MINUTE END,
+       CASE WHEN grade.perdida THEN 'perdida' ELSE 'tomada' END
+  FROM (
+    SELECT m.id AS id_medicamento,
+           d.dia,
+           p.passo,
+           TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL d.dia DAY), m.horario_inicial) + INTERVAL (p.passo * m.frequencia_horas) HOUR AS horario,
+           (m.id = 5 AND d.dia IN (2, 4)) OR (m.id = 4 AND d.dia = 3) AS perdida
+      FROM medicamentos m
+      JOIN (SELECT 0 AS dia UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3
+            UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) d
+      JOIN (SELECT 0 AS passo UNION ALL SELECT 1 UNION ALL SELECT 2) p
+     WHERE m.id IN (1, 2, 3, 4, 5, 8)
+       AND p.passo * m.frequencia_horas < 24
+  ) grade
+ WHERE grade.horario <= NOW() - INTERVAL 30 MINUTE
+ ORDER BY grade.horario, grade.id_medicamento;
 
-INSERT INTO cuidador_paciente (id_cuidador, id_paciente, ativo) VALUES
-(4, 1, TRUE),
-(4, 3, TRUE);
+-- Patricia acompanha a Maria (mae dela) e o Lucas. A Joana ninguem acompanha: da pra vincular ao vivo na apresentacao.
+INSERT INTO cuidador_paciente (id_cuidador, id_paciente, autorizado_em, ativo) VALUES
+(4, 1, DATE_SUB(NOW(), INTERVAL 20 DAY), TRUE),
+(4, 3, DATE_SUB(NOW(), INTERVAL 6 DAY), TRUE);
 
+-- O historico da LGPD. O acesso ao QR cancelado do Roberto tambem fica registrado.
 INSERT INTO acessos_qr (id_paciente, acessado_em, ip, user_agent) VALUES
 (1, DATE_SUB(NOW(), INTERVAL 3 DAY), '189.45.12.80', 'Mozilla/5.0 (Linux; Android 13)'),
-(1, DATE_SUB(NOW(), INTERVAL 2 HOUR), '200.147.35.12', 'Mozilla/5.0 (iPhone; iOS 17)'),
-(2, DATE_SUB(NOW(), INTERVAL 8 DAY), '177.92.204.31', 'Mozilla/5.0 (Linux; Android 12)');
+(1, DATE_SUB(NOW(), INTERVAL 2 HOUR), '200.147.35.12', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X)'),
+(2, DATE_SUB(NOW(), INTERVAL 8 DAY), '177.92.204.31', 'Mozilla/5.0 (Linux; Android 12)'),
+(4, DATE_SUB(NOW(), INTERVAL 1 DAY), '191.183.40.7', 'Mozilla/5.0 (Linux; Android 14)');

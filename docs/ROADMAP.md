@@ -258,7 +258,7 @@ As nove dúvidas do `DUVIDAS_CONTRATO.md` estão decididas e implementadas no ba
 
 - [ ] Rodar no banco de quem já tem ele criado o `ALTER TABLE doses` que está no `CONTRATO_API.md` (índice único da agenda) · **Erik e Daiane**
 - [x] Na Fase 9, a lista do cuidador chama `doseService.prepararAgenda(idPaciente, agora)` antes de ler as doses de cada paciente · **Daiane**
-- [ ] Botão de suspender e reativar remédio na tela de remédios, usando o `ativo` do `PUT /medicamentos/:id`
+- [x] Botão de suspender e reativar remédio na tela de remédios, usando o `ativo` do `PUT /medicamentos/:id`
 
 **Marco 7:** lembrete de medicamento fechado de ponta a ponta.
 

@@ -4,6 +4,12 @@
 import Dosagem from "../valueObjects/Dosagem";
 import HorarioDose from "../valueObjects/HorarioDose";
 
+// Quantos dias de agenda existem a frente (duvida 3 do docs/DUVIDAS_CONTRATO.md).
+// Remedio sem data de fim nao acaba, e nao da pra inserir dose infinita.
+// O cadastro gera esses dias, e o DoseService completa antes de cada leitura com este mesmo numero.
+// Mora aqui, e nao no MedicamentoService, porque os dois services usam: assim um nao importa o outro em circulo.
+export const DIAS_DE_AGENDA = 7;
+
 export class Medicamento {
 	// O nome corresponde a medicamentos.nome, que aceita ate 100 caracteres.
 	private static readonly NOME_TAMANHO_MAXIMO = 100;
