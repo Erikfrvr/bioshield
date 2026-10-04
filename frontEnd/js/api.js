@@ -168,6 +168,14 @@
 
     // Sobrou uma sessao de demonstracao e agora tem servidor de verdade: ela nao vale la.
     if (resultado.modo === "api" && resultado.origem && sessaoDeDemo(lerSessao())) gravarSessao(null);
+
+    // Sessao de uma conta criada na demonstracao, de antes de fechar o app. Os dados da demonstracao
+    // recomecaram do zero e essa conta nao existe mais: sem soltar a sessao, toda tela daria "ficha nao encontrada".
+    var sessaoAtual = lerSessao();
+    if (resultado.modo === "demo" && sessaoDeDemo(sessaoAtual) && escopo.BioShieldDemo &&
+        typeof escopo.BioShieldDemo.conheceUsuario === "function" && !escopo.BioShieldDemo.conheceUsuario(sessaoAtual.usuario)) {
+      gravarSessao(null);
+    }
     return resultado;
   }
 

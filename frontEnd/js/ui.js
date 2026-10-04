@@ -218,6 +218,40 @@
     if (alvo) alvo.hidden = true;
   }
 
+  // ===== Botao de voltar do Android =====
+  // Sem o plugin @capacitor/app, o Android fecha o app no primeiro toque em Voltar, em qualquer tela.
+  // Com ele, o aparelho avisa aqui e eu decido: janela aberta fecha, tela anterior volta e, na primeira tela, o app sai.
+  // O Capacitor apaga os ouvintes a cada troca de pagina, entao toda tela liga o dela quando carrega este arquivo.
+  // Uso direto a ponte que o Android coloca na janela, porque o front nao tem empacotador pra importar o @capacitor/app.
+  function ligarBotaoVoltar() {
+    var cap = escopo.Capacitor;
+    if (!cap || typeof cap.isNativePlatform !== "function" || !cap.isNativePlatform()) return;
+    if (typeof cap.addListener !== "function") return;
+    var temPlugin = (cap.PluginHeaders || []).some(function (plugin) { return plugin.name === "App"; });
+    if (!temPlugin) return;
+
+    cap.addListener("App", "backButton", function (dados, erro) {
+      if (erro) return;
+
+      var janelaAberta = todos(".sobreposicao").filter(function (janela) { return !janela.hidden; })[0];
+      if (janelaAberta) {
+        janelaAberta.hidden = true;
+        return;
+      }
+
+      if (dados && dados.canGoBack) {
+        history.back();
+        return;
+      }
+
+      if (typeof cap.nativePromise === "function") {
+        cap.nativePromise("App", "exitApp", {}).catch(function () { /* fica na tela */ });
+      }
+    });
+  }
+
+  ligarBotaoVoltar();
+
   escopo.UI = {
     escapar: escapar,
     icone: icone,

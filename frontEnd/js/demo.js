@@ -1,5 +1,5 @@
 // Modo demonstracao. Responde as mesmas chamadas da API usando os dados ficticios do banco,
-// guardados no localStorage. Serve pra rodar o front sozinho enquanto o backend nao esta pronto
+// guardados no sessionStorage. Serve pra rodar o front sozinho enquanto o backend nao esta pronto
 // e pra gravar o video da apresentacao. Quando a API responde, este arquivo nao e usado.
 
 (function (escopo) {
@@ -244,18 +244,29 @@
     };
   }
 
+  // Igual a entidade Medicamento do backend: a grade anda de frequencia em frequencia a partir do
+  // dataInicio + horarioInicial, so gera de agora pra frente e para no ultimo dia do tratamento.
+  // Remedio que ainda vai comecar so ganha dose a partir do dia de inicio.
   function gerarAgenda(banco, remedio, diasParaFrente) {
-    var inicio = new Date();
     var partes = remedio.horarioInicial.split(":");
-    inicio.setHours(Number(partes[0]), Number(partes[1]), 0, 0);
+    var dia = String(remedio.dataInicio || dataSimples(0)).split("-").map(Number);
+    var inicio = new Date(dia[0], dia[1] - 1, dia[2], Number(partes[0]), Number(partes[1]), 0, 0);
+
     var limite = new Date();
     limite.setDate(limite.getDate() + (diasParaFrente || 3));
+    if (remedio.dataFim) {
+      // O dia do fim ainda tem dose: o limite e a meia-noite do dia seguinte.
+      var fim = String(remedio.dataFim).split("-").map(Number);
+      var depoisDoFim = new Date(fim[0], fim[1] - 1, fim[2] + 1);
+      if (depoisDoFim < limite) limite = depoisDoFim;
+    }
 
     var passo = remedio.frequenciaHoras * 60 * 60 * 1000;
     var marca = inicio.getTime();
-    while (marca < Date.now() - passo) marca += passo;
+    var agora = Date.now();
+    while (marca < agora) marca += passo;
 
-    while (marca <= limite.getTime()) {
+    while (marca < limite.getTime()) {
       // Ao reativar um remedio a dose mais recente pode ja existir (tomada ou perdida). Nao duplico.
       var horario = new Date(marca).toISOString();
       var jaTem = banco.doses.some(function (d) { return d.idMedicamento === remedio.id && d.horarioPrevisto === horario; });
@@ -610,6 +621,15 @@
           .sort(function (a, b) { return a.prioridade - b.prioridade; })
           .map(function (c) { return { nome: c.nome, telefone: c.telefone, parentesco: c.parentesco }; })
       });
+    },
+
+    // Os dados da demonstracao ficam no sessionStorage e somem quando o app e fechado, mas a sessao
+    // fica no localStorage. Uma conta criada na demonstracao deixa de existir na proxima abertura,
+    // e o api.js usa isto pra soltar essa sessao em vez de deixar a pessoa presa em "ficha nao encontrada".
+    conheceUsuario: function (usuario) {
+      if (!usuario) return false;
+      var banco = carregar();
+      return banco.usuarios.some(function (u) { return u.id === usuario.id && u.email === usuario.email; });
     },
 
     reiniciar: function () {

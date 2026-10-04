@@ -102,16 +102,32 @@
     return bloco;
   }
 
-  function preencherAdesao(dados) {
+  // Dose confirmada antes da hora (ate 1 hora antes) so entra na adesao quando o horario dela chega.
+  // Conto essas pra explicar no texto, senao a tela diz "nenhuma dose" logo acima de uma dose tomada.
+  function contarAdiantadas(doses) {
+    var agora = Date.now();
+    return doses.filter(function (dose) {
+      return dose.status === "tomada" && new Date(dose.horarioPrevisto).getTime() > agora;
+    }).length;
+  }
+
+  function preencherAdesao(dados, adiantadas) {
     var hoje = dados.hoje || { previstas: 0, tomadas: 0, percentual: 0 };
     var semana = dados.semana || { previstas: 0, tomadas: 0, percentual: 0, perdidas: 0 };
 
     // A adesao so conta dose com horario ate agora. De manha cedo, antes da primeira dose, a conta da 0%,
     // igual ao painel do cuidador. O texto de baixo explica que ainda nao teve dose nenhuma.
-    UI.elemento("#percentualHoje").textContent = hoje.percentual + "%";
-    UI.elemento("#resumoHoje").textContent = hoje.previstas
+    var resumo = hoje.previstas
       ? hoje.tomadas + " de " + hoje.previstas + " doses confirmadas até agora"
-      : "Nenhuma dose até agora";
+      : adiantadas ? "" : "Nenhuma dose até agora";
+    if (adiantadas) {
+      var frase = adiantadas === 1
+        ? "1 dose confirmada antes da hora entra na conta quando o horário dela chegar"
+        : adiantadas + " doses confirmadas antes da hora entram na conta quando o horário delas chegar";
+      resumo = resumo ? resumo + ". " + frase : frase;
+    }
+    UI.elemento("#percentualHoje").textContent = hoje.percentual + "%";
+    UI.elemento("#resumoHoje").textContent = resumo;
 
     var barra = UI.elemento("#barraHoje");
     var anel = UI.elemento("#anelHoje");
@@ -133,8 +149,10 @@
       return;
     }
 
+    var adiantadas = 0;
     try {
       var doses = await Api.dosesDeHoje(sessao.idPaciente);
+      adiantadas = contarAdiantadas(doses);
       carregando.hidden = true;
       UI.limparErro(caixaErro);
       agenda.innerHTML = "";
@@ -146,9 +164,9 @@
     }
 
     try {
-      preencherAdesao(await Api.adesao(sessao.idPaciente));
+      preencherAdesao(await Api.adesao(sessao.idPaciente), adiantadas);
     } catch (erro) {
-      preencherAdesao({});
+      preencherAdesao({}, adiantadas);
     }
   }
 
