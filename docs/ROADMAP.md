@@ -235,7 +235,7 @@ Começa depois do Marco 4. Roda em paralelo com as Fases 5 e 6 do Erik.
 - [x] `controllers/medicamentoController.ts`
 - [x] `routes/medicamentoRoutes.ts`
 - [x] Testar o CRUD inteiro pelo `requests.http`
-- [ ] Abrir a tel de remédios no navegador e ver a lista real aparecendo
+- [x] Abrir a tela de remédios no navegador e ver a lista real aparecendo
 
 ---
 
@@ -401,19 +401,19 @@ Use o mesmo começo de arquivo da aula, `import { describe, expect, test } from 
 - [x] `tests/valueObjects/Telefone.test.ts` · **Erik**, 
   - [x] `"(11) 98765-4321"` vira `"11987654321"` **Erik**,
   - [x] Rejeita número curto, DDD `01` e celular sem o 9
-- [ ] `tests/valueObjects/TokenQR.test.ts` · **Daiane**,
-  - [ ] `gerar()` devolve 32 caracteres hexadecimais **Daiane**,
-  - [ ] Dois tokens gerados são diferentes **Daiane**,
-  - [ ] `aPartirDoValor` rejeita texto que não é token (`"abc"`) **Daiane**,
-- [ ] `tests/entidade/Alergia.test.ts` · **Daiane**,
-  - [ ] Sem gravidade, a alergia fica `"moderada"` **Daiane**,
-  - [ ] Rejeita gravidade `"fatal"` e substância vazia
-- [ ] `tests/entidade/FichaEmergencia.test.ts` · **Daiane**,
-  - [ ] Alergia grave aparece antes da leve **Daiane**,
-  - [ ] Remédio com `ativo: false` não aparece na ficha **Daiane**,
-- [ ] `tests/entidade/Cuidador.test.ts` · **Daiane**
-  - [ ] `desvincular()` deixa o vínculo inativo **Daiane**,
-  - [ ] Desvincular duas vezes dá erro **Daiane**,
+- [x] `tests/valueObjects/TokenQR.test.ts` · **Daiane**,
+  - [x] `gerar()` devolve 32 caracteres hexadecimais **Daiane**,
+  - [x] Dois tokens gerados são diferentes **Daiane**,
+  - [x] `aPartirDoValor` rejeita texto que não é token (`"abc"`) **Daiane**,
+- [x] `tests/entidade/Alergia.test.ts` · **Daiane**,
+  - [x] Sem gravidade, a alergia fica `"moderada"` **Daiane**,
+  - [x] Rejeita gravidade `"fatal"` e substância vazia
+- [x] `tests/entidade/FichaEmergencia.test.ts` · **Daiane**,
+  - [x] Alergia grave aparece antes da leve **Daiane**,
+  - [x] Remédio com `ativo: false` não aparece na ficha **Daiane**,
+- [x] `tests/entidade/Cuidador.test.ts` · **Daiane**
+  - [x] `desvincular()` deixa o vínculo inativo **Daiane**,
+  - [x] Desvincular duas vezes dá erro **Daiane**,
 
 **Marco 10:** `npm test` passando com esses oito arquivos.
 
@@ -434,7 +434,7 @@ Use o mesmo começo de arquivo da aula, `import { describe, expect, test } from 
 | 7 | Lembrete de dose fechado | Daiane | [ ] |
 | 8 | Backend completo | Daiane | [ ] |
 | 9 | App navegável | pronto no front | [x] |
-| 10 | Testes do Jest passando | Daiane | [ ] |
+| 10 | Testes do Jest passando | Daiane | [x] |
 
 ---
 
