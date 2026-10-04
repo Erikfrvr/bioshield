@@ -235,15 +235,65 @@
           observacao: bloco.querySelector(".campo-observacao").value.trim() || null
         };
       }).filter(function (item) { return item.substancia; }),
-      contatos: UI.todos(".item-contato", listaContatos).map(function (bloco, indice) {
+      // A prioridade e numerada depois de tirar as linhas vazias, pra ordem de ligar ficar 1, 2, 3 sem buraco.
+      contatos: UI.todos(".item-contato", listaContatos).map(function (bloco) {
         return {
           nome: bloco.querySelector(".campo-nome").value.trim(),
           telefone: bloco.querySelector(".campo-telefone").value.replace(/\D/g, ""),
-          parentesco: bloco.querySelector(".campo-parentesco").value.trim() || null,
-          prioridade: indice + 1
+          parentesco: bloco.querySelector(".campo-parentesco").value.trim() || null
         };
       }).filter(function (item) { return item.nome && item.telefone; })
+        .map(function (item, indice) {
+          item.prioridade = indice + 1;
+          return item;
+        })
     };
+  }
+
+  // Linha toda em branco e ignorada pelo coletar. Linha preenchida pela metade nao pode sumir calada:
+  // contato sem telefone some da ficha e, na emergencia, ninguem sabe que ele existia.
+  // Devolve o primeiro problema com o campo que precisa de atencao, ou null quando esta tudo certo.
+  function conferirLinhas() {
+    var alergias = UI.todos(".item-alergia", listaAlergias);
+    for (var i = 0; i < alergias.length; i++) {
+      var substancia = alergias[i].querySelector(".campo-substancia");
+      var reacao = alergias[i].querySelector(".campo-observacao");
+      if (!substancia.value.trim() && reacao.value.trim()) {
+        return { campo: substancia, mensagem: "Escreva a substância da alergia ou toque em Remover nessa linha." };
+      }
+    }
+
+    var contatos = UI.todos(".item-contato", listaContatos);
+    for (var j = 0; j < contatos.length; j++) {
+      var nome = contatos[j].querySelector(".campo-nome");
+      var telefone = contatos[j].querySelector(".campo-telefone");
+      var parentesco = contatos[j].querySelector(".campo-parentesco");
+      var digitos = telefone.value.replace(/\D/g, "");
+      var algumPreenchido = nome.value.trim() || digitos || parentesco.value.trim();
+      if (!algumPreenchido) continue;
+      if (!nome.value.trim()) {
+        return { campo: nome, mensagem: "Escreva o nome do contato de emergência ou toque em Remover nessa linha." };
+      }
+      if (!digitos) {
+        return { campo: telefone, mensagem: "Escreva o telefone de " + nome.value.trim() + ", com DDD." };
+      }
+      if (digitos.length < 10 || digitos.length > 11) {
+        return { campo: telefone, mensagem: "O telefone de " + nome.value.trim() + " precisa ter DDD e 10 ou 11 números." };
+      }
+    }
+    return null;
+  }
+
+  // O aviso fica no fim do formulario, perto do botao. Quando tem um campo culpado, levo a pessoa ate ele
+  // e repito a mensagem num recado, que aparece por cima da tela. Sem campo, rolo ate o aviso.
+  function mostrarErroFicha(mensagem, campo) {
+    UI.mostrarErro(erroFicha, mensagem);
+    if (campo) {
+      campo.focus();
+      UI.recado(mensagem, "erro");
+    } else {
+      erroFicha.scrollIntoView({ block: "center" });
+    }
   }
 
   // O backend guarda o user agent inteiro ("Mozilla/5.0 (Linux; Android 13) ..."), que nao diz nada pra pessoa.
@@ -288,12 +338,24 @@
       carregando.hidden = true;
       preencher();
     } catch (erro) {
+      // A ficha existe, so nao chegou. Mostrar o formulario vazio com "voce ainda nao tem ficha"
+      // faria a pessoa achar que perdeu tudo, entao aqui aparece so o aviso e o botao de tentar de novo.
       carregando.hidden = true;
-      semFicha.hidden = false;
-      abrirAba("ficha");
-      UI.mostrarErro(erroFicha, "Não consegui carregar a ficha agora. " + erro.message);
+      var mensagem = erro.status === 0
+        ? "Não consegui falar com o servidor. Confira a internet ou o endereço do servidor e tente de novo."
+        : erro.status === 403
+          ? "Esta conta não tem acesso a essa ficha. Toque em Sair e entre de novo."
+          : "Não consegui carregar a sua ficha agora. " + erro.message;
+      UI.elemento("#erroCarregar").textContent = mensagem;
+      UI.elemento("#falhaCarregar").hidden = false;
     }
   }
+
+  UI.elemento("#tentarDeNovo").addEventListener("click", function () {
+    UI.elemento("#falhaCarregar").hidden = true;
+    carregando.hidden = false;
+    carregar();
+  });
 
   UI.elemento("#novaAlergia").addEventListener("click", function () {
     listaAlergias.appendChild(linhaAlergia());
@@ -309,14 +371,12 @@
     evento.preventDefault();
     UI.limparErro(erroFicha);
 
-    var dados = coletar();
-    var invalidoTelefone = dados.contatos.some(function (contato) {
-      return contato.telefone.length < 10 || contato.telefone.length > 11;
-    });
-    if (invalidoTelefone) {
-      UI.mostrarErro(erroFicha, "Telefone precisa ter DDD e 10 ou 11 números, sem pontuação.");
+    var problema = conferirLinhas();
+    if (problema) {
+      mostrarErroFicha(problema.mensagem, problema.campo);
       return;
     }
+    var dados = coletar();
 
     var botao = UI.elemento("#salvar");
     botao.disabled = true;
@@ -337,7 +397,11 @@
       }
       preencher();
     } catch (erro) {
-      UI.mostrarErro(erroFicha, "Não consegui salvar. " + erro.message);
+      // 409 no criar: a ficha foi criada em outro aparelho depois deste login, e a sessao daqui nao sabe dela.
+      var mensagem = erro.status === 409 && !ficha
+        ? "Esta conta já tem uma ficha salva. Toque em Sair e entre de novo para carregar ela."
+        : "Não consegui salvar. " + erro.message;
+      mostrarErroFicha(mensagem);
     } finally {
       botao.disabled = false;
       botao.textContent = "Salvar ficha";

@@ -255,6 +255,13 @@
 
 .sem-ficha p { margin: 0.35rem 0 0; color: #7a2d1c; }
 
+/* ===== Ficha que nao carregou ===== */
+
+.falha-carregar {
+  display: grid;
+  gap: 0.9rem;
+}
+
 /* ===== Formulario da ficha ===== */
 
 #formularioFicha {

@@ -78,7 +78,17 @@ A conta está no `frontEnd/js/api.js`. Ele tenta, nesta ordem:
 3. fora do app, o endereço da própria página, que é o caso do site entregue pelo backend
 4. `http://localhost:3000`
 
-Só vale o endereço que responder em `/api/status`. Se nenhum responder, o app entra no **modo demonstração**, com dados fictícios, e avisa isso na tela. Quem já está logado em uma conta de verdade não cai na demonstração: vê o aviso de que não conseguiu falar com o servidor.
+Só vale o endereço que responder em `/api/status`.
+
+## Botão de voltar do Android
+
+Sem plugin, o Capacitor fecha o app no primeiro toque em Voltar, em qualquer tela. Por isso o projeto usa o plugin oficial `@capacitor/app` (já está no `package.json` da raiz), e o `frontEnd/js/ui.js` decide o que o Voltar faz:
+
+1. se tem uma janela aberta (cancelar QR Code, novo remédio), ela fecha
+2. se dá para voltar, volta para a tela anterior
+3. na primeira tela, fecha o app
+
+O `npm run app:sync` registra o plugin no projeto Android sozinho. O comportamento foi testado no navegador simulando o aviso que o Android manda, ainda não num celular. Se nenhum responder, o app entra no **modo demonstração**, com dados fictícios, e avisa isso na tela. Quem já está logado em uma conta de verdade não cai na demonstração: vê o aviso de que não conseguiu falar com o servidor.
 
 ## O QR Code dentro do app
 
@@ -99,7 +109,6 @@ O celular passa a enxergar a porta 3000 do computador como se fosse dele, e o ap
 ## O que não funciona dentro do app
 
 - **Baixar a imagem do QR e imprimir as etiquetas.** Dependem do navegador. No app os dois botões dão lugar a um recado com o endereço para abrir o BioShield no computador, onde a impressão funciona.
-- **Botão de voltar na primeira tela.** Ele volta de uma tela para a outra, mas pelo que conhecemos do Capacitor ele não fecha o app na primeira tela. Não testamos no celular. Para sair, use o botão de início.
 - **Notificação na hora do remédio.** Ainda não existe. O caminho é o plugin oficial `@capacitor/local-notifications`.
 - **Ícone no Android 7.** O ícone do BioShield aparece do Android 8 em diante. No Android 7 fica o ícone padrão do Capacitor.
 
@@ -122,13 +131,15 @@ Não rodem `npx cap add android` de novo: a pasta já existe. Se os dois gerarem
 
 ## O que foi testado e o que não foi
 
-O computador onde isto foi preparado não tem o Android Studio, então **o APK ainda não foi compilado**. O que foi testado:
+**O APK já foi compilado** pela linha de comando, sem o Android Studio, com o JDK 21 e o Android SDK 36 (o Gradle baixou sozinho o Build Tools 35). O `gradlew assembleDebug` terminou com `BUILD SUCCESSFUL`, e o APK gerado foi conferido por dentro: pacote `br.com.bioshield.app`, Android 7 em diante, permissão de internet, HTTP liberado, as telas iguais às do `frontEnd/`, o plugin `@capacitor/app` registrado e a assinatura de depuração válida.
+
+O que também foi testado:
 
 - as telas, de ponta a ponta, em um navegador com tamanho de celular, contra o servidor de verdade
-- o comportamento de app (quadro Servidor, endereço do QR, servidor fora do ar), simulado no navegador
+- o comportamento de app (quadro Servidor, endereço do QR, servidor fora do ar, botão de voltar), simulado no navegador
 - o QR Code gerado, lido por um decodificador, apontando para o endereço de rede
 
-O primeiro teste de verdade é abrir a pasta `android/` no Android Studio e rodar no celular. Se a compilação falhar, anotem a mensagem.
+O que falta: instalar num celular de verdade. Se algo der errado lá, anotem a mensagem.
 
 ## Play Store
 

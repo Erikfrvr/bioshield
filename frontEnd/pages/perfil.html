@@ -34,6 +34,13 @@
         <div class="esqueleto"></div>
       </section>
 
+      <!-- Aparece quando a ficha nao carregou (servidor fora do ar, por exemplo).
+           Fica separado do formulario: ficha que nao carregou nao e ficha que nao existe. -->
+      <section class="cartao falha-carregar" id="falhaCarregar" hidden>
+        <p class="aviso aviso-erro" id="erroCarregar"></p>
+        <button type="button" class="botao botao-secundario" id="tentarDeNovo">Tentar de novo</button>
+      </section>
+
       <!-- ===== Aba QR Code ===== -->
       <div class="painel-aba" id="painelQr" data-aba="qr" role="tabpanel" aria-labelledby="abaQr">
         <section class="cartao cartao-qr" id="cartaoQr" hidden aria-labelledby="tituloQr">
@@ -113,7 +120,9 @@
           </div>
         </section>
 
-        <form id="formularioFicha">
+        <!-- novalidate: as linhas de alergia e contato em branco sao ignoradas pelo perfil.js.
+             Sem ele o navegador barrava o salvar de quem nao tem alergia, com "Preencha este campo". -->
+        <form id="formularioFicha" novalidate>
           <section class="cartao" aria-labelledby="tituloFicha">
             <div class="cartao-cabecalho">
               <div class="cabecalho-com-icone">
