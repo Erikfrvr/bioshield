@@ -32,7 +32,7 @@ O BioShield resolve por software. O usuário gera o próprio QR Code, atualiza o
 
 **QR Code de emergência.** Quem escaneia vê alergias a medicamento, remédios em uso, tipo sanguíneo, condições de saúde e o contato de emergência com botão de ligar. Abre no navegador, sem login e sem instalar nada, porque quem escaneia é um estranho no meio de uma emergência.
 
-**Lembrete de medicamentos.** Cadastro de remédio com dosagem e frequência, agenda de doses gerada automaticamente e confirmação de cada tomada, com percentual de adesão. O remédio pode ser suspenso e reativado sem perder o histórico de doses.
+**Lembrete de medicamentos.** Cadastro de remédio com dosagem e frequência, agenda de doses gerada automaticamente e confirmação de cada tomada, com percentual de adesão. O remédio pode ser suspenso e reativado sem perder o histórico de doses. No app Android, o celular toca um alarme na hora de cada dose e repete a cada 5 minutos até a pessoa confirmar, com os botões Tomei e Lembrar em 5 min na própria notificação, mesmo com a tela bloqueada e o app fechado.
 
 **Modo cuidador.** O familiar acompanha de longe se as doses estão sendo tomadas. O vínculo só existe depois de autorização explícita do paciente, e o cuidador vê acompanhamento sem editar a ficha médica.
 

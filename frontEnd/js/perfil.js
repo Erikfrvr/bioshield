@@ -394,6 +394,7 @@
         sessao = atual;
         UI.recado("Ficha criada e QR Code gerado.");
         jaAbriuAba = false;
+        if (window.Lembretes) Lembretes.sincronizar(true);
       }
       preencher();
     } catch (erro) {

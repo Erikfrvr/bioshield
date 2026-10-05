@@ -88,6 +88,8 @@
         try {
           await Api.confirmarDose(dose.id);
           UI.recado("Dose confirmada.");
+          // Os lembretes que faltavam dessa dose param de tocar e somem da barra do celular.
+          if (window.Lembretes) Lembretes.doseConfirmada(dose.id, false);
           carregar();
         } catch (erro) {
           UI.recado("Não consegui confirmar. " + erro.message, "erro");
@@ -183,6 +185,15 @@
 
   setInterval(recarregarSePuder, UM_MINUTO_MS);
   document.addEventListener("visibilitychange", recarregarSePuder);
+
+  // Dose confirmada pela janela de alarme ou pelo botao Tomei da notificacao: a lista acompanha.
+  document.addEventListener("bioshield:doses-mudaram", carregar);
+
+  // O cartao do alarme. Na primeira visita com ficha, o app ja pede a permissao de notificacao.
+  if (window.Lembretes && sessao.idPaciente) {
+    Lembretes.montarCartao(UI.elemento("#cartaoAlarme"));
+    Lembretes.pedirSeNuncaPediu();
+  }
 
   carregar();
 })();

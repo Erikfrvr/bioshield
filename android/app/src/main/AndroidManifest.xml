@@ -39,4 +39,13 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Alarme dos remedios (frontEnd/js/lembretes.js). O plugin @capacitor/local-notifications ja traz
+         a permissao de notificacao, a de religar os alarmes quando o celular reinicia e a SCHEDULE_EXACT_ALARM.
+         USE_EXACT_ALARM: no Android 13 em diante libera o alarme no minuto certo sem a pessoa ir nas configuracoes.
+         O Google Play so aceita essa permissao em app de despertador ou agenda: antes de publicar na loja,
+         rever isso (docs/GUIA_APK.md).
+         VIBRATE: a janela de alarme vibra o celular com o app aberto. -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 </manifest>

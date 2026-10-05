@@ -56,6 +56,8 @@
     try {
       await Api.atualizarMedicamento(remedio.id, { ativo: ativar });
       UI.recado(ativar ? "Remédio reativado e agenda de doses refeita." : "Remédio suspenso.");
+      // Suspenso para de tocar o alarme na hora. Reativado volta a tocar.
+      if (window.Lembretes) Lembretes.sincronizar(true);
       carregar();
     } catch (erro) {
       botao.disabled = false;
@@ -105,6 +107,7 @@
       try {
         await Api.apagarMedicamento(remedio.id);
         UI.recado("Remédio removido.");
+        if (window.Lembretes) Lembretes.sincronizar(true);
         carregar();
       } catch (erro) {
         UI.recado("Não consegui remover. " + erro.message, "erro");
@@ -294,6 +297,11 @@
       await Api.cadastrarMedicamento(dados);
       fechar();
       UI.recado("Remédio cadastrado e agenda de doses criada.");
+      // Remedio novo ja entra no alarme. Se o app nunca pediu a permissao de notificacao, e a hora.
+      if (window.Lembretes) {
+        Lembretes.sincronizar(true);
+        Lembretes.pedirSeNuncaPediu();
+      }
       carregar();
     } catch (erro) {
       UI.mostrarErro(erroFormulario, "Não consegui salvar. " + erro.message);

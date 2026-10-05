@@ -354,6 +354,11 @@
       return chamar("dosesDeHoje", "/doses/hoje?idPaciente=" + idPaciente, {}, [idPaciente]);
     },
 
+    // Agenda dos proximos dias, que o lembretes.js usa pra agendar o alarme no celular.
+    proximasDoses: function (idPaciente) {
+      return chamar("proximasDoses", "/doses/proximas?idPaciente=" + idPaciente, {}, [idPaciente]);
+    },
+
     confirmarDose: function (id) {
       return chamar("confirmarDose", "/doses/" + id + "/confirmar", {
         metodo: "POST",

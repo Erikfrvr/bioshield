@@ -348,7 +348,7 @@ Protegida.
 
 Protegida. Cadastra o remédio **e gera a agenda de doses** a partir do horário inicial e do intervalo.
 
-A agenda é gerada para os próximos **7 dias**, ou até o `dataFim`, o que vier antes, e só de agora para a frente. Os dias seguintes são completados pelo backend antes de cada leitura de dose (`/doses/hoje`, `/doses/adesao`, `GET /medicamentos` e a lista do cuidador), então o front não precisa pedir nada.
+A agenda é gerada para os próximos **7 dias**, ou até o `dataFim`, o que vier antes, e só de agora para a frente. Os dias seguintes são completados pelo backend antes de cada leitura de dose (`/doses/hoje`, `/doses/proximas`, `/doses/adesao`, `GET /medicamentos` e a lista do cuidador), então o front não precisa pedir nada.
 
 ```json
 {
@@ -394,7 +394,33 @@ Protegida. Só as doses de hoje, ordenadas por horário.
 
 `status` é `prevista`, `tomada` ou `perdida`.
 
-Ninguém marca dose como `perdida` na mão e não existe rotina rodando de tempo em tempo. A troca acontece na leitura: antes de responder esta rota e a de adesão, o backend passa para `perdida` toda dose `prevista` do paciente que já passou **60 minutos** do horário sem confirmação. Por isso a dose das 8h aparece como `prevista` até as 9h e como `perdida` depois disso.
+Ninguém marca dose como `perdida` na mão e não existe rotina rodando de tempo em tempo. A troca acontece na leitura: antes de responder esta rota, a de próximas doses e a de adesão, o backend passa para `perdida` toda dose `prevista` do paciente que já passou **60 minutos** do horário sem confirmação. Por isso a dose das 8h aparece como `prevista` até as 9h e como `perdida` depois disso.
+
+### GET /api/doses/proximas?idPaciente=1
+
+Protegida. O dono ou um cuidador com vínculo ativo, igual ao `/doses/hoje`. É a agenda do **alarme dos remédios**: o app usa essa lista para agendar os avisos no próprio celular (`frontEnd/js/lembretes.js`).
+
+Mesmo formato do `/doses/hoje`, com três diferenças:
+
+- só doses com `status` `prevista` (tomada e perdida não têm mais o que lembrar)
+- a janela vai de **60 minutos atrás** (a dose atrasada dentro da tolerância ainda pode ser confirmada e ainda merece lembrete) até **2 dias para a frente** (`DIAS_DE_LEMBRETE` no `DoseService`)
+- ordenadas por horário, sem limite de dia do calendário
+
+```json
+[
+  {
+    "id": 9, "idMedicamento": 1, "nomeMedicamento": "Losartana",
+    "dosagem": 50, "unidade": "mg",
+    "horarioPrevisto": "2026-09-18T23:00:00.000Z",
+    "horarioConfirmado": null,
+    "status": "prevista"
+  }
+]
+```
+
+Antes de responder, o backend completa a agenda e aplica a tolerância, como nas outras leituras de dose. Remédio suspenso ou encerrado não aparece.
+
+No modo demonstração, o `demo.js` responde a mesma lista com os dados fictícios, e também completa a agenda até 2 dias para a frente.
 
 ### POST /api/doses/:id/confirmar
 
@@ -513,7 +539,7 @@ Depois do passo 4 vocês já conseguem escanear o QR com o celular e ver a ficha
 | `pages/perfil.html` | Ficha médica, QR Code, cancelamento, acessos, código do cuidador | `GET/POST/PUT /pacientes`, as três rotas de QR, `/acessos`, `/codigo` |
 | `pages/imprimir.html` | Folha A4 com as etiquetas | `GET /pacientes/:id` |
 | `pages/medicamentos.html` | Lista e cadastro de remédios | `GET/POST/DELETE /medicamentos` |
-| `pages/doses.html` | Agenda do dia e adesão | `GET /doses/hoje`, `POST /doses/:id/confirmar`, `GET /doses/adesao` |
+| `pages/doses.html` | Agenda do dia, adesão e cartão do alarme | `GET /doses/hoje`, `POST /doses/:id/confirmar`, `GET /doses/adesao`, `GET /doses/proximas` |
 | `pages/cuidador.html` | Painel do cuidador | `POST /cuidadores/vincular`, `GET /cuidadores/:id/pacientes`, `DELETE /cuidadores/vinculo/:id` |
 | `pages/emergencia.html` | Ficha pública do QR | `GET /emergencia/:token` |
 
@@ -526,3 +552,4 @@ Arquivos de apoio em `frontEnd/js/`:
 | `ui.js` | Guarda de sessão, navegação, recados e formatação |
 | `qrcode.js` | Gerador de QR Code próprio, sem CDN |
 | `demo.js` | Dados fictícios do modo demonstração |
+| `lembretes.js` | Alarme dos remédios: agenda os avisos no celular, janela de alarme com som e o cartão da tela de doses. Usa `GET /doses/proximas` e `POST /doses/:id/confirmar`. Detalhes em `docs/GUIA_APK.md` |

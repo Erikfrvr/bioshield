@@ -646,6 +646,15 @@ Authorization: Bearer {{loginMaria.response.body.token}}
 GET {{baseUrl}}/doses/hoje?idPaciente=2
 Authorization: Bearer {{loginMaria.response.body.token}}
 
+### Proximas doses, a agenda do alarme do celular (esperado 200, so status "prevista",
+### de 60 minutos atras ate 2 dias pra frente, ordenadas por horario)
+GET {{baseUrl}}/doses/proximas?idPaciente=1
+Authorization: Bearer {{loginMaria.response.body.token}}
+
+### Proximas doses de paciente que nao e da Maria (esperado 403)
+GET {{baseUrl}}/doses/proximas?idPaciente=2
+Authorization: Bearer {{loginMaria.response.body.token}}
+
 ### Confirmar a primeira dose de hoje (esperado 200, volta id, status "tomada" e horarioConfirmado)
 POST {{baseUrl}}/doses/{{dosesHoje.response.body.$[0].id}}/confirmar
 Authorization: Bearer {{loginMaria.response.body.token}}
