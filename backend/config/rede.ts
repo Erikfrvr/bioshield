@@ -73,11 +73,37 @@ setInterval(() => {
   void atualizarEnderecoDaRede();
 }, INTERVALO_MS).unref();
 
+// Endereco do Tailscale Funnel: sempre termina em .ts.net e sempre e HTTPS, sem porta.
+export function ehEnderecoTailscale(endereco: string): boolean {
+  try {
+    return new URL(endereco).hostname.toLowerCase().endsWith(".ts.net");
+  } catch {
+    return false;
+  }
+}
+
+// O URL_PUBLICA do .env como a pessoa escreveu, arrumado: sem barra no fim e com o protocolo na frente.
+// Sem protocolo, endereco do Tailscale ganha https:// e o resto ganha http://.
+// Endereco do Tailscale escrito com http:// tambem vira https://, porque o Funnel so atende HTTPS.
+export function urlPublicaConfigurada(): string {
+  let configurada = (process.env.URL_PUBLICA ?? "").trim().replace(/\/+$/, "");
+  if (configurada === "") {
+    return "";
+  }
+  if (!/^https?:\/\//i.test(configurada)) {
+    configurada = (configurada.toLowerCase().includes(".ts.net") ? "https://" : "http://") + configurada;
+  }
+  if (ehEnderecoTailscale(configurada)) {
+    configurada = configurada.replace(/^http:\/\//i, "https://");
+  }
+  return configurada;
+}
+
 // O endereco que vai dentro do QR Code e que o app usa pra achar o servidor.
-// Se o .env tiver URL_PUBLICA, vale ela: e o jeito de travar o endereco na mao.
+// Se o .env tiver URL_PUBLICA, vale ela: e o jeito de travar o endereco na mao, e e o que o Funnel precisa.
 // Sem ela, uso o IP da placa ligada na rede. Devolve null quando a maquina nao esta em rede nenhuma.
 export function urlPublica(porta: number): string | null {
-  const configurada = (process.env.URL_PUBLICA ?? "").trim().replace(/\/+$/, "");
+  const configurada = urlPublicaConfigurada();
   if (configurada !== "") {
     return configurada;
   }

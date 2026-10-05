@@ -362,9 +362,11 @@ O corte do cancelamento é o melhor plano do vídeo inteiro. É o que mostra que
 
 A ideia é deixar QR Codes de pacientes fictícios na mesa para o visitante escanear com o próprio celular. As pegadinhas e a linha do tempo completa estão em `docs/DIA_DO_EVENTO.md`. Leiam antes de imprimir qualquer coisa.
 
-- [ ] Subir o servidor no Linux Mint do professor, seguindo o `docs/SERVIDOR_LINUX.md`
-- [ ] Fixar o IP do servidor no roteador, para o endereço não mudar depois de imprimir
-- [ ] Abrir uma ficha com o celular no wifi do roteador, antes de gerar qualquer QR
+- [ ] Subir o servidor no notebook do Erik com o Tailscale Funnel, seguindo o `docs/SERVIDOR_ONLINE.md`
+- [ ] Escolher o nome da máquina no Tailscale, para o endereço não mudar depois de imprimir
+- [ ] Abrir uma ficha com o celular no 4G, antes de gerar qualquer QR
+- [x] Endereço público do Funnel no QR, no histórico de acessos e no app · `URL_PUBLICA` no `.env`
+- [ ] Trocar a senha das contas fictícias, porque o endereço fica aberto na internet
 - [x] Endereço do QR montado sozinho a partir do endereço de rede do servidor · não precisa mais preencher nada no `config.js`
 - [ ] **Só então** gerar e imprimir os QR Codes
 - [ ] Testar cada papel com dois celulares

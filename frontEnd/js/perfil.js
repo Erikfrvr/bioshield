@@ -119,8 +119,11 @@
     var endereco = UI.urlDaFicha(ficha.tokenQr);
     enderecoQr.textContent = endereco;
     UI.elemento("#verFicha").href = endereco;
-    // O QR guarda o endereco inteiro. Com "localhost" dentro, ele so abriria neste computador.
-    UI.elemento("#avisoEndereco").hidden = !UI.ehEnderecoLocal(endereco);
+    // O QR guarda o endereco inteiro. Com "localhost" dentro, ele so abriria neste computador,
+    // e com o IP do wifi so abre para quem estiver na mesma rede.
+    var alcance = UI.alcanceDoEndereco(endereco);
+    UI.elemento("#avisoEndereco").hidden = alcance !== "local";
+    UI.elemento("#avisoWifi").hidden = alcance !== "wifi";
 
     try {
       BioShieldQR.desenharNoCanvas(telaQr, endereco, { escala: 8, margem: 3, cor: "#0E3C39" });
@@ -142,10 +145,7 @@
     // No lugar do botao fica o recado de onde fazer isso.
     if (Api.noApp) {
       var conexao = Api.conexao();
-      var ondeAbrir = "";
-      if (conexao && conexao.origem) {
-        ondeAbrir = UI.ehEnderecoLocal(conexao.origem) && conexao.urlPublica ? conexao.urlPublica : conexao.origem;
-      }
+      var ondeAbrir = UI.enderecoPublico(conexao);
       UI.elemento("#notaApp").hidden = !ativo;
       UI.elemento("#notaApp").textContent = "Para imprimir as etiquetas, abra o BioShield no navegador de um computador" +
         (ondeAbrir ? ", no endereço " + ondeAbrir + "." : ".");

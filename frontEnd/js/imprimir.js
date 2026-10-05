@@ -130,7 +130,20 @@
     }
 
     endereco = UI.urlDaFicha(ficha.tokenQr);
+    avisarAlcance();
     montar();
+  }
+
+  // Papel impresso nao se corrige depois. Se o endereco nao abre de qualquer lugar, aviso antes.
+  function avisarAlcance() {
+    var aviso = UI.elemento("#avisoEndereco");
+    var alcance = UI.alcanceDoEndereco(endereco);
+    if (alcance === "local") {
+      aviso.textContent = "Atenção: este QR Code só abre neste computador. Abra o BioShield pelo endereço público do servidor antes de imprimir.";
+    } else if (alcance === "wifi") {
+      aviso.textContent = "Atenção: este QR Code só abre para quem estiver no mesmo wifi do servidor. Pelo 4G ele não abre.";
+    }
+    aviso.hidden = alcance === "";
   }
 
   ["#textoEtiqueta", "#mostrarNome", "#nivelCorrecao"].forEach(function (seletor) {

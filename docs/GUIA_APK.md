@@ -6,9 +6,9 @@ Este guia explica como gerar o APK, como o app encontra o servidor e como funcio
 
 ## Como o app conversa com o servidor
 
-O app leva só as telas. A API e o banco ficam no computador que roda o backend (no evento, o Linux Mint descrito em [`SERVIDOR_LINUX.md`](SERVIDOR_LINUX.md)), e o celular precisa estar no mesmo wifi dele.
+O app leva só as telas. A API e o banco ficam no computador que roda o backend. No evento, é o notebook do Erik com o Tailscale Funnel, descrito em [`SERVIDOR_ONLINE.md`](SERVIDOR_ONLINE.md), e aí o celular funciona em qualquer internet. Sem o Funnel, usando o IP da rede local, o celular precisa estar no mesmo wifi do computador.
 
-Na primeira vez que o app abre, a tela de entrada mostra o quadro **Servidor**. A pessoa toca em "Informar o endereço do servidor", escreve o número que o terminal do servidor mostrou (por exemplo `192.168.0.10`) e toca em "Testar e salvar". A porta 3000 entra sozinha. Quando aparece "Conectado ao servidor", é só entrar com a conta. O app guarda o endereço; se o servidor mudar de IP, o mesmo quadro tem o botão "Trocar de servidor". Trocar de servidor não exige gerar o APK de novo.
+Na primeira vez que o app abre, a tela de entrada mostra o quadro **Servidor**. A pessoa toca em "Informar o endereço do servidor", escreve o endereço e toca em "Testar e salvar". Com o Funnel, é o endereço `.ts.net` (por exemplo `bioshield.tail1234ab.ts.net`), com ou sem o `https://`. Na rede local, é o número que o terminal do servidor mostrou (por exemplo `192.168.0.10`), e a porta 3000 entra sozinha. Quando aparece "Conectado ao servidor", é só entrar com a conta. O app guarda o endereço; se o servidor mudar de IP, o mesmo quadro tem o botão "Trocar de servidor". Trocar de servidor não exige gerar o APK de novo.
 
 Por trás disso, o `frontEnd/js/api.js` testa os endereços nesta ordem e fica com o primeiro que responder em `/api/status`:
 
@@ -205,7 +205,7 @@ Recados (a faixa que aparece no rodapé da tela por alguns segundos):
 | O menu Build não tem a opção de gerar APK | O projeto foi aberto pela pasta `bioshield`, e não pela `android` |
 | "Please Select Gradle JVM" ao abrir | Escolha "Use JVM 21" |
 | O app abre com as telas antigas | Faltou o `npm run app:sync` antes de gerar |
-| "O BioShield não respondeu em..." ao salvar o servidor | Celular fora do wifi do servidor, IP errado, firewall do servidor ou roteador isolando os aparelhos |
+| "O BioShield não respondeu em..." ao salvar o servidor | Com o endereço `.ts.net`: celular sem internet, backend desligado ou Funnel desligado (`tailscale funnel status` no notebook). Com IP da rede local: celular fora do wifi do computador, IP errado ou firewall do Windows barrando a porta 3000 |
 | O app abre no modo demonstração | Nenhum servidor respondeu. Informe o endereço no quadro Servidor |
 | O emulador não abre: "Not enough space to create userdata partition" | Pouco espaço no disco. Diminua o armazenamento do celular virtual ou libere espaço |
 | O `npm run app:sync` reclama da versão do Node | Node abaixo do 22 |

@@ -10,8 +10,14 @@ import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
-import "./config/db";
-import { atualizarEnderecoDaRede, enderecosDaRede, urlPublica } from "./config/rede";
+import { bancoRespondendo } from "./config/db";
+import {
+  atualizarEnderecoDaRede,
+  ehEnderecoTailscale,
+  enderecosDaRede,
+  urlPublica,
+  urlPublicaConfigurada,
+} from "./config/rede";
 import usuarioRoutes from "./routes/usuarioRoutes";
 import pacienteRoutes from "./routes/pacienteRoutes";
 import emergenciaRoutes from "./routes/emergenciaRoutes";
@@ -19,20 +25,33 @@ import medicamentoRoutes from "./routes/medicamentoRoutes";
 import doseRoutes from "./routes/doseRoutes";
 import cuidadorRoutes from "./routes/cuidadorRoutes";
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const PORT = Number(process.env.PORT) || 3000;
 
 const app = express();
 
+// O Tailscale Funnel recebe o acesso da internet e repassa para ca de dentro do proprio computador (127.0.0.1),
+// com o IP de verdade de quem escaneou no cabecalho X-Forwarded-For.
+// "loopback" faz o Express acreditar nesse cabecalho so quando o pedido vem do proprio computador.
+// Assim o historico de acessos da LGPD grava o IP do visitante, e um celular do wifi, que chega direto,
+// nao consegue inventar um IP mandando esse cabecalho.
+app.set("trust proxy", "loopback");
+
 app.use(cors());
 app.use(express.json());
 
 // O front chama esta rota pra saber se a API esta de pe.
-// urlPublica e o endereco pelo qual os celulares da rede enxergam este servidor: o front usa ele
+// urlPublica e o endereco pelo qual os celulares enxergam este servidor: o front usa ele
 // pra montar o QR Code, assim o codigo nunca sai apontando pra "localhost".
-app.get("/api/status", (_req, res) => {
-  res.json({ status: "ok", urlPublica: urlPublica(PORT) });
+// banco diz se o MySQL respondeu. O front so olha o status; o banco e pra conferir no dia, abrindo esta rota no celular.
+app.get("/api/status", async (_req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.json({
+    status: "ok",
+    urlPublica: urlPublica(PORT),
+    banco: (await bancoRespondendo()) ? "ok" : "fora do ar",
+  });
 });
 
 // Todos os routers ficam registrados aqui de uma vez, mesmo os que ainda estao vazios.
@@ -81,20 +100,48 @@ app.use((erro: unknown, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ mensagem: "Erro interno ao processar a requisição. Tente novamente." });
 });
 
+// Confere o .env na subida e avisa no terminal o que vai dar problema.
+// So avisa, nao derruba o servidor: no dia, um servidor de pe com aviso e melhor que nenhum.
+function avisarConfiguracao(): void {
+  const segredo = process.env.JWT_SECRET ?? "";
+  if (segredo === "") {
+    console.log("ATENCAO: falta o JWT_SECRET no .env. Ninguem vai conseguir entrar no app.");
+  } else if (segredo === "troque_esse_valor" || segredo.length < 32) {
+    console.log("ATENCAO: o JWT_SECRET do .env e o do exemplo ou e curto demais.");
+    console.log("  Com o Tailscale Funnel o BioShield fica aberto na internet. Troque por um texto longo, de 32 letras ou mais.");
+  }
+
+  const configurada = urlPublicaConfigurada();
+  if (configurada !== "" && ehEnderecoTailscale(configurada)) {
+    console.log("Tailscale Funnel: confira se ele esta ligado com o comando  tailscale funnel status");
+    console.log(`  Ele precisa mostrar ${configurada} levando para a porta ${PORT}.`);
+  }
+}
+
 // Sem endereco no listen o Express atende em todas as placas de rede, e nao so no localhost.
 // E isso que deixa o celular do mesmo wifi chegar aqui.
 app.listen(PORT, async () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
+  avisarConfiguracao();
 
   await atualizarEnderecoDaRede();
   const enderecos = enderecosDaRede();
   if (enderecos.length === 0) {
     console.log("Este computador nao esta em nenhuma rede. So ele mesmo consegue abrir o BioShield.");
+  } else {
+    console.log("Nos celulares e nos outros computadores da mesma rede, use:");
+    for (const endereco of enderecos) {
+      console.log(`  http://${endereco}:${PORT}`);
+    }
+  }
+
+  const noQr = urlPublica(PORT);
+  if (noQr === null) {
     return;
   }
-  console.log("Nos celulares e nos outros computadores da mesma rede, use:");
-  for (const endereco of enderecos) {
-    console.log(`  http://${endereco}:${PORT}`);
+  console.log(`Endereco que vai dentro do QR Code: ${noQr}`);
+  if (!noQr.startsWith("https://")) {
+    console.log("  Esse endereco so abre para quem estiver no mesmo wifi. Para abrir pelo 4G com o Tailscale Funnel,");
+    console.log("  coloque o endereco dele no URL_PUBLICA do .env (veja docs/SERVIDOR_ONLINE.md).");
   }
-  console.log(`Endereco que vai dentro do QR Code: ${urlPublica(PORT)}`);
 });
