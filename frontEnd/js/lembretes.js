@@ -469,7 +469,14 @@
       try {
         await cancelarAgendados(false);
         // Os avisos que ja tocaram tambem saem da barra: sao da conta de quem saiu.
-        await plugin("removeAllDeliveredNotifications");
+        // So os do alarme (id zero ou maior). Os avisos do cuidador (VerificadorCuidador.java) usam id negativo
+        // e ficam: conta de cuidador sem ficha passa por aqui em toda tela, e apagar tudo sumiria com eles.
+        // Quando o cuidador sai, quem tira os avisos dele e o AvisosCuidador.desligar.
+        var resposta = await plugin("getDeliveredNotifications");
+        var doAlarme = ((resposta && resposta.notifications) || [])
+          .map(function (aviso) { return aviso.id; })
+          .filter(function (id) { return id >= 0; });
+        if (doAlarme.length) await plugin("removeDeliveredNotificationsById", { ids: doAlarme });
       } catch (erro) {
         // Na proxima abertura tento de novo.
       }
@@ -988,6 +995,8 @@
     doseConfirmada: doseConfirmada,
     pedirPermissao: pedirPermissao,
     pedirSeNuncaPediu: pedirSeNuncaPediu,
+    // "granted", "denied", "prompt" ou "navegador". Os avisos do cuidador usam a mesma permissao.
+    estadoPermissao: permissao,
     temAcaoPendente: temAcaoPendente,
     testar: testar,
     montarCartao: montarCartao,

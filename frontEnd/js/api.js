@@ -378,6 +378,11 @@
       return chamar("pacientesDoCuidador", "/cuidadores/" + idCuidador + "/pacientes", {}, [idCuidador]);
     },
 
+    // Doses perdidas de quem o cuidador acompanha, para os avisos do avisosCuidador.js.
+    alertasDoCuidador: function (idCuidador) {
+      return chamar("alertasDoCuidador", "/cuidadores/" + idCuidador + "/alertas", {}, [idCuidador]);
+    },
+
     desvincularCuidador: function (idVinculo) {
       return chamar("desvincularCuidador", "/cuidadores/vinculo/" + idVinculo, { metodo: "DELETE" }, [idVinculo]);
     },

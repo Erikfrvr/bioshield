@@ -4,7 +4,13 @@
 // Cuidador ve acompanhamento, nao edita a ficha medica do paciente.
 import cuidadorInfrastructure from "../infrastructure/cuidadorInfrastructure";
 import Cuidador from "../models/entidade/Cuidador";
-import { PacienteAcompanhadoResponseDTO, VinculoResponseDTO } from "../models/dto/cuidador/CuidadorResponseDTO";
+import { TOLERANCIA_ATRASO_MINUTOS } from "../models/entidade/Dose";
+import {
+  AlertasCuidadorResponseDTO,
+  DosePerdidaCuidadorDTO,
+  PacienteAcompanhadoResponseDTO,
+  VinculoResponseDTO,
+} from "../models/dto/cuidador/CuidadorResponseDTO";
 import { VincularCuidadorDTO } from "../models/dto/cuidador/VincularCuidadorDTO";
 import { CuidadorRepository, VinculoComPaciente } from "../repository/CuidadorRepository";
 import autorizacaoService, { ErroAcesso } from "./AutorizacaoService";
@@ -13,6 +19,17 @@ import doseService from "./DoseService";
 // Mensagem unica pra codigo que nao existe e pra codigo vencido (os dois dao 404 no contrato).
 // Se fossem diferentes, daria pra descobrir quais codigos ja existiram so tentando.
 const MENSAGEM_CODIGO_INVALIDO = "Esse código não corresponde a nenhum paciente.";
+
+// Avisos de dose perdida no celular do cuidador (listarAlertas).
+// Dose perdida mais velha que isso nao vira aviso: o celular pode ter ficado dias desligado.
+const JANELA_PERDIDAS_MS = 24 * 60 * 60 * 1000;
+// Ate quando o celular recebe os momentos de conferir de novo.
+const JANELA_VERIFICACOES_MS = 24 * 60 * 60 * 1000;
+// Teto de momentos devolvidos: cada um vira um alarme exato no celular.
+const MAXIMO_VERIFICACOES = 30;
+// Folga depois da tolerancia, pra quando o celular conferir a dose ja estar marcada como perdida.
+const FOLGA_VERIFICACAO_MS = 30 * 1000;
+const TOLERANCIA_MS = TOLERANCIA_ATRASO_MINUTOS * 60 * 1000;
 
 // Mesmo esquema do DoseService: o service diz o tipo, o controller escolhe o status code.
 export type TipoErroCuidador = "validacao" | "nao_encontrado";
@@ -73,6 +90,57 @@ export class CuidadorService {
     const agora = new Date();
     const vinculos = await this.repositorio.listarPacientes(idCuidador);
     return Promise.all(vinculos.map((v) => this.paraResposta(v, agora)));
+  }
+
+  // GET /cuidadores/:id/alertas. O celular do cuidador consulta de tempos em tempos e avisa de dose perdida.
+  // :id e o usuario cuidador e precisa ser o de quem esta logado, igual ao listarPacientes.
+  // Sai so quem, qual remedio e de que horario: nada da ficha medica.
+  // So entram doses de depois do vinculo, senao o cuidador novo receberia aviso de coisa antiga.
+  async listarAlertas(idCuidador: number, idLogado: number | undefined): Promise<AlertasCuidadorResponseDTO> {
+    this.validarId(idCuidador, "cuidador");
+    autorizacaoService.garantirMesmoUsuario(idLogado, idCuidador);
+
+    const agora = new Date();
+    const vinculos = await this.repositorio.listarPacientes(idCuidador);
+    const perdidas: DosePerdidaCuidadorDTO[] = [];
+    const verificacoes = new Set<number>();
+
+    for (const { vinculo, nomePaciente } of vinculos) {
+      const idPaciente = vinculo.getIdPaciente();
+      const autorizadoEm = vinculo.getAutorizadoEm()?.getTime() ?? 0;
+      const inicio = new Date(Math.max(agora.getTime() - JANELA_PERDIDAS_MS, autorizadoEm));
+      const fim = new Date(agora.getTime() + JANELA_VERIFICACOES_MS);
+
+      // O dosesDoPeriodo completa a agenda e aplica a tolerancia antes de ler, entao a dose
+      // que passou dos 60 minutos ja chega aqui como perdida.
+      const doses = await doseService.dosesDoPeriodo(idPaciente, inicio, fim, agora);
+      for (const { dose, nomeMedicamento } of doses) {
+        if (dose.foiPerdida()) {
+          perdidas.push({
+            idDose: dose.getId() as number,
+            idPaciente,
+            nomePaciente,
+            nomeMedicamento,
+            horarioPrevisto: dose.getHorarioPrevisto().toISOString(),
+          });
+        } else if (dose.estaPrevista()) {
+          const quando = dose.getHorarioPrevisto().getTime() + TOLERANCIA_MS + FOLGA_VERIFICACAO_MS;
+          if (quando > agora.getTime()) {
+            verificacoes.add(quando);
+          }
+        }
+      }
+    }
+
+    perdidas.sort((a, b) => b.horarioPrevisto.localeCompare(a.horarioPrevisto));
+    return {
+      acompanha: vinculos.length,
+      perdidas,
+      proximasVerificacoes: [...verificacoes]
+        .sort((a, b) => a - b)
+        .slice(0, MAXIMO_VERIFICACOES)
+        .map((quando) => new Date(quando).toISOString()),
+    };
   }
 
   // DELETE /cuidadores/vinculo/:id. Marca ativo = FALSE e nao apaga a linha:

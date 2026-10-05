@@ -142,6 +142,14 @@ export class DoseService {
     return { hoje: this.paraAdesao(hoje), semana: this.paraAdesao(semana) };
   }
 
+  // As doses do paciente num periodo, ja com a agenda completa e a tolerancia aplicada.
+  // Usado pelos avisos de dose perdida do cuidador (CuidadorService.listarAlertas).
+  // Atencao: este metodo NAO confere permissao. Quem chama ja tem que ter garantido o vinculo.
+  async dosesDoPeriodo(idPaciente: number, inicio: Date, fim: Date, agora: Date): Promise<DoseComMedicamento[]> {
+    await this.prepararAgenda(idPaciente, agora);
+    return this.repositorio.listarPorPeriodo(idPaciente, inicio, fim);
+  }
+
   // A adesao dos ultimos 7 dias, pro painel do cuidador (CuidadorService).
   // Atencao: este metodo NAO confere permissao. Quem chama ja tem que ter garantido o vinculo.
   // Prepara a agenda antes de contar, senao o familiar ve "em dia" pra quem nao abriu o app.

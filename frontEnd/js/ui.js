@@ -94,8 +94,9 @@
 
     elemento("#sair", alvo).addEventListener("click", function () {
       escopo.Api.encerrarSessao();
-      // Quem saiu da conta nao pode continuar recebendo o alarme dela.
+      // Quem saiu da conta nao pode continuar recebendo o alarme dela, nem os avisos de cuidador.
       if (escopo.Lembretes) escopo.Lembretes.desligar();
+      if (escopo.AvisosCuidador) escopo.AvisosCuidador.desligar();
       location.replace("../index.html");
     });
   }

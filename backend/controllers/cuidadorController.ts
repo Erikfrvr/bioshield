@@ -51,6 +51,17 @@ export async function listarPacientes(req: Request, res: Response): Promise<void
   }
 }
 
+// GET /api/cuidadores/:id/alertas
+// O celular do cuidador consulta esta rota de tempos em tempos para avisar de dose perdida.
+export async function listarAlertas(req: Request, res: Response): Promise<void> {
+  try {
+    const alertas = await cuidadorService.listarAlertas(Number(req.params.id), req.idUsuario);
+    res.status(200).json(alertas);
+  } catch (erro) {
+    responderErro(res, erro);
+  }
+}
+
 // DELETE /api/cuidadores/vinculo/:id
 // 204 sem corpo, igual ao DELETE de medicamento. O api.js do front aceita resposta vazia.
 export async function desvincular(req: Request, res: Response): Promise<void> {
