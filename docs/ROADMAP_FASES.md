@@ -13,57 +13,7 @@ Quase todas as fases estão fechadas. O que sobrou é, principalmente, a prepara
 
 ---
 
-## Painel de acompanhamento
-
-| Marco | O que prova | Dono | Feito |
-|---|---|---|---|
-| 0 | Ambiente pronto | os dois | [x] |
-| 1 | Banco criado | os dois | [x] |
-| 2 | API de pé | Erik | [x] |
-| 2.5 | Banco pronto para o cancelamento | Daiane | [x] |
-| 3 | Cadastro funcionando | Erik | [x] |
-| 4 | Login e rotas protegidas | Erik | [x] |
-| 5 | Ficha médica salvando | Erik | [x] |
-| 6 | QR abrindo a ficha | Erik e Daiane | [x] |
-| 7 | Lembrete de dose fechado | Daiane | [x] |
-| 8 | Backend completo | Daiane | [x] |
-| 9 | App navegável | os dois | [x] |
-| 10 | Testes do Jest passando | Daiane e Erik | [x] |
-| 11 | App Android com alarme dos remédios | os dois | [x] |
-| 12 | Demonstração e mesa de QR Codes | os dois | [ ] |
-
----
-
-## O que ainda falta
-
-Para o evento (detalhes em [`DIA_DO_EVENTO.md`](DIA_DO_EVENTO.md)):
-
-- [ ] Montar o servidor no Linux Mint do professor, seguindo o [`SERVIDOR_LINUX.md`](SERVIDOR_LINUX.md)
-- [ ] Fixar o IP do servidor no roteador, para o endereço não mudar depois de imprimir
-- [ ] Abrir uma ficha com o celular no wifi do roteador, antes de gerar qualquer QR
-- [ ] Gerar e imprimir os QR Codes só depois disso, e testar cada papel com dois celulares
-- [ ] Separar um paciente com QR cancelado para mostrar o aviso
-- [ ] Imprimir a folha de etiquetas e colar uma num chaveiro para a demonstração · Erik
-- [ ] Gravar o vídeo do fluxo completo: cadastro, ficha, QR, escanear com o celular, remédio, alarme e dose · Erik
-- [ ] Gravar o corte do cancelamento: escaneia e abre, cancela no app, escaneia de novo e aparece o aviso · Erik
-- [ ] Deixar o plano B pronto: vídeo, modo demonstração no notebook e prints
-
-O corte do cancelamento é o melhor plano do vídeo: é ele que mostra que existe um produto pensado ali, e não só um cadastro com QR Code em cima.
-
-Testes num celular de verdade:
-
-- [ ] Abrir a ficha de emergência pelo QR no celular de um visitante, no wifi do roteador
-- [ ] Passar pelas telas do app num celular físico, com a letra no tamanho máximo
-- [ ] Conferir o botão Voltar do Android em cada tela
-- [ ] Conferir o alarme dos remédios com a tela bloqueada num celular de marca (Samsung, Motorola ou Xiaomi), que é onde a economia de bateria pode atrasar alarmes
-
-No banco:
-
-- [ ] Quem criou o banco antes da agenda de doses virar índice único precisa rodar o `ALTER TABLE doses` que está no [`CONTRATO_API.md`](../frontEnd/CONTRATO_API.md). Banco criado do zero pelo `bioshield.sql` atual já está certo
-
----
-
-## Como a dupla se divide
+# Como a dupla se divide
 
 O projeto foi feito em fatias verticais: um domínio inteiro de cada vez, do value object até a rota, testado no `requests.http` antes de começar o próximo. As telas ficaram prontas antes do backend. O backend tinha um gargalo: a Fase 3 é o molde de todas as outras camadas. Enquanto o molde não existisse, não dava para duas pessoas escreverem service e repository em paralelo, porque cada uma ia inventar um padrão diferente.
 
