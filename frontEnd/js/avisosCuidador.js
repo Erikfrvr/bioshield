@@ -6,7 +6,7 @@
 // (android/app/src/main/java/br/com/bioshield/app), pelo plugin BioShieldCuidador. Ele faz uma checagem de
 // tempos em tempos e marca um alarme exato para o momento em que cada dose vira perdida.
 // Nao usamos o plugin oficial de tarefa em segundo plano porque ele so roda em rede com internet,
-// e no evento o roteador nao tem.
+// e o aviso precisa funcionar tambem com o servidor numa rede local sem internet.
 // Este arquivo so liga e desliga o lado nativo, passando o endereco do servidor e o login.
 //
 // No navegador e no modo demonstracao, o aviso aparece enquanto o BioShield estiver aberto.

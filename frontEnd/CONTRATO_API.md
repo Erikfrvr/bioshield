@@ -118,10 +118,18 @@ Fora disso a resposta é `403`. Paciente que não existe também devolve `403`, 
 Rota pública, sem token. É ela que decide se o front usa a API ou a demonstração.
 
 ```json
-{ "status": "ok", "urlPublica": "http://192.168.0.10:3000" }
+{ "status": "ok", "urlPublica": "https://bioshield.tail1234ab.ts.net", "banco": "ok" }
 ```
 
-`urlPublica` é o endereço pelo qual os outros aparelhos da rede enxergam o servidor. O front usa esse valor para montar o QR Code quando chegou ao servidor por `localhost`, assim o código nunca sai apontando para um endereço que só abre no próprio computador. Vem do `URL_PUBLICA` do `.env` ou, sem ele, do IP da placa de rede. Vem `null` quando o computador não está em rede nenhuma.
+`urlPublica` é o endereço pelo qual os outros aparelhos enxergam o servidor. Vem do `URL_PUBLICA` do `.env` ou, sem ele, do IP da placa de rede (`http://192.168.0.10:3000`). Vem `null` quando o computador não está em rede nenhuma e o `URL_PUBLICA` está vazio.
+
+O front usa esse valor para montar o QR Code (`UI.enderecoPublico`, no `ui.js`):
+
+- Chegou ao servidor por `localhost`: usa a `urlPublica`, assim o código nunca sai apontando para um endereço que só abre no próprio computador
+- A `urlPublica` é HTTPS (o Tailscale Funnel): usa ela, mesmo que tenha chegado pelo IP do wifi
+- Chegou por HTTPS e a `urlPublica` é só o IP do wifi: fica com o endereço HTTPS por onde chegou
+
+`banco` vem `"ok"` quando o MySQL respondeu e `"fora do ar"` quando não respondeu em 1,5 segundo. O front não usa esse campo: ele serve para conferir o servidor abrindo esta rota no navegador do celular. Com o banco fora do ar, o `status` continua `"ok"`, porque o servidor em si está de pé.
 
 Caminho de API que não existe devolve `404` com `{ "mensagem": "Rota não encontrada." }`.
 

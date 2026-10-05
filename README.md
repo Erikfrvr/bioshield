@@ -94,7 +94,7 @@ bioshield/
 
 ## Como rodar
 
-Você vai precisar do Node.js 20 ou mais novo (22 para gerar o app Android) e do MySQL 8.0.16 ou mais novo, ou do MariaDB que vem no XAMPP. Os passos abaixo são para Windows. Para montar o servidor no Linux Mint, ligado a um roteador, siga o [`docs/SERVIDOR_LINUX.md`](docs/SERVIDOR_LINUX.md).
+Você vai precisar do Node.js 20 ou mais novo (22 para gerar o app Android) e do MySQL 8.0.16 ou mais novo, ou do MariaDB que vem no XAMPP. Os passos abaixo são para Windows. Para deixar o BioShield aberto na internet com o Tailscale Funnel, que é o plano do evento, siga depois o [`docs/SERVIDOR_ONLINE.md`](docs/SERVIDOR_ONLINE.md).
 
 **1. Baixar o projeto e as dependências**
 
@@ -128,7 +128,7 @@ cp .env.example .env
 | `DB_PORT` | Porta do MySQL | `3306` |
 | `PORT` | Porta do BioShield, a mesma para site, app e API | `3000` |
 | `JWT_SECRET` | Segredo que assina o login. Use um texto longo e só seu | |
-| `URL_PUBLICA` | Opcional. Endereço de rede do servidor, que vai dentro do QR Code. Vazio, o servidor descobre sozinho | |
+| `URL_PUBLICA` | Endereço público do servidor, que vai dentro do QR Code. Com o Tailscale Funnel, é o endereço `.ts.net`. Vazio, o servidor usa o IP da rede e o QR só abre no mesmo wifi | `https://bioshield.tail1234ab.ts.net` |
 
 O `.env` de verdade nunca vai para o Git.
 
@@ -185,7 +185,7 @@ npm run app:sync
 npm run app:abrir
 ```
 
-O app não carrega o servidor dentro dele. Na primeira vez, a pessoa escreve o endereço do servidor no quadro Servidor da tela de entrada, e o celular precisa estar no mesmo wifi. No app, o botão Voltar do Android volta de tela em tela e fecha o app na primeira, e o alarme dos remédios toca pelo próprio sistema, mesmo com o app fechado.
+O app não carrega o servidor dentro dele. Na primeira vez, a pessoa escreve o endereço do servidor no quadro Servidor da tela de entrada. Com o endereço `.ts.net` do Tailscale Funnel, o celular funciona em qualquer internet; com o IP da rede local, precisa estar no mesmo wifi do servidor. No app, o botão Voltar do Android volta de tela em tela e fecha o app na primeira, e o alarme dos remédios toca pelo próprio sistema, mesmo com o app fechado.
 
 ## Modo demonstração
 
@@ -268,7 +268,7 @@ Dado de saúde é dado sensível pela LGPD, e isso pesou em várias decisões:
 | [`docs/DICIONARIO_DETALHADO.md`](docs/DICIONARIO_DETALHADO.md) | Cada classe do backend: entidades, value objects, DTOs, services e rotas |
 | [`docs/DUVIDAS_CONTRATO.md`](docs/DUVIDAS_CONTRATO.md) | As decisões de regra de negócio e o porquê de cada uma |
 | [`docs/GUIA_APK.md`](docs/GUIA_APK.md) | Como gerar e usar o app Android, e como funciona o alarme |
-| [`docs/SERVIDOR_LINUX.md`](docs/SERVIDOR_LINUX.md) | Como montar o servidor no Linux Mint para a rede do roteador |
+| [`docs/SERVIDOR_ONLINE.md`](docs/SERVIDOR_ONLINE.md) | Como abrir o BioShield na internet com o Tailscale Funnel, no notebook do evento |
 | [`docs/DIA_DO_EVENTO.md`](docs/DIA_DO_EVENTO.md) | O plano da mesa de QR Codes no Empreenda |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Como o projeto foi construído e o que ainda falta |
 
@@ -276,7 +276,7 @@ Dado de saúde é dado sensível pela LGPD, e isso pesou em várias decisões:
 
 Versão 1.0. As três funcionalidades estão completas e testadas, no site e no app Android.
 
-O que ainda depende da equipe é a preparação do evento: montar o servidor na rede do Senac, imprimir os QR Codes da mesa e gravar o vídeo da demonstração. A lista está no [`docs/ROADMAP.md`](docs/ROADMAP.md).
+O que ainda depende da equipe é a preparação do evento: deixar o notebook servidor pronto com o Tailscale Funnel, imprimir os QR Codes da mesa e gravar o vídeo da demonstração. A lista está no [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 Limites conhecidos desta versão:
 

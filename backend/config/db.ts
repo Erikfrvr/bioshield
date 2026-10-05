@@ -7,7 +7,8 @@ import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 import { FUSO_DESLOCAMENTO } from "./fuso";
 
-dotenv.config();
+// quiet: sem isso o dotenv escreve uma propaganda no terminal a cada vez que carrega o .env
+dotenv.config({ quiet: true });
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -40,7 +41,48 @@ async function testarConexao(): Promise<void> {
     console.log("Conexao com o banco MySQL estabelecida com sucesso.");
     conexao.release();
   } catch (erro) {
-    console.error("Nao foi possivel conectar ao banco MySQL:", erro);
+    // So o codigo do erro e uma dica do que conferir. O erro inteiro enchia o terminal sem ajudar.
+    const codigo = (erro as { code?: string })?.code ?? "desconhecido";
+    console.error(`Nao foi possivel conectar ao banco MySQL (${codigo}).`);
+    if (codigo === "ECONNREFUSED") {
+      console.error("  O MySQL nao esta ligado. No XAMPP, clique em Start na linha do MySQL.");
+      if (process.env.DB_HOST === "localhost") {
+        console.error("  Se ele ja estiver ligado, troque DB_HOST=localhost por DB_HOST=127.0.0.1 no .env.");
+      }
+    } else if (codigo === "ER_ACCESS_DENIED_ERROR") {
+      console.error("  Usuario ou senha do banco errados. Confira DB_USER e DB_PASSWORD no .env.");
+    } else if (codigo === "ER_BAD_DB_ERROR") {
+      console.error("  O banco nao existe. Rode o database/bioshield.sql e depois o database/dados_ficticios.sql.");
+    }
+  }
+}
+
+// Usado pelo /api/status: o servidor pode estar de pe com o banco desligado, e ai nada carrega.
+// ping nao e consulta de dado, so pergunta ao MySQL se ele esta ouvindo.
+// Tem limite de tempo porque o front espera o /api/status por pouco tempo: banco travado
+// nao pode fazer o servidor inteiro parecer desligado.
+const LIMITE_PING_MS = 1500;
+
+export async function bancoRespondendo(): Promise<boolean> {
+  const ping = (async () => {
+    const conexao = await pool.getConnection();
+    try {
+      await conexao.ping();
+      return true;
+    } finally {
+      conexao.release();
+    }
+  })().catch(() => false);
+
+  let relogio: NodeJS.Timeout | undefined;
+  const limite = new Promise<boolean>((resolver) => {
+    relogio = setTimeout(() => resolver(false), LIMITE_PING_MS);
+  });
+
+  try {
+    return await Promise.race([ping, limite]);
+  } finally {
+    clearTimeout(relogio);
   }
 }
 

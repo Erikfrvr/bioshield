@@ -5,7 +5,8 @@
 //   1. o endereco que a pessoa salvou na tela de entrada, no botao "Servidor"
 //   2. o endereco da propria pagina, quando quem entrega as telas e o backend
 //   3. http://localhost:3000, que e o backend rodando neste mesmo computador
-// Preencha so se quiser travar um endereco. Exemplo: "http://192.168.0.10:3000"
+// Preencha so se quiser travar um endereco. Exemplos: "https://bioshield.tail1234ab.ts.net" (Tailscale Funnel)
+// ou "http://192.168.0.10:3000" (rede local). Endereco terminado em .ts.net vira sempre https, sem porta.
 //
 // MODO aceita "auto", "api" e "demo". Em "auto" o front usa a API e cai pro modo demonstracao
 // se nenhum servidor responder. Em "api" nunca cai na demonstracao. Em "demo" nem procura servidor.

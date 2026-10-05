@@ -17,8 +17,8 @@ export async function buscarPorToken(req: Request, res: Response): Promise<void>
 
   try {
     // ip e user agent vao so para o log da LGPD. Os dois podem faltar, e isso nao barra o socorro.
-    // Com a API hospedada atras de um proxy, o req.ip so mostra o ip de quem escaneou
-    // se o "trust proxy" do Express for configurado no server.ts para aquele servidor.
+    // Pelo Tailscale Funnel o acesso chega de dentro do proprio computador. O "trust proxy" do server.ts
+    // faz o req.ip mostrar o ip de quem escaneou, e nao o 127.0.0.1 do Funnel.
     const ficha = await emergenciaService.buscarPorToken(
       String(req.params.token),
       req.ip ?? null,
