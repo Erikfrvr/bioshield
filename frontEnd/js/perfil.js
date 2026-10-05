@@ -138,23 +138,21 @@
       ? "Código criado em " + UI.formatarDataHora(ficha.tokenGeradoEm)
       : "Cancelado em " + UI.formatarDataHora(ficha.qrCanceladoEm);
 
-    UI.elemento("#baixarQr").disabled = !ativo;
-    // Dentro do app Android nao existe baixar arquivo nem imprimir pelo navegador.
-    // No lugar dos dois botoes fica o recado de onde fazer isso.
+    // Dentro do app Android nao existe imprimir pelo navegador.
+    // No lugar do botao fica o recado de onde fazer isso.
     if (Api.noApp) {
       var conexao = Api.conexao();
       var ondeAbrir = "";
       if (conexao && conexao.origem) {
         ondeAbrir = UI.ehEnderecoLocal(conexao.origem) && conexao.urlPublica ? conexao.urlPublica : conexao.origem;
       }
-      UI.elemento("#acoesQr").classList.add("oculto");
       UI.elemento("#notaApp").hidden = !ativo;
-      UI.elemento("#notaApp").textContent = "Para baixar a imagem ou imprimir as etiquetas, abra o BioShield no navegador de um computador" +
+      UI.elemento("#notaApp").textContent = "Para imprimir as etiquetas, abra o BioShield no navegador de um computador" +
         (ondeAbrir ? ", no endereço " + ondeAbrir + "." : ".");
     }
     UI.elemento("#rotacionarQr").disabled = !ativo;
     UI.elemento("#cancelarQr").classList.toggle("oculto", !ativo);
-    UI.elemento("#irImprimir").classList.toggle("oculto", !ativo);
+    UI.elemento("#irImprimir").classList.toggle("oculto", !ativo || Api.noApp);
     UI.elemento("#reativarQr").classList.toggle("oculto", ativo);
     UI.elemento("#rotacionarQr").classList.toggle("oculto", !ativo);
     UI.elemento("#verFicha").classList.toggle("oculto", !ativo);
@@ -407,14 +405,6 @@
       botao.disabled = false;
       botao.textContent = "Salvar ficha";
     }
-  });
-
-  UI.elemento("#baixarQr").addEventListener("click", function () {
-    var link = document.createElement("a");
-    link.download = "bioshield-qrcode.png";
-    link.href = telaQr.toDataURL("image/png");
-    link.click();
-    UI.recado("Imagem baixada.");
   });
 
   UI.elemento("#rotacionarQr").addEventListener("click", async function () {

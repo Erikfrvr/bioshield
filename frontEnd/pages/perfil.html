@@ -1,5 +1,5 @@
 <!-- Essa tela mostra a ficha medica do usuario: tipo sanguineo, alergias, condicoes e contato de emergencia.
-     Tem o QR Code em destaque no topo, com botao pra salvar imagem e pra gerar um codigo novo.
+     Tem o QR Code em destaque no topo, com botao pra imprimir e pra gerar um codigo novo.
      E a tela que a pessoa mais volta pra conferir se esta tudo certo.
      Fica dividida em tres abas (QR Code, Ficha medica e Privacidade) pra pessoa nao se perder
      numa pagina comprida demais. -->
@@ -60,21 +60,15 @@
             </div>
           </div>
 
+          <a class="botao botao-coral qr-imprimir" id="irImprimir" href="imprimir.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3.5h10V9M7 17.5H4.5v-7a1.5 1.5 0 0 1 1.5-1.5h12a1.5 1.5 0 0 1 1.5 1.5v7H17"/><path d="M7 14h10v6.5H7z"/></svg>
+            Imprimir QR Code
+          </a>
+
           <p class="qr-gerado" id="geradoEm"></p>
           <p class="qr-endereco" id="enderecoQr"></p>
           <p class="aviso aviso-erro" id="avisoEndereco" hidden>Este endereço só abre neste computador. Para o QR Code abrir no celular de outra pessoa, abra o BioShield pelo endereço de rede do servidor antes de imprimir.</p>
           <p class="aviso aviso-neutro" id="notaApp" hidden></p>
-
-          <div class="linha-botoes qr-acoes" id="acoesQr">
-            <button type="button" class="botao botao-claro" id="baixarQr">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg>
-              Baixar imagem
-            </button>
-            <a class="botao botao-coral" id="irImprimir" href="imprimir.html">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3.5h10V9M7 17.5H4.5v-7a1.5 1.5 0 0 1 1.5-1.5h12a1.5 1.5 0 0 1 1.5 1.5v7H17"/><path d="M7 14h10v6.5H7z"/></svg>
-              Imprimir folha
-            </a>
-          </div>
 
           <button type="button" class="botao botao-coral oculto" id="reativarQr">Gerar um código novo</button>
 

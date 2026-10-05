@@ -103,6 +103,12 @@
 
 .qr-moldura.inativa canvas { opacity: 0.08; }
 
+.qr-imprimir {
+  display: flex;
+  max-width: 17.5rem;
+  margin: 0 auto 1rem;
+}
+
 .qr-cancelado {
   position: absolute;
   inset: 0;
@@ -145,8 +151,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-.qr-acoes .botao { min-height: 3.2rem; }
 
 .botao-claro {
   background: var(--branco);
