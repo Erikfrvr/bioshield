@@ -1,8 +1,8 @@
-# Dicionário de Dados — BioShield
+# Dicionário de dados do BioShield
 
-Banco: `bioshield` | SGBD: MySQL 8 | Charset: `utf8mb4` | Collation: `utf8mb4_general_ci`
+Banco `bioshield`, em MySQL 8 ou MariaDB 10.4, com charset `utf8mb4` e collation `utf8mb4_general_ci`.
 
-Documento de referência do schema. Antes de criar ou alterar qualquer tabela, atualize aqui.
+Cada tabela e cada coluna do banco, com o motivo das escolhas. O script que cria tudo é o `database/bioshield.sql`; quando uma tabela muda, este documento muda junto.
 
 ---
 
@@ -10,7 +10,7 @@ Documento de referência do schema. Antes de criar ou alterar qualquer tabela, a
 
 | Tabela | O que guarda | Depende de |
 |---|---|---|
-| `usuarios` | Contas de acesso ao app | — |
+| `usuarios` | Contas de acesso ao app | nenhuma |
 | `pacientes` | Ficha médica ligada a uma conta | `usuarios` |
 | `alergias` | Alergias do paciente | `pacientes` |
 | `contatos_emergencia` | Quem avisar numa emergência | `pacientes` |
@@ -38,9 +38,9 @@ Conta de acesso. Vale tanto para o paciente quanto para o cuidador: o que difere
 | Campo | Tipo | Nulo | Padrão | Descrição |
 |---|---|---|---|---|
 | `id` | BIGINT | Não | AUTO_INCREMENT | Chave primária |
-| `nome` | VARCHAR(80) | Não | — | Nome completo |
-| `email` | VARCHAR(120) | Não | — | Login. Único, gravado em minúsculo |
-| `senha` | VARCHAR(255) | Não | — | Hash bcrypt. Nunca texto puro |
+| `nome` | VARCHAR(80) | Não | | Nome completo |
+| `email` | VARCHAR(120) | Não | | Login. Único, gravado em minúsculo |
+| `senha` | VARCHAR(255) | Não | | Hash bcrypt. Nunca texto puro |
 | `criado_em` | TIMESTAMP | Não | CURRENT_TIMESTAMP | Data do cadastro |
 
 Chaves: PK `id` | UNIQUE `email`
@@ -56,11 +56,11 @@ A ficha médica. É o centro do banco: quase tudo aponta para cá.
 | Campo | Tipo | Nulo | Padrão | Descrição |
 |---|---|---|---|---|
 | `id` | BIGINT | Não | AUTO_INCREMENT | Chave primária |
-| `id_usuario` | BIGINT | Não | — | Dono da ficha. Único: uma ficha por conta |
+| `id_usuario` | BIGINT | Não | | Dono da ficha. Único: uma ficha por conta |
 | `tipo_sanguineo` | ENUM | Sim | NULL | `A+`, `A-`, `B+`, `B-`, `AB+`, `AB-`, `O+`, `O-` |
 | `condicoes` | TEXT | Sim | NULL | Condições de saúde (epilepsia, diabetes, hipertensão) |
 | `observacoes` | TEXT | Sim | NULL | Texto livre para o socorrista |
-| `token_qr` | CHAR(32) | Não | — | Código do QR. Único e aleatório |
+| `token_qr` | CHAR(32) | Não | | Código do QR. Único e aleatório |
 | `token_gerado_em` | TIMESTAMP | Não | CURRENT_TIMESTAMP | Quando o token atual foi criado |
 | `qr_ativo` | BOOLEAN | Não | TRUE | Se o QR atual abre a ficha. FALSE quando o paciente cancela o código |
 | `qr_cancelado_em` | TIMESTAMP | Sim | NULL | Quando o QR atual foi cancelado. Nulo enquanto ele estiver ativo |
@@ -84,8 +84,8 @@ Tabela separada porque um paciente pode ter várias e elas aparecem em destaque 
 | Campo | Tipo | Nulo | Padrão | Descrição |
 |---|---|---|---|---|
 | `id` | BIGINT | Não | AUTO_INCREMENT | Chave primária |
-| `id_paciente` | BIGINT | Não | — | Dono da alergia |
-| `substancia` | VARCHAR(100) | Não | — | Nome da substância (dipirona, penicilina) |
+| `id_paciente` | BIGINT | Não | | Dono da alergia |
+| `substancia` | VARCHAR(100) | Não | | Nome da substância (dipirona, penicilina) |
 | `gravidade` | ENUM | Não | `moderada` | `leve`, `moderada`, `grave` |
 | `observacao` | VARCHAR(200) | Sim | NULL | Reação que costuma ter |
 
@@ -100,9 +100,9 @@ Regras: alergia com gravidade `grave` sempre vai no topo da ficha de emergência
 | Campo | Tipo | Nulo | Padrão | Descrição |
 |---|---|---|---|---|
 | `id` | BIGINT | Não | AUTO_INCREMENT | Chave primária |
-| `id_paciente` | BIGINT | Não | — | Dono do contato |
-| `nome` | VARCHAR(80) | Não | — | Nome de quem ligar |
-| `telefone` | VARCHAR(11) | Não | — | Só dígitos, DDD junto, sem máscara |
+| `id_paciente` | BIGINT | Não | | Dono do contato |
+| `nome` | VARCHAR(80) | Não | | Nome de quem ligar |
+| `telefone` | VARCHAR(11) | Não | | Só dígitos, DDD junto, sem máscara |
 | `parentesco` | VARCHAR(40) | Sim | NULL | Filha, esposo, vizinho |
 | `prioridade` | TINYINT | Não | 1 | Ordem de quem ligar primeiro |
 
@@ -117,13 +117,13 @@ Regras: telefone entra sem máscara e a formatação acontece na tela. O value o
 | Campo | Tipo | Nulo | Padrão | Descrição |
 |---|---|---|---|---|
 | `id` | BIGINT | Não | AUTO_INCREMENT | Chave primária |
-| `id_paciente` | BIGINT | Não | — | Quem toma |
-| `nome` | VARCHAR(100) | Não | — | Nome do remédio |
-| `dosagem` | DECIMAL(10,2) | Não | — | Quantidade por tomada. Sempre maior que zero |
+| `id_paciente` | BIGINT | Não | | Quem toma |
+| `nome` | VARCHAR(100) | Não | | Nome do remédio |
+| `dosagem` | DECIMAL(10,2) | Não | | Quantidade por tomada. Sempre maior que zero |
 | `unidade` | ENUM | Não | `mg` | `mg`, `ml`, `g`, `gota`, `comprimido`, `unidade` |
-| `frequencia_horas` | SMALLINT | Não | — | Intervalo entre doses, de 1 a 168 |
-| `horario_inicial` | TIME | Não | — | Hora da primeira dose do dia |
-| `data_inicio` | DATE | Não | — | Começo do tratamento |
+| `frequencia_horas` | SMALLINT | Não | | Intervalo entre doses, de 1 a 168 |
+| `horario_inicial` | TIME | Não | | Hora da primeira dose do dia |
+| `data_inicio` | DATE | Não | | Começo do tratamento |
 | `data_fim` | DATE | Sim | NULL | Fim. Nulo significa uso contínuo |
 | `ativo` | BOOLEAN | Não | TRUE | Falso quando o usuário suspende sem apagar |
 | `criado_em` | TIMESTAMP | Não | CURRENT_TIMESTAMP | Cadastro |
@@ -141,8 +141,8 @@ Cada linha é uma tomada específica. A agenda é gerada quando o medicamento é
 | Campo | Tipo | Nulo | Padrão | Descrição |
 |---|---|---|---|---|
 | `id` | BIGINT | Não | AUTO_INCREMENT | Chave primária |
-| `id_medicamento` | BIGINT | Não | — | Remédio da dose |
-| `horario_previsto` | DATETIME | Não | — | Quando deveria ser tomada |
+| `id_medicamento` | BIGINT | Não | | Remédio da dose |
+| `horario_previsto` | DATETIME | Não | | Quando deveria ser tomada |
 | `horario_confirmado` | DATETIME | Sim | NULL | Quando foi confirmada de fato |
 | `status` | ENUM | Não | `prevista` | `prevista`, `tomada`, `perdida` |
 
@@ -159,8 +159,8 @@ Vínculo autorizado. Um cuidador pode acompanhar vários pacientes, e um pacient
 | Campo | Tipo | Nulo | Padrão | Descrição |
 |---|---|---|---|---|
 | `id` | BIGINT | Não | AUTO_INCREMENT | Chave primária |
-| `id_cuidador` | BIGINT | Não | — | Conta do cuidador |
-| `id_paciente` | BIGINT | Não | — | Ficha acompanhada |
+| `id_cuidador` | BIGINT | Não | | Conta do cuidador |
+| `id_paciente` | BIGINT | Não | | Ficha acompanhada |
 | `autorizado_em` | TIMESTAMP | Não | CURRENT_TIMESTAMP | Quando o paciente liberou |
 | `ativo` | BOOLEAN | Não | TRUE | Falso quando o vínculo é revogado |
 
@@ -177,14 +177,14 @@ Log de cada abertura da ficha pública. Existe por causa da LGPD: dado sensível
 | Campo | Tipo | Nulo | Padrão | Descrição |
 |---|---|---|---|---|
 | `id` | BIGINT | Não | AUTO_INCREMENT | Chave primária |
-| `id_paciente` | BIGINT | Não | — | Ficha que foi aberta |
+| `id_paciente` | BIGINT | Não | | Ficha que foi aberta |
 | `acessado_em` | TIMESTAMP | Não | CURRENT_TIMESTAMP | Momento do acesso |
 | `ip` | VARCHAR(45) | Sim | NULL | Origem. 45 caracteres para caber IPv6 |
 | `user_agent` | VARCHAR(255) | Sim | NULL | Navegador de quem escaneou |
 
 Chaves: PK `id` | FK `id_paciente` → `pacientes(id)` ON DELETE CASCADE | INDEX `id_paciente, acessado_em`
 
-Regras: o paciente pode ver esse histórico dentro do app. É o que responde "quem andou olhando a minha ficha". Guardar por tempo limitado e apagar depois, já que o dado não serve para nada além de auditoria recente.
+Regras: o paciente vê esse histórico dentro do app, na aba Privacidade da ficha, com as 100 leituras mais recentes. É o que responde "quem andou olhando a minha ficha". O ideal seria apagar os registros antigos depois de um tempo, já que eles só servem para auditoria recente; o app ainda não tem essa limpeza.
 
 ---
 

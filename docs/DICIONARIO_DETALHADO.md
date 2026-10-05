@@ -1,330 +1,188 @@
-# Dicionário de Dados: Sistema de Vendas
+# Dicionário detalhado do código
 
-Documento de referência do projeto `sistemaVenda`. Serve para consultar rapidamente nomes de tabelas, colunas, tipos, entidades, DTOs, rotas e regras de negócio sem precisar abrir vários arquivos ao mesmo tempo.
+Um mapa do backend e das telas do BioShield: o que cada classe guarda, que regra ela faz valer e quem chama quem. Serve para achar rápido onde mora uma regra sem abrir dez arquivos. As tabelas e colunas do banco estão no [`DICIONARIO_DADOS.md`](../database/DICIONARIO_DADOS.md), e o formato de cada rota no [`CONTRATO_API.md`](../frontEnd/CONTRATO_API.md).
 
-**Onde salvar:** `projeto/docs/DICIONARIO_DE_DADOS.md`
-
-**Como abrir no VS Code:** com o arquivo aberto, use `Ctrl + Shift + V` para ver a versão formatada. Use `Ctrl + K` e depois `V` para abrir a visualização ao lado do código.
-
----
-
-## 1. Legenda de status
-
-Cada item do documento tem um status, para vocês saberem o que já está fechado e o que ainda precisa de conferência.
-
-| Status | Significado |
-|---|---|
-| Confirmado | Existe no código ou no script do banco e já foi validado |
-| Verificar | Está previsto pela estrutura do projeto, mas precisa ser conferido em `projeto/database/sistemaVendas.sql` |
-| Pendente | Ainda não existe e precisa ser criado |
-
----
-
-## 2. Visão geral do sistema
-
-Sistema de vendas com cadastro de usuários, categorias e produtos. O backend é feito em TypeScript seguindo DDD e Clean Architecture, com banco MySQL. O frontend consome a API por meio de requisições em JavaScript puro.
-
-**Fluxo de uma requisição:**
+## O caminho de uma requisição
 
 ```
-Rota  ->  Controller  ->  Service  ->  Repository (contrato)  ->  Infrastructure (MySQL)  ->  Banco
+rota  ->  middleware  ->  controller  ->  service  ->  repository (interface)  ->  infrastructure (SQL)  ->  banco
+                                            |
+                                            v
+                                 entidades e value objects
 ```
 
-O caminho de volta é o inverso, com a Entidade sendo convertida em DTO de resposta antes de sair pelo Controller.
+Na volta, a entidade vira DTO de resposta dentro do service, campo por campo, e o controller só escolhe o status HTTP. Se um campo não está escrito no DTO de resposta, ele não sai: é assim que a senha e o token do QR nunca escapam por acidente.
 
----
+## Value objects
 
-## 3. Mapa de pastas
+Um value object valida o próprio valor quando é criado. Se o valor for inválido, ele nem chega a existir, e a mensagem do erro é a que a pessoa vê na tela.
 
-```
-projeto/
-├── backend/
-│   ├── controllers/          Recebe a requisição e devolve a resposta HTTP
-│   │   └── usuarioController.ts
-│   ├── infrastructure/       Implementação real do acesso ao MySQL
-│   │   ├── UsuarioInfrasctructure.ts
-│   │   ├── categoriaInfrasctructure.ts
-│   │   └── produtosInfrastructure.ts
-│   ├── models/
-│   │   ├── dto/              Formato dos dados que entram e saem da API
-│   │   ├── entidade/         Objetos de domínio com as regras do negócio
-│   │   └── valueObjects/     Tipos que se validam sozinhos
-│   ├── repository/           Contratos (interfaces) de acesso a dados
-│   ├── routes/               Definição dos endpoints
-│   ├── services/             Regras de negócio e orquestração
-│   └── server.ts             Ponto de entrada da aplicação
-├── database/
-│   └── sistemaVendas.sql     Script de criação do banco
-├── estudo/                   Exercícios de apoio, fora do sistema principal
-└── frontEnd/
-    ├── index.html
-    ├── style.css
-    ├── js/produtos.js
-    └── pages/
-        ├── produtos.html
-        └── produto.css
-```
-
----
-
-## 4. Banco de dados
-
-**Nome do banco:** `sistemaVendas` (Verificar)
-**Motor:** MySQL / InnoDB
-**Codificação recomendada:** `utf8mb4` com collation `utf8mb4_general_ci`
-
-### 4.1 Tabela: usuarios
-
-Guarda quem acessa o sistema.
-
-| Coluna | Tipo | Obrigatório | Chave | Padrão | Descrição | Status |
-|---|---|---|---|---|---|---|
-| id | INT | Sim | PK, incremento automático | | Identificador único do usuário | Verificar |
-| nome | VARCHAR(100) | Sim | | | Nome completo do usuário | Verificar |
-| email | VARCHAR(150) | Sim | Única | | Endereço de email, usado como login | Verificar |
-| senha | VARCHAR(255) | Sim | | | Senha do usuário, armazenada com hash | Verificar |
-
-**Observações**
-* O campo `email` precisa de índice único, porque a busca por email é usada no login e no cadastro.
-* O tamanho 255 em `senha` é proposital: hash de bcrypt ocupa 60 caracteres e outros algoritmos ocupam mais.
-
-### 4.2 Tabela: categorias
-
-Agrupa os produtos por tipo.
-
-| Coluna | Tipo | Obrigatório | Chave | Padrão | Descrição | Status |
-|---|---|---|---|---|---|---|
-| id | INT | Sim | PK, incremento automático | | Identificador único da categoria | Verificar |
-| nome | VARCHAR(100) | Sim | Única | | Nome da categoria, por exemplo Bebidas | Verificar |
-| descricao | VARCHAR(255) | Não | NULL | Texto livre explicando a categoria | Verificar |
-
-### 4.3 Tabela: produtos
-
-Núcleo do sistema. Cada produto pertence a uma categoria.
-
-| Coluna | Tipo | Obrigatório | Chave | Padrão | Descrição | Status |
-|---|---|---|---|---|---|---|
-| id | INT | Sim | PK, incremento automático | | Identificador único do produto | Verificar |
-| nome | VARCHAR(100) | Sim | | | Nome comercial do produto | Verificar |
-| descricao | VARCHAR(255) | Não | NULL | Detalhes do produto | Verificar |
-| preco | DECIMAL(10,2) | Sim | | | Preço de venda em reais | Verificar |
-| quantidade | INT | Sim | 0 | Quantidade disponível em estoque | Verificar |
-| data_vencimento | DATE | Não | NULL | Data de validade do produto | Verificar |
-| categoria_id | INT | Sim | FK para categorias.id | | Categoria à qual o produto pertence | Verificar |
-
-**Observações**
-* Use `DECIMAL(10,2)` e nunca `FLOAT` ou `DOUBLE` para dinheiro. Float arredonda errado e some com centavos.
-* `DECIMAL(10,2)` comporta valores até 99.999.999,99.
-* A existência do value object `DataVencimento` indica que a coluna de validade faz parte do modelo.
-
----
-
-## 5. Relacionamentos
-
-| Origem | Destino | Cardinalidade | Regra |
-|---|---|---|---|
-| produtos.categoria_id | categorias.id | Muitos para um | Um produto pertence a uma categoria; uma categoria tem vários produtos |
-
-**Comportamento sugerido da chave estrangeira**
-
-```sql
-FOREIGN KEY (categoria_id) REFERENCES categorias(id)
-    ON DELETE RESTRICT
-    ON UPDATE CASCADE
-```
-
-`RESTRICT` impede apagar uma categoria que ainda tem produtos ligados a ela, o que evita produto órfão no banco.
-
----
-
-## 6. Value Objects
-
-Value Objects são tipos que validam o próprio conteúdo no momento em que são criados. Se o valor for inválido, o objeto nem chega a existir. Isso impede dado errado de entrar no domínio.
-
-| Arquivo | Representa | Validações esperadas | Status |
-|---|---|---|---|
-| `Email.ts` | Endereço de email | Formato válido, presença de arroba e domínio, texto não vazio | Confirmado |
-| `Senha.ts` | Senha do usuário | Tamanho mínimo, regras de complexidade, geração e comparação de hash | Confirmado |
-| `Preco.ts` | Valor monetário | Número válido, não negativo, duas casas decimais | Confirmado |
-| `DataVencimento.ts` | Data de validade | Data válida, coerência com a data atual | Confirmado |
-
-**Ponto de atenção:** todo valor que entra pelo DTO deve ser convertido em Value Object antes de virar Entidade. Se o Service passar uma string direto para a Entidade, a validação é perdida.
-
----
-
-## 7. Entidades de domínio
-
-### 7.1 Usuario (`models/entidade/Usuario.ts`)
-
-| Atributo | Tipo | Origem no banco | Descrição |
-|---|---|---|---|
-| id | number | usuarios.id | Identificador |
-| nome | string | usuarios.nome | Nome completo |
-| email | Email | usuarios.email | Value object de email |
-| senha | Senha | usuarios.senha | Value object de senha |
-
-### 7.2 Categoria (`models/entidade/Categoria.ts`)
-
-| Atributo | Tipo | Origem no banco | Descrição |
-|---|---|---|---|
-| id | number | categorias.id | Identificador |
-| nome | string | categorias.nome | Nome da categoria |
-| descricao | string | categorias.descricao | Descrição opcional |
-
-### 7.3 Produto (`models/entidade/Produto.ts`)
-
-| Atributo | Tipo | Origem no banco | Descrição |
-|---|---|---|---|
-| id | number | produtos.id | Identificador |
-| nome | string | produtos.nome | Nome do produto |
-| descricao | string | produtos.descricao | Descrição opcional |
-| preco | Preco | produtos.preco | Value object de preço |
-| quantidade | number | produtos.quantidade | Estoque disponível |
-| dataVencimento | DataVencimento | produtos.data_vencimento | Value object de validade |
-| categoriaId | number | produtos.categoria_id | Ligação com a categoria |
-
-**Atenção à tradução de nomes:** o banco usa `snake_case` (`data_vencimento`, `categoria_id`) e o TypeScript usa `camelCase` (`dataVencimento`, `categoriaId`). Essa conversão acontece na camada Infrastructure. Se um campo voltar `undefined` no frontend, o primeiro lugar a olhar é essa conversão.
-
----
-
-## 8. DTOs
-
-DTO é o formato dos dados em trânsito. Ele existe para que a API não exponha a entidade inteira nem aceite qualquer coisa vinda do cliente.
-
-### 8.1 DTOs de Usuario
-
-| Arquivo | Direção | Campos | Uso |
-|---|---|---|---|
-| `UsuarioCadastrarDTO.ts` | Entrada | nome, email, senha | Corpo do cadastro de usuário |
-| `UsuarioBuscarPorEmailDTO.ts` | Entrada | email | Busca ou verificação de usuário existente |
-| `UsuarioListarDTO.ts` | Saída | id, nome, email | Listagem de usuários, **sem a senha** |
-
-**Regra importante:** a senha nunca aparece em DTO de saída, nem com hash.
-
-### 8.2 DTOs de Produto
-
-| Arquivo | Direção | Campos | Uso |
-|---|---|---|---|
-| `CriarProdutoDTO.ts` | Entrada | nome, descricao, preco, quantidade, dataVencimento, categoriaId | Criação de produto |
-| `AtualizarProdutoDTO.ts` | Entrada | id e os campos editáveis | Atualização de produto existente |
-| `ProdutoResponseDTO.ts` | Saída | id, nome, descricao, preco, quantidade, dataVencimento, categoria | Retorno da API para o frontend |
-
-### 8.3 DTOs de Categoria
-
-| Arquivo | Direção | Campos | Uso |
-|---|---|---|---|
-| `categoria/CadastrarCategoriaDTO.ts` | Entrada | nome, descricao | Criação de categoria |
-| `categoria/ListarCategoriaDTO.ts` | Saída | id, nome, descricao | Listagem de categorias |
-
----
-
-## 9. Contratos de repositório
-
-As interfaces em `repository/` dizem **o que** pode ser feito. As classes em `infrastructure/` dizem **como** é feito no MySQL. Trocar de banco no futuro significa escrever uma nova Infrastructure sem mexer em Service nem em Controller.
-
-| Contrato | Implementação | Métodos esperados |
+| Arquivo | O que representa | Regras |
 |---|---|---|
-| `UsuarioRepository.ts` | `UsuarioInfrasctructure.ts` | cadastrar, listar, buscarPorEmail |
-| `CategoriaRepository.ts` | `categoriaInfrasctructure.ts` | cadastrar, listar, buscarPorId |
-| `ProdutoRepository.ts` | `produtosInfrastructure.ts` | criar, listar, buscarPorId, atualizar, deletar |
+| `Email.ts` | Email da conta | Obrigatório, até 120 caracteres, formato com arroba, domínio e terminação. Guardado em minúsculo e sem espaço |
+| `Senha.ts` | Senha da conta | Senha nova: pelo menos 8 caracteres, até 72 bytes (o limite do bcrypt), com maiúscula, minúscula, número e um de `@ $ ! % * ? & #`. `aPartirDoHash` carrega o hash do banco sem regra. Impressa em log ou JSON, aparece só `********` |
+| `Telefone.ts` | Telefone de contato | Aceita com ou sem máscara e guarda só os dígitos. 10 dígitos (fixo) ou 11 (celular, com 9 depois do DDD). DDD de 11 a 99, sem zero |
+| `TipoSanguineo.ts` | Tipo sanguíneo | Só os oito tipos, aceitando minúscula e espaço. `0+` com zero é recusado. `opcional` transforma vazio em nulo, porque muita gente não sabe o próprio tipo |
+| `TokenQR.ts` | Código do QR Code | 16 bytes aleatórios do `crypto` do Node, em 32 caracteres hexadecimais. `aPartirDoValor` recusa qualquer coisa fora desse formato antes de consultar o banco |
+| `Dosagem.ts` | Quantidade e unidade do remédio | Maior que zero, até 99.999.999,99 e com no máximo 2 casas decimais (dose de remédio não se arredonda escondido). Aceita "2,5". Unidade: `mg`, `ml`, `g`, `gota`, `comprimido` ou `unidade`, com `mg` por padrão |
+| `HorarioDose.ts` | Primeira dose e intervalo | Horário no formato HH:mm, de 00:00 a 23:59. Frequência inteira de 1 a 168 horas |
+| `CodigoCuidador.ts` | Código de autorização do cuidador | 7 caracteres sorteados pelo `crypto`, sem 0, O, 1, I e L, que se confundem ao ditar. Vale 24 horas |
 
----
+## Entidades
 
-## 10. Services e regras de negócio
+| Entidade | O que é | Regras que ela faz valer |
+|---|---|---|
+| `Usuario` | A conta, de paciente ou de cuidador | Nome obrigatório, até 80 caracteres. Email e senha entram já como value objects |
+| `Paciente` | A ficha médica | Condições e observações até 1.000 caracteres. No máximo 30 alergias e 5 contatos. A mesma substância não pode aparecer duas vezes, nem dois contatos com a mesma prioridade. Os contatos ficam em ordem de prioridade. Alergias e contatos são substituídos inteiros no PUT |
+| `Alergia` | Uma alergia | Substância até 100 caracteres, gravidade `leve`, `moderada` ou `grave` (moderada por padrão), reação até 200 caracteres |
+| `ContatoEmergencia` | Quem avisar | Nome até 80, parentesco até 40, prioridade de 1 a 127 (1 é o primeiro a ser chamado) |
+| `Medicamento` | Um remédio | Nome até 100. Datas no formato `AAAA-MM-DD`, com o fim nunca antes do início. `suspender` e `reativar`. `tratamentoEncerradoEm` diz se o fim já passou. `gerarHorariosDaAgenda` e `gerarHorariosEntre` montam a grade de doses a partir do início e do horário da primeira dose, parando no fim do tratamento. `DIAS_DE_AGENDA` vale 7 |
+| `Dose` | Uma tomada | Situação `prevista`, `tomada` ou `perdida`. `TOLERANCIA_ATRASO_MINUTOS` e `ANTECEDENCIA_CONFIRMACAO_MINUTOS` valem 60. `confirmar` recusa dose já tomada e dose cedo demais, usando o relógio do servidor. `limiteDePerdidas` calcula o momento a partir do qual a dose prevista vira perdida |
+| `Cuidador` | O vínculo entre cuidador e paciente | `desvincular` marca como inativo (desvincular duas vezes é erro). `reativar` aproveita a linha antiga quando a mesma dupla volta a se vincular |
+| `FichaEmergencia` | A versão pública da ficha | Ordena alergias da grave para a leve, mostra só remédio em uso e ordena contatos por prioridade. Não tem campo para id, email, senha ou token |
 
-| Service | Responsabilidades |
+## DTOs
+
+O formato exato do que entra e do que sai. Ficam em `models/dto/`, uma pasta por domínio.
+
+| Domínio | Entrada | Saída |
+|---|---|---|
+| `usuario` | `CadastrarUsuarioDTO` (nome, email, senha), `LoginUsuarioDTO` (email, senha) | `UsuarioResponseDTO` (id, nome, email), `LoginResponseDTO` (token, usuário e `idPaciente`, nulo quando ainda não há ficha) |
+| `paciente` | `CriarPacienteDTO` e `AtualizarPacienteDTO` (tipo sanguíneo, condições, observações, alergias e contatos) | `PacienteResponseDTO` (a ficha completa), `QrResponseDTO`, `AcessoQrResponseDTO`, `CodigoCuidadorResponseDTO` |
+| `emergencia` | o token, na URL | `FichaEmergenciaResponseDTO`: nome, tipo sanguíneo, condições, observações, data da última atualização, alergias, remédios em uso e contatos. É o filtro de privacidade do app |
+| `medicamento` | `CadastrarMedicamentoDTO`, `AtualizarMedicamentoDTO` (campos opcionais, mais `ativo` para suspender e reativar) | `MedicamentoResponseDTO`, com a próxima dose |
+| `dose` | `ConfirmarDoseDTO` (a hora real da tomada). `RegistrarDoseDTO` é interno, usado para gravar a agenda | `DoseResponseDTO`, `DoseConfirmadaResponseDTO`, `AdesaoResponseDTO` (hoje e semana) |
+| `cuidador` | `VincularCuidadorDTO` (o código; o id do cuidador que vem no corpo é ignorado) | `VinculoResponseDTO` e `PacienteAcompanhadoResponseDTO` (adesão da semana, doses perdidas e próxima dose, sem nada da ficha médica) |
+
+## Repositórios e SQL
+
+Cada interface em `repository/` diz o que o service precisa do banco, e a classe de mesmo nome em `infrastructure/` faz isso com SQL. Toda consulta usa `?` nos parâmetros, toda conexão volta para o pool no `finally`, e o que grava em mais de uma tabela roda numa transação.
+
+| Interface | Implementação | O que oferece |
+|---|---|---|
+| `UsuarioRepository` | `usuarioInfrastructure` | cadastrar, buscar por email, buscar por id e descobrir a ficha da conta |
+| `PacienteRepository` | `pacienteInfrastructure` | criar a ficha com alergias e contatos, ler, atualizar substituindo as listas, trocar e cancelar o token do QR, listar as 100 leituras mais recentes e gravar o código do cuidador |
+| `EmergenciaRepository` | `emergenciaInfrastructure` | buscar a ficha pública pelo token (dizendo se o QR está ativo ou cancelado) e registrar a leitura |
+| `MedicamentoRepository` | `medicamentoInfrastructure` | cadastrar o remédio com a agenda, listar com a próxima dose, ler, atualizar refazendo a agenda futura e apagar |
+| `DoseRepository` | `doseInfrastructure` | gravar doses sem repetir, achar a última dose de cada remédio, marcar perdidas, listar por período, ler, confirmar e contar para a adesão |
+| `CuidadorRepository` | `cuidadorInfrastructure` | achar o paciente pelo código, criar, ler e atualizar vínculos, listar quem o cuidador acompanha e achar a próxima dose |
+| `AutorizacaoRepository` | `autorizacaoInfrastructure` | dizer quem é o dono de uma ficha e se existe vínculo ativo entre cuidador e paciente |
+
+## Services
+
+| Service | O que faz | Erros que levanta |
+|---|---|---|
+| `UsuarioService` | Cadastro com hash da senha e email único, login com o mesmo tempo de resposta para email inexistente e senha errada (para não entregar quem tem conta), e leitura da própria conta | `ErroUsuario`: validação, conflito, não encontrado e não autorizado |
+| `PacienteService` | Ficha médica, QR Code (criar, trocar, cancelar e reativar sempre com token novo), histórico de leituras e código do cuidador | `ErroPaciente`: validação, não encontrado e conflito |
+| `EmergenciaService` | A ficha pública: valida o token, registra a leitura (inclusive de QR cancelado) e monta a resposta reduzida | `ErroEmergencia`: não encontrado e cancelado |
+| `MedicamentoService` | Remédios, com a agenda gerada no cadastro e refeita quando horário, período ou suspensão mudam | `ErroMedicamento`: validação e não encontrado |
+| `DoseService` | Doses de hoje, próximas doses do alarme, confirmação e adesão. O `prepararAgenda` completa a agenda e marca as perdidas antes de toda leitura. `DIAS_DE_LEMBRETE` vale 2 | `ErroDose`: validação e não encontrado |
+| `CuidadorService` | Vínculo pelo código, painel do cuidador e desvínculo pelo próprio cuidador ou pelo dono da ficha | `ErroCuidador`: validação e não encontrado |
+| `AutorizacaoService` | Quem vê o quê: `garantirDono`, `garantirAcompanhamento` e `garantirMesmoUsuario` | `ErroAcesso` |
+
+Cada service é uma classe exportada como instância única no fim do arquivo. O repositório chega pelo construtor, com a implementação MySQL como padrão.
+
+## Como o erro vira status HTTP
+
+O service levanta o erro com um tipo, e o controller só traduz. Erro que nenhum service conhece vira 500, e a mensagem interna (que às vezes repete um dado do banco) não vai para a tela nem para o log.
+
+| Status | Quando |
 |---|---|
-| `UsuarioService.ts` | Impedir email repetido no cadastro, transformar senha em hash, montar `UsuarioListarDTO` sem expor senha |
-| `CategoriaService.ts` | Impedir nome de categoria repetido, validar que o nome não está vazio |
-| `ProdutoService.ts` | Validar preço e quantidade, confirmar que a categoria informada existe, converter Entidade em `ProdutoResponseDTO` |
+| 400 | Dado inválido (tipo validação) ou JSON quebrado |
+| 401 | Login errado, ou token faltando, vencido ou adulterado |
+| 403 | Logado, mas sem acesso àquele paciente (`ErroAcesso`) |
+| 404 | O recurso da própria rota não existe (remédio, dose, vínculo, QR) |
+| 409 | Email já cadastrado, ficha já criada ou QR já cancelado |
+| 410 | QR Code cancelado, na rota de emergência |
+| 413 | Corpo da requisição grande demais |
+| 500 | Qualquer outro erro |
 
----
+## Segurança e configuração
 
-## 11. Rotas da API
-
-Base sugerida: `http://localhost:3000`
-
-### Usuários (`routes/UsuarioRoutes.ts`)
-
-| Método | Caminho | Corpo | Retorno | Status |
-|---|---|---|---|---|
-| POST | /usuarios | UsuarioCadastrarDTO | Usuário criado | Verificar |
-| GET | /usuarios | | Lista de UsuarioListarDTO | Verificar |
-| GET | /usuarios/email/:email | | UsuarioListarDTO | Verificar |
-
-### Categorias (`routes/categoriaRoutes.ts`)
-
-| Método | Caminho | Corpo | Retorno | Status |
-|---|---|---|---|---|
-| POST | /categorias | CadastrarCategoriaDTO | Categoria criada | Verificar |
-| GET | /categorias | | Lista de ListarCategoriaDTO | Verificar |
-
-### Produtos (`routes/produtoRoutes.ts`)
-
-| Método | Caminho | Corpo | Retorno | Status |
-|---|---|---|---|---|
-| POST | /produtos | CriarProdutoDTO | ProdutoResponseDTO | Verificar |
-| GET | /produtos | | Lista de ProdutoResponseDTO | Verificar |
-| GET | /produtos/:id | | ProdutoResponseDTO | Verificar |
-| PUT | /produtos/:id | AtualizarProdutoDTO | ProdutoResponseDTO | Verificar |
-| DELETE | /produtos/:id | | Confirmação | Verificar |
-
----
-
-## 12. Códigos de resposta HTTP
-
-| Código | Quando usar |
+| Arquivo | O que faz |
 |---|---|
-| 200 | Requisição concluída com sucesso |
-| 201 | Registro criado |
-| 400 | Dados inválidos enviados pelo cliente |
-| 404 | Registro não encontrado |
-| 409 | Conflito, por exemplo email ou categoria já cadastrados |
-| 500 | Erro interno do servidor |
+| `middleware/autenticacao.ts` | Lê o `Authorization: Bearer`, confere o token e põe o id da conta em `req.idUsuario` |
+| `infrastructure/security/JwtService.ts` | Gera e confere o token de sessão. Ele leva só o id da conta e vale 7 dias, porque pedir senha todo dia faz o idoso desistir |
+| `infrastructure/security/PasswordHasher.ts` | Hash e comparação de senha com bcrypt |
+| `config/db.ts` | O pool do MySQL, com até 10 conexões, e o fuso de Brasília em cada conexão |
+| `config/fuso.ts` | O fuso do Node, carregado antes de qualquer outro arquivo |
+| `config/rede.ts` | Descobre o endereço de rede do servidor, que vai dentro do QR Code, ou usa o `URL_PUBLICA` do `.env` |
+| `server.ts` | Liga as rotas em `/api`, entrega as telas da pasta `frontEnd` na mesma porta e trata os erros gerais sem expor dado |
 
----
+## Rotas por arquivo
 
-## 13. Glossário
+| Arquivo | Rotas | Login |
+|---|---|---|
+| `usuarioRoutes.ts` | `POST /usuarios`, `POST /usuarios/login`, `GET /usuarios/:id` | só a última |
+| `pacienteRoutes.ts` | ficha, QR Code, acessos e código do cuidador, tudo em `/pacientes` | todas |
+| `emergenciaRoutes.ts` | `GET /emergencia/:token` | nenhuma, de propósito |
+| `medicamentoRoutes.ts` | CRUD em `/medicamentos` | todas |
+| `doseRoutes.ts` | `/doses/hoje`, `/doses/proximas`, `/doses/adesao` e `/doses/:id/confirmar` | todas |
+| `cuidadorRoutes.ts` | `/cuidadores/vincular`, `/cuidadores/:id/pacientes` e `/cuidadores/vinculo/:id` | todas |
+
+## Telas e scripts
+
+As telas são HTML, CSS e JavaScript sem framework. Cada tela carrega os scripts de apoio e depois o seu.
+
+| Arquivo | O que faz |
+|---|---|
+| `js/config.js` | Modo (`auto`, `api` ou `demo`), tempos de espera e, se precisar travar, o endereço do servidor |
+| `js/api.js` | Todas as chamadas à API, a procura do servidor, a sessão e a troca automática para o modo demonstração |
+| `js/demo.js` | Responde as mesmas chamadas com os dados fictícios, com as mesmas regras de dose do backend |
+| `js/ui.js` | Sessão, barra de navegação, recados, formatação de data e telefone, endereço do QR e o botão Voltar do Android |
+| `js/acessibilidade.js` | O botão de acessibilidade: quatro tamanhos de letra e o contraste reforçado |
+| `js/qrcode.js` | O gerador de QR Code do projeto, sem biblioteca |
+| `js/lembretes.js` | O alarme dos remédios (detalhes no [`GUIA_APK.md`](GUIA_APK.md)) |
+| `index.html` e `js/login.js` | Entrada, com o quadro Servidor e as contas de exemplo da demonstração |
+| `pages/cadastro.html` e `js/cadastro.js` | Criar conta, com o medidor de força da senha |
+| `pages/perfil.html` e `js/perfil.js` | A ficha, em três abas: QR Code, Ficha médica e Privacidade (código do cuidador e histórico de leituras) |
+| `pages/imprimir.html` e `js/imprimir.js` | A folha A4 com o QR em quatro tamanhos |
+| `pages/medicamentos.html` e `js/medicamentos.js` | Remédios: cadastrar, suspender, reativar e remover |
+| `pages/doses.html` e `js/doses.js` | Agenda do dia, adesão e o cartão do alarme |
+| `pages/cuidador.html` e `js/cuidador.js` | Painel do cuidador |
+| `pages/emergencia.html` e `js/emergencia.js` | A ficha pública que o QR abre, com os botões de ligar e o SAMU |
+
+### Mensagens de validação da ficha
+
+A tela da ficha confere as linhas de alergia e de contato antes de enviar. Linha toda em branco é ignorada; linha preenchida pela metade avisa e leva a pessoa até o campo.
+
+| Quando | Mensagem |
+|---|---|
+| Alergia com reação, mas sem substância | Escreva a substância da alergia ou toque em Remover nessa linha. |
+| Contato sem nome | Escreva o nome do contato de emergência ou toque em Remover nessa linha. |
+| Contato sem telefone | Escreva o telefone de {nome}, com DDD. |
+| Telefone com tamanho errado | O telefone de {nome} precisa ter DDD e 10 ou 11 números. |
+| A conta já tem ficha criada em outro aparelho | Esta conta já tem uma ficha salva. Toque em Sair e entre de novo para carregar ela. |
+| A ficha não carregou, sem servidor | Não consegui falar com o servidor. Confira a internet ou o endereço do servidor e tente de novo. |
+| A ficha não carregou, sem acesso | Esta conta não tem acesso a essa ficha. Toque em Sair e entre de novo. |
+| A ficha não carregou, outro motivo | Não consegui carregar a sua ficha agora. {motivo} |
+
+Nos três últimos casos aparece também o botão **Tentar de novo**. As mensagens do alarme dos remédios estão no [`GUIA_APK.md`](GUIA_APK.md).
+
+## Convenções de nome
+
+| O quê | Como | Exemplo |
+|---|---|---|
+| Tabelas | plural, minúsculo | `contatos_emergencia` |
+| Colunas | separadas por sublinhado | `horario_previsto` |
+| Entidade, value object, service e interface de repositório | iniciais maiúsculas, num arquivo do mesmo nome | `DoseService.ts` |
+| Controller, rota e infrastructure | começa com minúscula | `doseController.ts` |
+| DTO | termina em `DTO`, numa pasta por domínio | `dto/dose/DoseResponseDTO.ts` |
+| Campos na API | começa com minúscula, sem sublinhado | `horarioPrevisto` |
+
+A tradução entre o nome da coluna (`horario_previsto`) e o nome do campo (`horarioPrevisto`) acontece só na infrastructure. Se um campo chega vazio na tela, esse é o primeiro lugar a olhar.
+
+## Glossário
 
 | Termo | Significado |
 |---|---|
-| DTO | Data Transfer Object, objeto que carrega dados entre camadas |
-| Entidade | Objeto de domínio com identidade própria e regras de negócio |
-| Value Object | Objeto sem identidade que vale pelo seu valor e valida a si mesmo |
-| Repository | Contrato que define as operações de acesso a dados |
-| Infrastructure | Implementação concreta do repositório, aqui usando MySQL |
-| Service | Camada que concentra as regras de negócio |
-| Controller | Camada que recebe a requisição HTTP e devolve a resposta |
-| PK | Chave primária, identifica cada linha de forma única |
-| FK | Chave estrangeira, liga uma tabela a outra |
-
----
-
-## 14. Convenções do projeto
-
-| Item | Convenção |
-|---|---|
-| Tabelas do banco | Plural e minúsculo: `usuarios`, `produtos`, `categorias` |
-| Colunas do banco | `snake_case`: `data_vencimento`, `categoria_id` |
-| Classes TypeScript | `PascalCase`: `Produto`, `ProdutoService` |
-| Variáveis e métodos | `camelCase`: `buscarPorEmail`, `dataVencimento` |
-| Arquivos de classe | Mesmo nome da classe que exportam |
-
----
-
-## 15. Pendências e pontos de atenção
-
-Lista do que precisa de ajuste ou confirmação. Marquem conforme forem resolvendo.
-
-| Item | Descrição | Responsável |
-|---|---|---|
-| Confirmar o script SQL | Abrir `projeto/database/sistemaVendas.sql` e ajustar as seções 4 e 5 com os tipos reais | |
-| Erro de grafia nos arquivos | `UsuarioInfrasctructure.ts` e `categoriaInfrasctructure.ts` estão escritos como Infrasctructure | |
-| Padronizar nomes de arquivos | Há mistura de maiúscula e minúscula na primeira letra e de singular com plural nas camadas infrastructure e routes | |
-| Controllers faltando | Existe apenas `usuarioController.ts`; faltam os de categoria e produto | |
-| Pasta EstudoArquiteturaTI102 | No último commit subiram apenas `.gitattributes`, `LICENSE` e `README.md`; conferir se o código ficou de fora | |
-| Publicar no GitHub | O repositório `DaiHoss/sistemaVenda` ainda não existe no GitHub, por isso o push falha | Daiane |
-
----
-
-*Última atualização: 15 de setembro de 2026*
+| Entidade | Objeto do domínio com identidade própria e regras, como um paciente ou uma dose |
+| Value object | Valor que se valida sozinho e vale pelo conteúdo, como um email ou um tipo sanguíneo |
+| DTO | O formato dos dados que entram e saem da API |
+| Repository | A interface que diz o que o service precisa do banco |
+| Infrastructure | A implementação dessa interface, com SQL |
+| Service | Onde ficam as regras de negócio |
+| Controller | Recebe a requisição HTTP e devolve a resposta |
+| Adesão | Doses tomadas divididas pelas doses que já deviam ter sido tomadas |
+| Tolerância | Os 60 minutos depois do horário em que a dose ainda não conta como perdida |
+| Token do QR | O código aleatório que vai no fim do endereço do QR Code e identifica a ficha |

@@ -96,8 +96,11 @@ Contas dos dados fictícios, todas com a senha `123456`:
 
 | Conta | Papel |
 |---|---|
-| `maria.souza@exemplo.com` | Paciente com remédios e alergias |
-| `patricia.martins@exemplo.com` | Cuidadora da Maria |
+| `maria.souza@exemplo.com` | Paciente com remédios, alergias e uma semana de doses em dia |
+| `patricia.martins@exemplo.com` | Cuidadora da Maria e do Lucas |
+| `joana.lima@exemplo.com` | Paciente com duas alergias graves |
+| `lucas.andrade@exemplo.com` | Paciente com doses perdidas |
+| `roberto.nunes@exemplo.com` | Paciente com o QR Code cancelado |
 
 ## Se o celular não abrir
 
@@ -125,7 +128,9 @@ URL_PUBLICA=http://192.168.0.10:3000
 
 Na primeira vez, o app mostra na tela de entrada um quadro chamado Servidor. O aluno toca em "Informar o endereço do servidor", escreve o IP (por exemplo `192.168.0.10`) e toca em "Testar e salvar". O app guarda o endereço e não pergunta de novo.
 
-Como gerar o app está em `docs/GUIA_APK.md`.
+O alarme dos remédios não depende do servidor depois de agendado: o celular toca mesmo fora do wifi. Só a confirmação da dose precisa falar com o servidor.
+
+Como gerar o app está em [`GUIA_APK.md`](GUIA_APK.md).
 
 ## Atualizar o projeto
 
@@ -161,4 +166,4 @@ Vale também desativar a suspensão automática do computador nas configuraçõe
 
 ## O que foi testado
 
-A subida do servidor, o site, a API e o QR Code foram testados no Windows, com o servidor atendendo pelo endereço de rede. No Linux Mint ainda não rodamos. O código foi conferido para o que muda de um sistema para o outro: nomes de arquivo com maiúscula e minúscula, nomes de tabela e fuso horário. Se algum passo deste guia falhar no Mint, anotem a mensagem do terminal.
+A subida do servidor, o site, a API, o QR Code e o app Android foram testados no Windows, com o servidor atendendo pelo endereço de rede. No Linux Mint ainda não rodamos. O código foi conferido no que muda de um sistema para o outro: nomes de arquivo com maiúscula e minúscula, nomes de tabela e fuso horário (com o relógio do computador forçado para UTC, que é o padrão de muitos servidores Linux, os horários das doses continuaram no horário de Brasília). Se algum passo deste guia falhar no Mint, anotem a mensagem do terminal.

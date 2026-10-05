@@ -40,6 +40,17 @@ export async function listarDeHoje(req: Request, res: Response): Promise<void> {
   }
 }
 
+// GET /api/doses/proximas?idPaciente=1
+// As doses que ainda vao tocar o alarme. O app agenda os avisos no celular a partir desta lista.
+export async function listarProximas(req: Request, res: Response): Promise<void> {
+  try {
+    const doses = await doseService.listarProximas(Number(req.query.idPaciente), req.idUsuario);
+    res.status(200).json(doses);
+  } catch (erro) {
+    responderErro(res, erro);
+  }
+}
+
 // POST /api/doses/:id/confirmar
 export async function confirmar(req: Request, res: Response): Promise<void> {
   try {

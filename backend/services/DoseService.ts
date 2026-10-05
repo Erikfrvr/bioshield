@@ -24,6 +24,11 @@ const DIAS_DA_SEMANA = 7;
 
 const MS_POR_DIA = 24 * 60 * 60 * 1000;
 
+// Quantos dias de doses o app recebe pra agendar o alarme no celular (frontEnd/js/lembretes.js).
+// Dois dias seguram o alarme tocando pra quem passa um tempo sem abrir o app,
+// e cabem folgados no limite de 500 alarmes por app do Android.
+export const DIAS_DE_LEMBRETE = 2;
+
 // Mesmo esquema do MedicamentoService: o service diz o tipo, o controller escolhe o status code.
 export type TipoErroDose = "validacao" | "nao_encontrado";
 
@@ -61,6 +66,23 @@ export class DoseService {
     const inicio = this.inicioDoDia(agora);
     const doses = await this.repositorio.listarPorPeriodo(idPaciente, inicio, this.inicioDoDiaSeguinte(agora));
     return doses.map((d) => this.paraResposta(d));
+  }
+
+  // GET /doses/proximas?idPaciente=1. O dono ou um cuidador com vinculo ativo, igual ao /doses/hoje.
+  // Devolve so as doses 'prevista' de agora menos a tolerancia ate DIAS_DE_LEMBRETE pra frente.
+  // Comeca na tolerancia porque a dose atrasada ha menos de 60 minutos ainda pode ser confirmada
+  // e ainda merece lembrete. Tomada e perdida ficam de fora: nao tem mais o que lembrar.
+  async listarProximas(idPaciente: number, idLogado: number | undefined): Promise<DoseResponseDTO[]> {
+    this.validarId(idPaciente, "paciente");
+    await autorizacaoService.garantirAcompanhamento(idLogado, idPaciente);
+
+    const agora = new Date();
+    await this.prepararAgenda(idPaciente, agora);
+
+    const inicio = Dose.limiteDePerdidas(agora);
+    const fim = new Date(agora.getTime() + DIAS_DE_LEMBRETE * MS_POR_DIA);
+    const doses = await this.repositorio.listarPorPeriodo(idPaciente, inicio, fim);
+    return doses.filter((d) => d.dose.estaPrevista()).map((d) => this.paraResposta(d));
   }
 
   // POST /doses/:id/confirmar. Vale pra dose prevista e pra perdida ("Tomei mesmo assim").

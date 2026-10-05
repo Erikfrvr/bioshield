@@ -744,6 +744,86 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 @keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
 @keyframes subir { from { transform: translateY(2rem); opacity: 0; } to { transform: none; opacity: 1; } }
 
+/* ===== Alarme dos remedios ===== */
+/* A janela que abre na hora da dose, por cima de qualquer tela (lembretes.js).
+   Fica no centro, acima de tudo e com letra maior, porque e a unica janela que aparece sem a pessoa pedir.
+   O sino balanca enquanto o alarme toca. Quem pediu menos movimento no celular ve o sino parado. */
+
+.sobreposicao.alarme {
+  align-items: center;
+  z-index: 80;
+  background: rgba(9, 37, 35, 0.78);
+}
+
+.alarme-janela {
+  text-align: center;
+  border-top: 6px solid var(--coral);
+  padding: 1.8rem 1.4rem 1.4rem;
+}
+
+.alarme-janela::before { display: none; }
+
+.alarme-icone {
+  display: inline-grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  background: var(--coral-fraco);
+  color: var(--coral-escuro);
+  margin-bottom: 0.9rem;
+  animation: balancar 1.2s ease-in-out infinite;
+}
+
+.alarme-icone svg { width: 2.3rem; height: 2.3rem; }
+
+@keyframes balancar {
+  0%, 100% { transform: rotate(0); }
+  12% { transform: rotate(-14deg); }
+  24% { transform: rotate(12deg); }
+  36% { transform: rotate(-8deg); }
+  48% { transform: rotate(4deg); }
+  60% { transform: rotate(0); }
+}
+
+.alarme-janela .alarme-rotulo {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--coral-escuro);
+}
+
+.alarme-janela .alarme-nome {
+  margin: 0.25rem 0 0.4rem;
+  font-size: 2rem;
+  overflow-wrap: anywhere;
+}
+
+.alarme-janela .alarme-detalhe {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+  color: var(--texto);
+}
+
+.alarme-janela .alarme-fila {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: var(--texto-suave);
+}
+
+.alarme-botoes {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 1.2rem;
+}
+
+.alarme-tomei {
+  min-height: 4rem;
+  font-size: 1.2rem;
+}
+
 .janela h2 { margin-bottom: 0.35rem; font-size: 1.4rem; }
 
 .janela > p {

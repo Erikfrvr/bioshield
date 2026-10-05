@@ -266,6 +266,7 @@
     var agora = Date.now();
     while (marca < agora) marca += passo;
 
+    var criadas = 0;
     while (marca < limite.getTime()) {
       // Ao reativar um remedio a dose mais recente pode ja existir (tomada ou perdida). Nao duplico.
       var horario = new Date(marca).toISOString();
@@ -278,8 +279,24 @@
         horarioConfirmado: null,
         status: "prevista"
       });
+      criadas += 1;
       marca += passo;
     }
+    return criadas;
+  }
+
+  // Quantos dias de doses vao pro alarme do celular. O mesmo DIAS_DE_LEMBRETE do DoseService do backend.
+  var DIAS_DE_LEMBRETE = 2;
+
+  // Igual ao prepararAgenda do backend: antes de qualquer leitura, os remedios em uso ganham as doses
+  // que faltam ate DIAS_DE_LEMBRETE pra frente. Sem isso a demonstracao so teria as doses de hoje
+  // e o alarme pararia de tocar a meia-noite. Remedio suspenso nao ganha dose nova.
+  function completarAgenda(banco, idPaciente) {
+    var criadas = 0;
+    banco.medicamentos
+      .filter(function (m) { return m.idPaciente === idPaciente && m.ativo !== false; })
+      .forEach(function (remedio) { criadas += gerarAgenda(banco, remedio, DIAS_DE_LEMBRETE); });
+    if (criadas) salvar(banco);
   }
 
   var Demo = {
@@ -420,6 +437,7 @@
 
     listarMedicamentos: function (idPaciente) {
       var banco = carregar();
+      completarAgenda(banco, Number(idPaciente));
       return pronto(
         banco.medicamentos
           .filter(function (m) { return m.idPaciente === Number(idPaciente); })
@@ -478,6 +496,7 @@
 
     dosesDeHoje: function (idPaciente) {
       var banco = carregar();
+      completarAgenda(banco, Number(idPaciente));
       marcarPerdidas(banco, Number(idPaciente));
       var inicio = new Date(); inicio.setHours(0, 0, 0, 0);
       var fim = new Date(); fim.setHours(23, 59, 59, 999);
@@ -486,6 +505,24 @@
           .filter(function (d) {
             var marca = new Date(d.horarioPrevisto);
             return marca >= inicio && marca <= fim;
+          })
+          .sort(function (a, b) { return new Date(a.horarioPrevisto) - new Date(b.horarioPrevisto); })
+      );
+    },
+
+    // Igual ao GET /doses/proximas: so as doses 'prevista' de agora menos a tolerancia
+    // ate DIAS_DE_LEMBRETE pra frente, em ordem de horario. E a agenda do alarme.
+    proximasDoses: function (idPaciente) {
+      var banco = carregar();
+      completarAgenda(banco, Number(idPaciente));
+      marcarPerdidas(banco, Number(idPaciente));
+      var inicio = Date.now() - TOLERANCIA_ATRASO_MS;
+      var fim = Date.now() + DIAS_DE_LEMBRETE * 24 * 60 * 60 * 1000;
+      return pronto(
+        dosesDoPaciente(banco, Number(idPaciente))
+          .filter(function (d) {
+            var marca = new Date(d.horarioPrevisto).getTime();
+            return d.status === "prevista" && marca >= inicio && marca < fim;
           })
           .sort(function (a, b) { return new Date(a.horarioPrevisto) - new Date(b.horarioPrevisto); })
       );
@@ -507,6 +544,7 @@
 
     adesao: function (idPaciente) {
       var banco = carregar();
+      completarAgenda(banco, Number(idPaciente));
       marcarPerdidas(banco, Number(idPaciente));
       var todas = dosesDoPaciente(banco, Number(idPaciente));
       var inicioDia = new Date(); inicioDia.setHours(0, 0, 0, 0);
@@ -555,6 +593,7 @@
         .map(function (v) {
           var paciente = banco.pacientes.find(function (p) { return p.id === v.idPaciente; });
           var usuario = banco.usuarios.find(function (u) { return u.id === paciente.idUsuario; });
+          completarAgenda(banco, paciente.id);
           marcarPerdidas(banco, paciente.id);
           var doses = dosesDoPaciente(banco, paciente.id);
           var inicioSemana = new Date(); inicioSemana.setDate(inicioSemana.getDate() - 6); inicioSemana.setHours(0, 0, 0, 0);

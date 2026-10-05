@@ -57,8 +57,9 @@
     botaoSalvar.textContent = "Testando";
     try {
       await Api.salvarServidor(campoServidor.value);
-      // Conta de um servidor nao vale no outro.
+      // Conta de um servidor nao vale no outro, e o alarme dela tambem nao.
       Api.encerrarSessao();
+      if (window.Lembretes) Lembretes.desligar();
       formularioServidor.hidden = true;
       botaoAbrirServidor.hidden = false;
       mostrarConexao(await Api.conectar());
@@ -95,8 +96,11 @@
 
   // Ja esta logado: vai direto pra ficha. Espero a procura do servidor porque ela pode descartar
   // uma sessao de demonstracao que sobrou no aparelho.
+  // Se o app abriu pelo toque numa notificacao do alarme, vai para as doses, onde o toque e tratado.
   Api.conectar().then(function () {
-    if (Api.sessao()) location.replace("pages/perfil.html");
+    if (!Api.sessao()) return;
+    var veioDoAlarme = window.Lembretes && Lembretes.temAcaoPendente();
+    location.replace(veioDoAlarme ? "pages/doses.html" : "pages/perfil.html");
   });
 
   formulario.addEventListener("submit", async function (evento) {

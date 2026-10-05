@@ -1,14 +1,12 @@
 # Contrato da API do BioShield
 
-Este documento é o combinado entre o front e o backend. O front já foi escrito contra tudo que está aqui, então toda rota desta lista existe do lado de cá esperando resposta.
+Todas as rotas da API, com o formato de cada requisição e de cada resposta. Foi a partir deste contrato que as telas e o backend foram escritos, cada um de um lado, e é ele que diz o que cada campo significa.
 
-Enquanto o backend não sobe, o front roda em modo demonstração. Assim que a API responder em `GET /api/status`, ele passa a usar a API sozinho.
-
-Base: `/api` no mesmo endereço do servidor, por exemplo `http://localhost:3000/api`. O backend também entrega as telas, na mesma porta.
+A API fica em `/api`, no mesmo endereço e na mesma porta em que o backend entrega as telas, por exemplo `http://localhost:3000/api`.
 
 ---
 
-## Como o front escolhe entre API e demonstração
+## Como as telas escolhem entre a API e a demonstração
 
 `frontEnd/js/config.js` tem três modos:
 
@@ -39,7 +37,7 @@ Todo corpo vai e volta em JSON. As rotas protegidas esperam o header:
 Authorization: Bearer <token>
 ```
 
-Erro devolve o status HTTP certo e um corpo com uma frase explicando. O front lê qualquer um destes campos, então escolham um e sigam:
+Erro devolve o status HTTP certo e um corpo com uma frase pronta para mostrar na tela:
 
 ```json
 { "mensagem": "Email ou senha não conferem." }
@@ -65,9 +63,11 @@ Status que o front trata de forma diferente:
 
 ---
 
-## Mudança necessária no banco
+## Para quem criou o banco antes
 
-O cancelamento do QR Code precisa de duas colunas que ainda não existem em `pacientes`:
+O `database/bioshield.sql` atual já cria tudo certo. Os comandos abaixo servem só para quem criou o banco numa versão antiga e não quer recriar do zero.
+
+As duas colunas do cancelamento do QR Code:
 
 ```sql
 ALTER TABLE pacientes
@@ -75,11 +75,9 @@ ALTER TABLE pacientes
   ADD COLUMN qr_cancelado_em TIMESTAMP NULL AFTER qr_ativo;
 ```
 
-O `DICIONARIO_DADOS.md` precisa ganhar essas duas linhas também.
+Por que coluna nova, em vez de apagar o token: o índice único em `token_qr` impede token nulo repetido, e apagar o token destrói o rastro de qual código foi impresso. Marcar como inativo mantém a auditoria e deixa o cancelamento reversível pela geração de um token novo.
 
-Por que coluna nova e não apagar o token: o índice único em `token_qr` impede token nulo repetido, e apagar o token destrói o rastro de qual código foi impresso. Marcar como inativo mantém a auditoria e deixa o cancelamento reversível pela geração de um token novo.
-
-O código do cuidador (`POST /api/pacientes/:id/codigo`) também precisa de lugar para ficar:
+As colunas do código do cuidador (`POST /api/pacientes/:id/codigo`):
 
 ```sql
 ALTER TABLE pacientes
@@ -88,9 +86,7 @@ ALTER TABLE pacientes
   ADD CONSTRAINT uk_pacientes_codigo UNIQUE (codigo_cuidador);
 ```
 
-As quatro colunas já estão no `database/bioshield.sql` e no `DICIONARIO_DADOS.md`. O ALTER serve só para quem já tem o banco criado.
-
-A agenda de doses precisa que o mesmo remédio não tenha duas doses no mesmo horário, então o índice de `doses` virou único:
+E o índice da agenda de doses, que virou único para o mesmo remédio nunca ter duas doses no mesmo horário:
 
 ```sql
 ALTER TABLE doses
@@ -98,7 +94,6 @@ ALTER TABLE doses
   ADD CONSTRAINT uk_doses_agenda UNIQUE (id_medicamento, horario_previsto);
 ```
 
-Também já está no `bioshield.sql`. Quem tem o banco criado roda só este ALTER.
 
 ---
 
@@ -109,7 +104,7 @@ O token carrega só o id do usuário. O middleware `autenticar` põe esse id em 
 | Rotas | Quem passa |
 |---|---|
 | `/pacientes/:id` e tudo abaixo (QR, acessos, código), `/medicamentos` | Só o dono da ficha (`garantirDono`) |
-| `/doses/hoje`, `/doses/:id/confirmar`, `/doses/adesao` | O dono ou um cuidador com vínculo `ativo = TRUE` (`garantirAcompanhamento`) |
+| `/doses/hoje`, `/doses/proximas`, `/doses/:id/confirmar`, `/doses/adesao` | O dono ou um cuidador com vínculo `ativo = TRUE` (`garantirAcompanhamento`) |
 | `/usuarios/:id`, `/cuidadores/:id/pacientes` | Só quando `:id` é o próprio usuário logado (`garantirMesmoUsuario`) |
 
 Fora disso a resposta é `403`. Paciente que não existe também devolve `403`, com a mesma mensagem, para que ninguém descubra quais ids existem trocando o número na URL. `404` fica para o recurso da própria rota (remédio ou dose que não existe).
@@ -253,7 +248,7 @@ A partir daí, `GET /api/emergencia/:token` com esse token devolve `410`.
 
 Protegida. Gera um token novo e volta `qr_ativo = TRUE`. Mesma resposta da rotação.
 
-Atenção: reativar **não** é ressuscitar o código antigo. Se o chaveiro perdido voltasse a funcionar, o cancelamento não teria servido para nada. Gere token novo sempre.
+Reativar **não** ressuscita o código antigo: o token é sempre novo. Se o chaveiro perdido voltasse a funcionar, o cancelamento não teria servido para nada.
 
 ### GET /api/pacientes/:id/acessos
 
@@ -304,14 +299,14 @@ Resposta `200`:
 }
 ```
 
-Regras desta rota, que valem mais que a pressa de entregar:
+Como esta rota se comporta:
 
-1. **Ordene as alergias por gravidade**, grave primeiro. O front confia nessa ordem e mostra na ordem que vier.
-2. **Só medicamentos em uso hoje:** `ativo = TRUE`, `data_inicio` até hoje e `data_fim` nulo ou de hoje em diante. Remédio suspenso, encerrado ou que ainda vai começar no meio da lista atrapalha quem está socorrendo.
-3. **Ordene os contatos por `prioridade`.**
-4. **Nada de `id`, `email`, `senha`, `idUsuario` ou `tokenQr` na resposta.** Este DTO é o filtro de privacidade: se um campo não está escrito aqui, ele não sai.
-5. **Registre o acesso** em `acessos_qr` com ip e user agent antes de responder.
-6. **Não logue o corpo da resposta** no console. É dado de saúde.
+1. **As alergias vêm em ordem de gravidade**, grave primeiro. A tela mostra na ordem em que recebe.
+2. **Só vêm os remédios em uso hoje:** ativos, já começados e ainda não encerrados (`ativo = TRUE`, `data_inicio` até hoje e `data_fim` nulo ou de hoje em diante). Remédio suspenso, encerrado ou que ainda vai começar só atrapalharia quem está socorrendo.
+3. **Os contatos vêm em ordem de `prioridade`.**
+4. **Nunca vêm `id`, `email`, `senha`, `idUsuario` ou `tokenQr`.** O `FichaEmergenciaResponseDTO` é o filtro de privacidade: se um campo não está escrito nele, não sai.
+5. **Toda leitura é registrada** em `acessos_qr`, com ip e navegador, antes da resposta. Leitura de QR cancelado também.
+6. **O corpo da resposta nunca vai para o log** do servidor, porque é dado de saúde.
 
 Token inexistente devolve `404`. Token com `qr_ativo = FALSE` devolve `410`, com um corpo enxuto:
 
@@ -348,7 +343,7 @@ Protegida.
 
 Protegida. Cadastra o remédio **e gera a agenda de doses** a partir do horário inicial e do intervalo.
 
-A agenda é gerada para os próximos **7 dias**, ou até o `dataFim`, o que vier antes, e só de agora para a frente. Os dias seguintes são completados pelo backend antes de cada leitura de dose (`/doses/hoje`, `/doses/adesao`, `GET /medicamentos` e a lista do cuidador), então o front não precisa pedir nada.
+A agenda é gerada para os próximos **7 dias**, ou até o `dataFim`, o que vier antes, e só de agora para a frente. Os dias seguintes são completados pelo backend antes de cada leitura de dose (`/doses/hoje`, `/doses/proximas`, `/doses/adesao`, `GET /medicamentos` e a lista do cuidador), então o front não precisa pedir nada.
 
 ```json
 {
@@ -394,7 +389,33 @@ Protegida. Só as doses de hoje, ordenadas por horário.
 
 `status` é `prevista`, `tomada` ou `perdida`.
 
-Ninguém marca dose como `perdida` na mão e não existe rotina rodando de tempo em tempo. A troca acontece na leitura: antes de responder esta rota e a de adesão, o backend passa para `perdida` toda dose `prevista` do paciente que já passou **60 minutos** do horário sem confirmação. Por isso a dose das 8h aparece como `prevista` até as 9h e como `perdida` depois disso.
+Ninguém marca dose como `perdida` na mão e não existe rotina rodando de tempo em tempo. A troca acontece na leitura: antes de responder esta rota, a de próximas doses e a de adesão, o backend passa para `perdida` toda dose `prevista` do paciente que já passou **60 minutos** do horário sem confirmação. Por isso a dose das 8h aparece como `prevista` até as 9h e como `perdida` depois disso.
+
+### GET /api/doses/proximas?idPaciente=1
+
+Protegida. O dono ou um cuidador com vínculo ativo, igual ao `/doses/hoje`. É a agenda do **alarme dos remédios**: o app usa essa lista para agendar os avisos no próprio celular (`frontEnd/js/lembretes.js`).
+
+Mesmo formato do `/doses/hoje`, com três diferenças:
+
+- só doses com `status` `prevista` (tomada e perdida não têm mais o que lembrar)
+- a janela vai de **60 minutos atrás** (a dose atrasada dentro da tolerância ainda pode ser confirmada e ainda merece lembrete) até **2 dias para a frente** (`DIAS_DE_LEMBRETE` no `DoseService`)
+- ordenadas por horário, sem limite de dia do calendário
+
+```json
+[
+  {
+    "id": 9, "idMedicamento": 1, "nomeMedicamento": "Losartana",
+    "dosagem": 50, "unidade": "mg",
+    "horarioPrevisto": "2026-09-18T23:00:00.000Z",
+    "horarioConfirmado": null,
+    "status": "prevista"
+  }
+]
+```
+
+Antes de responder, o backend completa a agenda e aplica a tolerância, como nas outras leituras de dose. Remédio suspenso ou encerrado não aparece.
+
+No modo demonstração, o `demo.js` responde a mesma lista com os dados fictícios, e também completa a agenda até 2 dias para a frente.
 
 ### POST /api/doses/:id/confirmar
 
@@ -410,7 +431,7 @@ Resposta:
 { "id": 7, "status": "tomada", "horarioConfirmado": "2026-09-18T11:03:00.000Z" }
 ```
 
-O front permite confirmar dose com status `perdida` também, com o botão "Tomei mesmo assim". Não bloqueie isso no backend.
+Dose com status `perdida` também pode ser confirmada: é o botão "Tomei mesmo assim" da tela de doses.
 
 Confirmar adiantado tem limite: o backend aceita a partir de **60 minutos antes** do horário previsto. Mais cedo que isso devolve `400` com a mensagem "Ainda é cedo para confirmar essa dose. Dá para confirmar a partir de 1 hora antes do horário.". Quem decide se está cedo é o relógio do servidor, não o `horarioConfirmado` que veio no corpo. A tela de doses segue a mesma regra e só mostra o botão quando a dose já pode ser confirmada.
 
@@ -483,28 +504,11 @@ O cuidador vê acompanhamento de dose. Ele **não** recebe a ficha médica nem o
 
 ### DELETE /api/cuidadores/vinculo/:id
 
-Protegida. Marca `ativo = FALSE`. Não apague a linha: quem teve acesso a dado de saúde precisa ficar registrado.
+Protegida. Pode ser chamada pelo próprio cuidador ou pelo dono da ficha. Marca `ativo = FALSE` e responde `204`. A linha não é apagada, porque quem teve acesso a dado de saúde precisa ficar registrado.
 
 ---
 
-## Ordem sugerida de implementação
-
-O front foi escrito para degradar bem. Cada rota que vocês entregam já acende uma parte da tela, e o resto continua na demonstração. A ordem que libera mais valor por hora de trabalho:
-
-1. `GET /api/status` (uma linha, e é ela que faz o front trocar de modo)
-2. `POST /api/usuarios` e `POST /api/usuarios/login`
-3. `GET` e `POST /api/pacientes`
-4. `GET /api/emergencia/:token` com o `410`
-5. `POST /api/pacientes/:id/qr/rotacionar` e `DELETE /api/pacientes/:id/qr`
-6. Medicamentos
-7. Doses e adesão
-8. Cuidador
-
-Depois do passo 4 vocês já conseguem escanear o QR com o celular e ver a ficha abrir de verdade, que é o marco 6 do roadmap e o coração da demonstração.
-
----
-
-## Mapa das telas do front
+## Telas e as rotas que cada uma usa
 
 | Arquivo | O que faz | Rotas que usa |
 |---|---|---|
@@ -513,7 +517,7 @@ Depois do passo 4 vocês já conseguem escanear o QR com o celular e ver a ficha
 | `pages/perfil.html` | Ficha médica, QR Code, cancelamento, acessos, código do cuidador | `GET/POST/PUT /pacientes`, as três rotas de QR, `/acessos`, `/codigo` |
 | `pages/imprimir.html` | Folha A4 com as etiquetas | `GET /pacientes/:id` |
 | `pages/medicamentos.html` | Lista e cadastro de remédios | `GET/POST/DELETE /medicamentos` |
-| `pages/doses.html` | Agenda do dia e adesão | `GET /doses/hoje`, `POST /doses/:id/confirmar`, `GET /doses/adesao` |
+| `pages/doses.html` | Agenda do dia, adesão e cartão do alarme | `GET /doses/hoje`, `POST /doses/:id/confirmar`, `GET /doses/adesao`, `GET /doses/proximas` |
 | `pages/cuidador.html` | Painel do cuidador | `POST /cuidadores/vincular`, `GET /cuidadores/:id/pacientes`, `DELETE /cuidadores/vinculo/:id` |
 | `pages/emergencia.html` | Ficha pública do QR | `GET /emergencia/:token` |
 
@@ -526,3 +530,4 @@ Arquivos de apoio em `frontEnd/js/`:
 | `ui.js` | Guarda de sessão, navegação, recados e formatação |
 | `qrcode.js` | Gerador de QR Code próprio, sem CDN |
 | `demo.js` | Dados fictícios do modo demonstração |
+| `lembretes.js` | Alarme dos remédios: agenda os avisos no celular, janela de alarme com som e o cartão da tela de doses. Usa `GET /doses/proximas` e `POST /doses/:id/confirmar`. Detalhes em `docs/GUIA_APK.md` |

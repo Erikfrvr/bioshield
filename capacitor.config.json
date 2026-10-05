@@ -5,5 +5,12 @@
   "server": {
     "androidScheme": "http",
     "cleartext": true
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_bioshield",
+      "iconColor": "#E8604C",
+      "sound": "bioshield_alarme.wav"
+    }
   }
 }

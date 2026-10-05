@@ -94,6 +94,8 @@
 
     elemento("#sair", alvo).addEventListener("click", function () {
       escopo.Api.encerrarSessao();
+      // Quem saiu da conta nao pode continuar recebendo o alarme dela.
+      if (escopo.Lembretes) escopo.Lembretes.desligar();
       location.replace("../index.html");
     });
   }

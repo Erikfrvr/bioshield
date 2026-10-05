@@ -1,248 +1,147 @@
-# Dúvidas sobre o CONTRATO_API.md
+# Decisões de regra de negócio
 
-Anotadas pela Daiane na leitura do `frontEnd/CONTRATO_API.md`, comparando com o `database/bioshield.sql` e o front.
-Cada item tem uma proposta. Onde estiver **Decisão**, preencham juntos e depois atualizem o contrato.
+Na leitura do [`CONTRATO_API.md`](../frontEnd/CONTRATO_API.md), comparando com o `database/bioshield.sql` e com as telas, a Daiane anotou nove pontos que o contrato deixava em aberto ou em que ele se contradizia. Para cada um ela propôs uma saída, e o Erik decidiu. As nove decisões estão implementadas e testadas.
 
-As que travam código: **1, 2, 3 e 8**. Resolver antes de começar as Fases 7 e 8.
+A numeração ficou a mesma da época, porque vários comentários do backend apontam para ela (por exemplo, "dúvida 4" no `config/fuso.ts`).
 
-Situação: **as nove estão decididas e implementadas no backend.** Onde uma decisão ainda lista "o que falta fazer", a tabela abaixo diz o que sobrou de verdade.
-
-| Dúvida | Decisão | No código |
+| Dúvida | Decisão | Onde está no código |
 |---|---|---|
-| 1. Adesão | Dose do futuro não conta | Pronto: `DoseService.calcularAdesao` |
-| 2. Dose perdida | 60 minutos, na leitura | Pronto: `DoseService.prepararAgenda` |
-| 3. Dias de agenda | 7 dias, completando antes de toda leitura de dose | Pronto nas rotas de dose. Falta a lista do cuidador chamar o `prepararAgenda` (Fase 9) e rodar o `ALTER` no banco de quem já tem ele criado |
-| 4. Fuso | Brasília fixo nos três relógios, API em UTC | Pronto: `config/fuso.ts` e `config/db.ts` |
-| 5. PUT de remédio | Refaz a agenda futura em transação | Pronto no backend. Nenhuma tela chama o `PUT` ainda |
-| 6. `ativo` | Suspenso é a coluna, encerrado é o `data_fim` | Pronto no backend. Falta o botão de suspender na tela de remédios |
-| 7. Confirmar adiantado | Até 60 minutos antes | Pronto: `DoseService.confirmar` |
-| 8. Código do cuidador | Colunas em `pacientes` | Pronto |
-| 9. Quem vê o quê | `AutorizacaoService` | Pronto |
+| 1. Adesão | Dose do futuro não entra na conta | `DoseService.calcularAdesao` |
+| 2. Dose perdida | Vira perdida 60 minutos depois do horário, na hora da leitura | `Dose.limiteDePerdidas` e `DoseService.prepararAgenda` |
+| 3. Dias de agenda | 7 dias, completados antes de toda leitura de dose | `Medicamento.gerarHorariosEntre` e `DoseService.prepararAgenda` |
+| 4. Fuso horário | Tudo no horário de Brasília, com a API respondendo em UTC | `config/fuso.ts` e `config/db.ts` |
+| 5. Alterar remédio | A agenda futura é refeita, numa transação | `MedicamentoService.atualizar` |
+| 6. Remédio inativo | Suspenso é a coluna `ativo`; encerrado é o `data_fim` | `MedicamentoService` e `emergenciaInfrastructure` |
+| 7. Confirmar adiantado | A partir de 60 minutos antes do horário | `Dose.confirmar` |
+| 8. Código do cuidador | Duas colunas novas em `pacientes` | `CodigoCuidador` e `CuidadorService.vincular` |
+| 9. Quem vê o quê | Uma regra única de permissão, no service | `AutorizacaoService` |
 
----
+## Remédios e doses
 
-## Medicamentos e doses (fatia da Daiane)
+### 1. Como calcular a adesão
 
-### 1. O cálculo de adesão se contradiz
+O contrato dizia que dose no futuro não entra na conta, mas o exemplo dele contava. Com 6 doses no dia, 4 tomadas e 2 ainda por vir, o exemplo dava 67%, ou seja, 4 de 6.
 
-O contrato diz que dose no futuro não entra na conta, mas o exemplo conta:
+**Decisão:** vale a regra escrita; o exemplo é que estava errado. Nas duas janelas (hoje e os últimos 7 dias):
 
-- `hoje`: 6 previstas, 4 tomadas, 0 perdidas, 67%. Sobram 2 doses que ainda não chegaram, e 4/6 = 67%, então elas entraram na conta.
-- `semana`: 36/42 = 86%, mas 36 + 4 = 40, então também tem 2 futuras nas 42.
-- `frontEnd/js/demo.js`, função `contar`, faz `tomadas / lista.length` com a lista inteira.
+- `previstas` é o total de doses com horário previsto até agora, seja qual for a situação delas
+- `tomadas` e `perdidas` saem dessas mesmas doses, e o `percentual` é `tomadas / previstas`, arredondado
+- dose confirmada adiantado só entra na conta quando o horário dela chega, senão `tomadas` passaria de `previstas`
+- dose atrasada há menos de 60 minutos já conta em `previstas`, mas ainda não em `perdidas`
+- janela sem nenhuma dose dá `percentual` 0
 
-**Proposta:** seguir a regra escrita. `previstas` e `percentual` contam só dose com `horario_previsto <= NOW()`. Corrigir o exemplo do contrato e o `contar` do `demo.js`.
+Não precisou de SQL novo: o `contarPorPeriodo` já recebe início e fim, e o service passa "agora" como fim. O exemplo do contrato foi corrigido (4 previstas, 3 tomadas, 1 perdida, 75%), e a demonstração passou a parar a conta do dia em agora.
 
-**Decisão (Erik):** aceita como proposto. Vale a regra escrita, o exemplo é que estava errado.
+Na tela de doses, antes da primeira dose do dia aparece 0% com o texto "Nenhuma dose até agora". Quando há dose confirmada antes da hora, a tela explica que ela entra na conta quando o horário dela chegar.
 
-- `previstas` é o total de doses com horário previsto até agora, seja qual for o status. `tomadas` e `perdidas` saem dessas mesmas doses, e `percentual` é `tomadas / previstas`. Vale igual para `hoje` e para `semana`
-- No backend não precisa de SQL novo: o `contarPorPeriodo` do `DoseRepository` já recebe início e fim por parâmetro, com o fim inclusive. O `DoseService` passa `agora` como fim nas duas janelas (início do dia até agora, e sete dias atrás até agora)
-- Dose confirmada adiantado (dúvida 7) só entra na conta quando o horário dela chega, senão `tomadas` passaria de `previstas`
-- Dose atrasada há menos de 60 minutos (dúvida 2) já conta em `previstas`, mas ainda não em `perdidas`
-- Exemplo do `CONTRATO_API.md` corrigido: `hoje` com 4 previstas, 3 tomadas, 1 perdida, 75%. `semana` com 40 previstas, 36 tomadas, 4 perdidas, 90%. A seção ganhou a explicação da conta
-- `demo.js` corrigido: o problema não era o `contar`, era a lista do dia, que ia até 23:59. Agora ela para em agora, como a da semana já fazia
-- Na tela de doses, antes da primeira dose do dia não existe conta para mostrar. Aparece `0%`, igual ao painel do cuidador, com o texto "Nenhuma dose até agora" explicando o motivo
+### 2. Quando a dose vira perdida
 
-### 2. Quem marca a dose como `perdida`
+Nada no sistema mudava uma dose de prevista para perdida, e o roteiro falava em "janela de tolerância" sem dizer o tamanho.
 
-Não existe job nem rotina que mude `prevista` para `perdida`. O roadmap fala em janela de tolerância, mas não diz o tamanho.
+**Decisão:** 60 minutos, aplicados na hora da leitura, sem rotina rodando no servidor.
 
-**Proposta:** tolerância de 60 minutos, aplicada na hora da leitura. Antes de `GET /doses/hoje` e `GET /doses/adesao`, rodar:
+O número mora num lugar só, a constante `TOLERANCIA_ATRASO_MINUTOS` da entidade `Dose`. Antes de responder qualquer leitura de dose (as doses de hoje, as próximas doses do alarme, a adesão, a lista de remédios e o painel do cuidador), o service marca como perdida toda dose prevista do paciente com horário anterior a "agora menos 60 minutos". Quem calcula a hora é o service, e não o `NOW()` do banco. Confirmar uma dose perdida continua liberado: é o botão "Tomei mesmo assim".
 
-```sql
-UPDATE doses d
-JOIN medicamentos m ON m.id = d.id_medicamento
-SET d.status = 'perdida'
-WHERE m.id_paciente = ?
-  AND d.status = 'prevista'
-  AND d.horario_previsto < NOW() - INTERVAL 60 MINUTE;
-```
-
-**Decisão (Erik):** aceita como proposto, 60 minutos, aplicada na hora da leitura. Sem job e sem rotina agendada.
-
-- O número mora em um lugar só: a constante `TOLERANCIA_ATRASO_MINUTOS` da entidade `Dose`
-- A única diferença para o SQL de cima é o `NOW()`. O `DoseRepository` já combinou que quem manda a hora é o service, então o `marcarPerdidas(idPaciente, limite)` recebe o limite pronto. O service calcula com `Dose.limiteDePerdidas(agora)`
-- O `DoseService` chama o `marcarPerdidas` antes de `GET /doses/hoje` e de `GET /doses/adesao`. Na Fase 9, antes de montar a lista do cuidador também, senão o familiar vê "em dia" para quem não abriu o app
-- Confirmar uma dose `perdida` continua liberado, é o "Tomei mesmo assim"
-- O `demo.js` agora faz a mesma coisa (função `marcarPerdidas`), então a demonstração se comporta igual à API
-- Regra descrita no `CONTRATO_API.md`, em `GET /api/doses/hoje`
+O alarme do celular segue a mesma janela: os lembretes repetem até 60 minutos depois do horário, quando a dose passa a contar como perdida.
 
 ### 3. Quantos dias de agenda gerar
 
-Com `dataFim: null` o remédio não acaba, e não dá para inserir dose infinita. O `demo.js` gera 3 dias à frente (`gerarAgenda(banco, remedio, 3)`), mas não diz quem gera os dias seguintes.
+Remédio sem data de fim não acaba, e não dá para gravar dose infinita.
 
-**Proposta:** gerar 7 dias no cadastro (ou até `dataFim`, o que vier antes). No `GET /doses/hoje`, completar a agenda se o último dia gerado estiver a menos de 7 dias.
+**Decisão:** o cadastro gera 7 dias (ou até o `data_fim`, o que vier antes), só de agora para a frente. Antes de toda leitura de dose, o backend continua a agenda de cada remédio em uso a partir da última dose que já existe, até 7 dias à frente.
 
-**Decisão (Erik):** aceita, com três ajustes na parte de completar. A parte do cadastro já está pronta.
+Três detalhes que vieram junto:
 
-O que já existe: o `MedicamentoService` gera 7 dias no cadastro (`DIAS_DE_AGENDA`), pelo `gerarHorariosDaAgenda` da entidade `Medicamento`, que já para no `dataFim` e só gera de agora para a frente.
+1. **Completar antes de toda leitura, e não só na tela de doses.** Se fosse só lá, quem parasse de abrir o app ficaria sem dose no banco, e o familiar veria "em dia" justamente quando a pessoa sumiu.
+2. **O buraco do passado também é preenchido, até 7 dias para trás.** Se a agenda acabou há 3 dias, esses dias são gerados e logo marcados como perdidos, porque ninguém confirmou. O limite de 7 dias é o tamanho da janela da adesão.
+3. **Sem dose repetida.** A grade de horários sai sempre do `data_inicio` mais o `horario_inicial`, andando de frequência em frequência. O índice `uk_doses_agenda` é único e o insert usa `INSERT IGNORE`, então duas telas completando a agenda ao mesmo tempo não duplicam nada.
 
-Completar é do `DoseService`. Regra: para cada remédio em uso do paciente, continuar a agenda de onde a última dose parou até agora mais 7 dias, ou até o `dataFim`.
+Quem criou o banco antes disso precisa rodar o `ALTER TABLE doses` que está no contrato. O modo demonstração faz a mesma coisa em escala menor: completa 2 dias à frente, o suficiente para o alarme.
 
-Os três ajustes em relação à proposta:
-
-1. **Não é só no `GET /doses/hoje`.** Completar roda antes de toda leitura de dose: `/doses/hoje`, `/doses/adesao` e a lista do cuidador. Se rodasse só na tela de doses, o paciente que para de abrir o app ficaria sem dose nenhuma no banco, e o familiar veria "em dia" justamente quando a pessoa sumiu. Fica uma função só no service, que completa a agenda e depois chama o `marcarPerdidas` da dúvida 2, nessa ordem
-2. **O buraco do passado também é preenchido, até 7 dias para trás.** Se a agenda acabou há 3 dias, esses 3 dias de dose são gerados, e o `marcarPerdidas` logo em seguida marca como `perdida`. É o certo: ninguém confirmou essas doses. O limite de 7 dias é porque a adesão só olha a última semana, então gerar mais que isso seria linha à toa. Isso não contradiz a regra do cadastro: lá não se gera dose antiga porque o remédio ainda não existia no app
-3. **Sem dose repetida.** A grade de horários sai sempre de `dataInicio` mais `horarioInicial`, andando de `frequenciaHoras` em `frequenciaHoras`. Completar usa o `gerarHorariosEntre` da entidade `Medicamento`, que é a mesma conta do `gerarHorariosDaAgenda`, e só insere horário depois da última dose que já existe. Para duas requisições ao mesmo tempo não duplicarem, o índice `idx_doses_agenda` vira `UNIQUE` e o insert passa a ser `INSERT IGNORE`:
-
-```sql
-ALTER TABLE doses
-  DROP INDEX idx_doses_agenda,
-  ADD CONSTRAINT uk_doses_agenda UNIQUE (id_medicamento, horario_previsto);
-```
-
-Como ficou no código:
-
-- `DoseService.prepararAgenda(idPaciente, agora)` completa a agenda e depois marca as perdidas. As rotas `/doses/hoje` e `/doses/adesao` chamam antes de ler
-- `DoseRepository.ultimoHorarioPorMedicamento` devolve a última dose de cada remédio, e o `registrar` usa `INSERT IGNORE`. O índice único já está no `bioshield.sql` e no `DICIONARIO_DADOS.md`. Quem já tem o banco criado roda o `ALTER` de cima
-- Falta só a lista do cuidador, na Fase 9, chamar o `prepararAgenda` de cada paciente
-- O `proximaDose` do `GET /medicamentos` pode vir `null` para quem ficou mais de 7 dias sem abrir a tela de doses. O contrato já diz que pode vir `null` e o front trata
-- O `demo.js` gera 3 dias e não completa. Como os dados dele ficam só na aba e somem ao fechar, não precisa mudar
-
----
-
-## Regras que o contrato não cobre
+## Regras que o contrato não cobria
 
 ### 4. Fuso horário
 
-O `horarioInicial` chega como `"08:00"` (hora local), o `proximaDose` sai em UTC (`"2026-09-18T23:00:00.000Z"`, 20:00 em Brasília) e `doses.horario_previsto` é `DATETIME`, que não guarda fuso. Se servidor e MySQL estiverem em fusos diferentes, a dose das 22h cai no dia seguinte em `GET /doses/hoje`.
+O `horarioInicial` chega como "08:00", a API devolve horários em UTC e a coluna `DATETIME` não guarda fuso. Com servidor e banco em fusos diferentes, a dose das 22h cairia no dia seguinte.
 
-**Proposta:** fixar `America/Sao_Paulo` no pool do mysql2 (`timezone`) e no Node, gravar hora local e converter para ISO só no DTO. Isso vale também para os `TIMESTAMP` da Fase 6.
-
-**Decisão (Erik):** aceita a ideia, com uma correção técnica. O BioShield inteiro trabalha no horário de Brasília, e a API continua devolvendo todo horário em ISO com `Z` (UTC).
-
-A correção: a opção `timezone` do mysql2 **não aceita nome de fuso**. Só aceita `local`, `Z` ou um deslocamento como `-03:00`. Escrever `America/Sao_Paulo` ali não funciona. Como o Brasil não tem horário de verão desde 2019, `-03:00` é sempre Brasília.
+**Decisão:** o BioShield inteiro trabalha no horário de Brasília, e a API continua devolvendo todo momento exato em ISO com `Z` (UTC).
 
 São três relógios, e os três precisam concordar:
 
-| Relógio | Onde aparece | Como fixar |
+| Relógio | Onde pesa | Como foi fixado |
 |---|---|---|
-| Node | `new Date(ano, mes, dia, hora, minuto)` do `gerarHorariosDaAgenda`, início do dia do `GET /doses/hoje` | `process.env.TZ = "America/Sao_Paulo"` na primeira linha do `server.ts`, antes de qualquer import que use data |
-| mysql2 | Conversão entre `Date` do JavaScript e `DATETIME`/`TIMESTAMP` do banco | `timezone: "-03:00"` no `createPool` do `config/db.ts` |
-| MySQL | `NOW()`, `CURDATE()`, `CURRENT_TIMESTAMP` e a leitura das colunas `TIMESTAMP` | `SET time_zone = '-03:00'` em cada conexão nova do pool (evento `connection`). Com deslocamento, e não com nome, porque o MySQL do XAMPP não vem com a tabela de nomes de fuso carregada |
+| Node | A montagem da agenda e o "começo do dia" | `process.env.TZ = "America/Sao_Paulo"` no `config/fuso.ts`, importado primeiro pelo `server.ts` |
+| mysql2 | A conversão entre a data do JavaScript e as colunas de data do banco | `timezone: "-03:00"` no pool |
+| MySQL | `NOW()`, `CURDATE()` e as colunas `TIMESTAMP` | `SET time_zone = '-03:00'` em cada conexão nova |
 
-Hoje funciona sem nada disso porque o computador de desenvolvimento e o MySQL do XAMPP já estão em Brasília, e o padrão do mysql2 é `local`. Quebra no dia em que o backend for publicado em um servidor em UTC: o `"08:00"` viraria 5h da manhã em Brasília, e o `NOW()` do `SELECT_MEDICAMENTO` deixaria de bater com os horários gravados.
+O mysql2 e o MySQL recebem o deslocamento, e não o nome do fuso, porque o mysql2 só aceita deslocamento e o MySQL do XAMPP não vem com a tabela de nomes de fuso. Como o Brasil não tem horário de verão desde 2019, `-03:00` é sempre Brasília. Isso foi testado com o relógio do computador forçado para outros fusos (UTC e Tóquio): a dose das 8h continuou sendo às 8h de Brasília.
 
-Como fica cada dado:
+`horarioInicial`, `dataInicio` e `dataFim` entram e saem como texto, sem conversão. As telas convertem os horários em UTC para a hora do aparelho na hora de mostrar.
 
-- `horarioInicial` (`"08:00"`), `dataInicio` e `dataFim` (`"2026-09-18"`) são hora e dia de parede em Brasília. Entram e saem como texto, sem conversão
-- `horarioPrevisto`, `horarioConfirmado`, `proximaDose` e os `TIMESTAMP` saem em ISO com `Z`, pelo `toISOString()` no DTO, como já é hoje. O exemplo do contrato está certo: `23:00Z` é 20h em Brasília
-- O front converte para a hora do aparelho na hora de mostrar (`UI.formatarHora`), então não muda nada lá
-- "Hoje" no `GET /doses/hoje` e na adesão é o dia de Brasília, da meia noite até a meia noite seguinte
+Limite conhecido: o app assume um fuso só. Um paciente em Manaus que cadastra "08:00" recebe o alarme às 7h do relógio dele. Resolver de verdade pede guardar o fuso de cada paciente.
 
-Limite conhecido, que fica para depois do Empreenda: o app assume um fuso só. Um paciente em Manaus, que está uma hora atrás, cadastrando `"08:00"`, recebe a dose às 7h do relógio dele. Resolver de verdade pede guardar o fuso de cada paciente.
+### 5. Alterar horário ou frequência de um remédio
 
-Como ficou no código: o arquivo novo `config/fuso.ts` guarda o nome e o deslocamento do fuso e acerta o Node. O `config/db.ts` usa o deslocamento no `timezone` do pool e no `SET time_zone` de cada conexão. Testado subindo o servidor com o relógio do processo forçado para UTC: a dose das 8h continuou gravada às 8h e o código do cuidador continuou valendo 24 horas.
+Quando o horário muda, a agenda futura precisa acompanhar.
 
-### 5. PUT de medicamento que muda horário ou frequência
+**Decisão:** dentro de uma transação, junto com a alteração do remédio, as doses previstas com horário no futuro são apagadas e geradas de novo. Tomadas e perdidas ficam, porque são histórico.
 
-A agenda futura precisa acompanhar.
+- A agenda é refeita quando muda o horário, a frequência, o início, o fim ou a suspensão
+- Mudar só nome, dosagem ou unidade não mexe na agenda: a dose busca esses dados no remédio na hora de listar
+- A dose atrasada dentro da tolerância fica, porque ainda pode ser confirmada
+- Dose confirmada adiantado no mesmo horário da grade nova não duplica, graças ao índice único da dúvida 3
 
-**Proposta:** dentro de uma transação, apagar as doses `prevista` com horário no futuro e gerar de novo. As `tomada` e `perdida` ficam, porque são histórico.
+A tela de remédios usa essa rota para suspender e reativar, e o alarme do celular é refeito em seguida.
 
-**Decisão (Erik):** aceita como proposto, com o detalhe de quando refazer. Hoje o `PUT` grava o remédio e não toca nas doses, então a agenda fica com os horários antigos.
+### 6. Quando um remédio deixa de estar em uso
 
-- **Refaz a agenda** quando muda `horarioInicial`, `frequenciaHoras`, `dataInicio`, `dataFim` ou `ativo`. Encurtar o `dataFim` precisa apagar as doses depois dele, e mudar o `dataInicio` desloca a grade inteira
-- **Não refaz** quando muda só `nome`, `dosagem` ou `unidade`. A dose busca esses dados no remédio na hora de listar, então já aparecem atualizados
-- Refazer é: apagar as doses `prevista` com `horario_previsto` maior que agora e inserir o resultado de `gerarHorariosDaAgenda(agora, 7)` com os dados novos
-- Ficam como estão: `tomada`, `perdida`, e a `prevista` atrasada dentro dos 60 minutos de tolerância, que ainda pode ser confirmada
-- Tudo em uma transação só, junto com o `UPDATE` do remédio, porque mexe em duas tabelas. O `atualizar` do `MedicamentoRepository` passa a receber a agenda nova (ou `null` quando não é para refazer), no mesmo desenho do `cadastrar`
-- Uma dose confirmada adiantado (dúvida 7) é `tomada` com horário no futuro e não é apagada. Se a grade nova cair no mesmo horário, o `UNIQUE` com `INSERT IGNORE` da dúvida 3 impede a repetição
+A coluna `ativo` existia e a emergência filtrava por ela, mas nenhuma rota mudava esse valor.
 
-Como ficou no código: o `atualizar` do `MedicamentoService` compara horário, período e `ativo` de antes e de depois, e só então manda a agenda nova para o `atualizar` do repository, que faz tudo em uma transação. Hoje nenhuma tela chama o `PUT` de medicamento: o `api.js` tem a função, mas a tela de remédios só cadastra e apaga.
+**Decisão:** eram duas coisas diferentes misturadas na mesma coluna.
 
-### 6. Quando `medicamentos.ativo` vira FALSE
+- **Suspenso** é decisão de alguém, como o médico mandar parar. É a coluna `ativo`, mudada pelo `PUT /medicamentos/:id`, e as doses futuras saem da agenda
+- **Encerrado** é o calendário: o tratamento tinha data para acabar e ela passou. É o `data_fim`, e não precisa de coluna nem de rotina
 
-A coluna existe e a emergência filtra por ela, mas nenhuma rota muda esse valor. O `DELETE` apaga a linha de verdade.
+Consequências:
 
-**Proposta:** tratar como inativo quando `data_fim < CURDATE()`, direto na consulta da emergência (`ativo = TRUE AND (data_fim IS NULL OR data_fim >= CURDATE())`).
+1. A ficha de emergência mostra só remédio em uso hoje: ativo, já começado e ainda não encerrado. Remédio que só começa semana que vem também fica de fora, porque na emergência informação errada é pior que informação faltando.
+2. No `GET /medicamentos`, o campo `ativo` vem falso tanto para suspenso quanto para encerrado, e a tela separa os dois pela data.
+3. O `DELETE` continua apagando de verdade, com as doses. É para remédio cadastrado por engano; para remédio que a pessoa parou de tomar, o caminho é suspender, que guarda o histórico de adesão.
 
-**Decisão (Erik):** aceita, e completada. São duas coisas diferentes que estavam misturadas na mesma coluna:
+### 7. Confirmar uma dose antes da hora
 
-- **Suspenso** é decisão de alguém: o médico mandou parar. É a coluna `ativo`
-- **Encerrado** é o calendário: o tratamento tinha data para acabar e ela passou. É o `data_fim`, e não precisa de coluna nem de rotina para virar nada
+O contrato liberava confirmar dose perdida, mas não dizia nada sobre confirmar às 10h da manhã a dose das 20h.
 
-Regras:
+**Decisão:** dá para confirmar a partir de 60 minutos antes do horário. Mais cedo que isso, a API responde 400 com "Ainda é cedo para confirmar essa dose. Dá para confirmar a partir de 1 hora antes do horário."
 
-1. **Emergência.** Só sai remédio em uso hoje. Além da proposta, entra o começo do tratamento, porque remédio que só começa semana que vem também não está em uso, e na emergência informação errada é pior que informação faltando:
+Quem decide se está cedo é o relógio do servidor, e não o horário que vem do celular; senão bastaria mandar uma hora inventada. O horário que vem do celular é gravado como a hora real da tomada. Na tela de doses, a dose que ainda não pode ser confirmada aparece sem botão, com o aviso "Dá para confirmar a partir das 19:00". Para o lado do atraso não há limite.
 
-```sql
-WHERE id_paciente = ?
-  AND ativo = TRUE
-  AND data_inicio <= CURDATE()
-  AND (data_fim IS NULL OR data_fim >= CURDATE())
-```
+## Cuidador e permissões
 
-   O `CURDATE()` só é confiável depois da dúvida 4, que põe o MySQL no fuso de Brasília.
+### 8. Onde guardar o código do cuidador
 
-2. **Quem muda a coluna `ativo`.** O `PUT /api/medicamentos/:id` passa a aceitar `ativo: false` (suspender) e `ativo: true` (reativar). A entidade `Medicamento` já tem `suspender()` e `reativar()`, e o `atualizar` do infrastructure já grava a coluna. Falta o campo no `AtualizarMedicamentoDTO` e o tratamento no service. Suspender apaga as doses `prevista` futuras e reativar gera de novo, pela mesma rotina da dúvida 5. O `gerarHorariosDaAgenda` já devolve lista vazia para remédio inativo
+A rota que gera o código devolvia `codigo` e `validoAte`, mas nenhuma tabela tinha onde guardar isso, e o vínculo não teria com o que comparar.
 
-3. **O campo `ativo` na resposta do `GET /medicamentos`.** Vem `false` quando o remédio está suspenso **ou** quando o `dataFim` já passou. Assim a tela de remédios, que já mostra o selo de encerrado quando `ativo === false`, funciona para os dois casos sem mudar o front. Remédio que ainda vai começar continua `ativo: true`
+**Decisão:** duas colunas em `pacientes`, `codigo_cuidador` (7 caracteres, único) e `codigo_valido_ate`. Cada paciente tem no máximo um código válido por vez; gerar de novo substitui o anterior. O código vale 24 horas e evita letras e números que se confundem ao ditar (0, O, 1, I e L).
 
-4. **`DELETE` continua apagando de verdade**, com as doses junto. É para remédio cadastrado por engano. Para remédio que a pessoa parou de tomar, o caminho é suspender, que guarda o histórico de adesão
-
-5. **Agenda.** Não gera dose depois do `dataFim` (já é assim) nem para remédio suspenso
-
-Como ficou no código:
-
-- O `WHERE` da consulta de medicamentos no `emergenciaInfrastructure.ts` já é o de cima
-- `ativo` entrou no `AtualizarMedicamentoDTO` e no `atualizar` do `MedicamentoService`, que só aceita verdadeiro ou falso de verdade. A conta do item 3 está no `paraResposta`, com o método `tratamentoEncerradoEm` da entidade
-- Falta a tela de remédios ganhar o botão de suspender. Sem ele a regra 2 só é alcançável pelo `requests.http`
-
-### 7. Confirmar dose no futuro
-
-O contrato libera confirmar dose `perdida`, mas não diz nada sobre confirmar uma dose das 20h às 10h da manhã.
-
-**Proposta:** aceitar até 60 minutos antes do horário e devolver `400` fora disso.
-
-**Decisão (Erik):** aceita como proposto. Dá para confirmar a partir de 60 minutos antes do horário previsto. Mais cedo que isso, `400`.
-
-- A regra está na entidade `Dose`: constante `ANTECEDENCIA_CONFIRMACAO_MINUTOS`, método `podeSerConfirmadaEm(agora)` e a checagem dentro do `confirmar(horarioConfirmado, agora)`, que joga `Error` com a mensagem "Ainda é cedo para confirmar essa dose. Dá para confirmar a partir de 1 hora antes do horário."
-- Quem decide se está cedo é o relógio do servidor (`agora`), não o `horarioConfirmado` do corpo. Se valesse o que vem do celular, bastava mandar uma hora inventada. O `horarioConfirmado` continua sendo gravado como a hora real da tomada
-- O `DoseService` só precisa chamar `dose.confirmar(...)` e traduzir o `Error` para erro de validação, como os outros services fazem
-- Para o lado do atraso não tem limite: dose `perdida` pode ser confirmada a qualquer hora
-- Na tela de doses, a dose que ainda não pode ser confirmada aparece sem botão, com o aviso "Dá para confirmar a partir das 19:00". O `demo.js` recusa igual à API
-- Regra descrita no `CONTRATO_API.md`, em `POST /api/doses/:id/confirmar`
-
----
-
-## Para o Erik
-
-### 8. O código do cuidador não tem onde ser guardado
-
-`POST /api/pacientes/:id/codigo` devolve `codigo` e `validoAte`, mas nenhuma tabela tem essas colunas. Sem isso, `POST /api/cuidadores/vincular` (Fase 9) não tem com o que comparar.
-
-**Proposta:** ALTER no mesmo esquema da Fase 2.5, sem depender de nenhuma outra fase:
-
-```sql
-ALTER TABLE pacientes
-  ADD COLUMN codigo_cuidador CHAR(7) NULL AFTER qr_cancelado_em,
-  ADD COLUMN codigo_valido_ate TIMESTAMP NULL AFTER codigo_cuidador,
-  ADD CONSTRAINT uk_pacientes_codigo UNIQUE (codigo_cuidador);
-```
-
-Levar também para o `bioshield.sql` e para o `DICIONARIO_DADOS.md`.
-
-**Decisão (Erik):** aceita como proposto. As colunas `codigo_cuidador` e `codigo_valido_ate` e o `UNIQUE` já estão no `bioshield.sql` e no `DICIONARIO_DADOS.md`. O ALTER ficou no `CONTRATO_API.md` para quem já tem o banco criado. O `POST /cuidadores/vincular` pega o cuidador de `req.idUsuario` (o token), não do corpo, e recusa código vencido com `404`.
+No vínculo, o cuidador é sempre quem está logado, e não um id que venha no corpo da requisição; senão daria para vincular a conta de outra pessoa. Código que não existe e código vencido respondem igual, com 404, para ninguém descobrir quais códigos já existiram.
 
 ### 9. Quem pode ver os dados de qual paciente
 
-O JWT carrega só o id do usuário. Em `GET /api/medicamentos?idPaciente=1`, se ninguém conferir, qualquer usuário logado lê o remédio de qualquer paciente trocando o número. O mesmo vale para doses, ficha, acessos e QR.
+O token de sessão carrega só o id do usuário. Sem conferência, qualquer pessoa logada leria os remédios de qualquer paciente trocando o número na URL.
 
-**Proposta:** uma função única, usada por todos os services, que libera quando o paciente é do usuário logado ou quando existe vínculo `ativo = TRUE` em `cuidador_paciente`. Cuidador só passa nas rotas de dose e adesão. Negar com `403`.
+**Decisão:** a regra fica no service, num lugar só, o `AutorizacaoService`. O middleware de autenticação só descobre quem está logado; quem sabe de qual paciente é o dado é o service de cada domínio, porque o id chega de jeitos diferentes (na URL, na query ou escondido atrás de uma dose ou de um remédio).
 
-**Decisão (Erik):** fica no **service**. O middleware `autenticar` (Fase 4) só descobre quem está logado e grava em `req.idUsuario`. Ele não tem como saber o paciente, porque o id chega de jeitos diferentes: `?idPaciente`, `:id`, ou atrás de um id de dose ou de remédio. Erik escreveu `services/AutorizacaoService.ts`, com repository e infrastructure no molde da Fase 3:
+| Função | Quem passa | Onde é usada |
+|---|---|---|
+| `garantirDono` | Só o dono da ficha | Ficha, QR Code, histórico de acessos, código do cuidador e remédios |
+| `garantirAcompanhamento` | O dono ou um cuidador com vínculo ativo | Doses de hoje, próximas doses, confirmação e adesão |
+| `garantirMesmoUsuario` | Só a própria conta | `/usuarios/:id` e a lista de pacientes do cuidador |
 
-- `garantirDono(req.idUsuario, idPaciente)`: ficha, QR, acessos, código e medicamentos
-- `garantirAcompanhamento(req.idUsuario, idPaciente)`: doses e adesão, dono ou cuidador com vínculo ativo
-- `garantirMesmoUsuario(req.idUsuario, id)`: `/usuarios/:id` e `/cuidadores/:id/pacientes`
+Todas respondem 403 quando a pessoa não tem acesso. Paciente que não existe também responde 403, com a mesma mensagem, para ninguém descobrir quais ids existem trocando o número.
 
-As três lançam `ErroAcesso`, que o controller traduz para `403` (ver o `usuarioController`). Paciente inexistente também dá `403`, com a mesma mensagem. Cada service passa `req.idUsuario` para essas funções logo depois de validar os ids e antes de consultar o banco. O `GET /usuarios/:id` já usa isso.
+## Detalhes técnicos que não precisaram de decisão
 
----
-
-## Pegadinhas técnicas (não precisam de decisão)
-
-- O mysql2 devolve `DECIMAL(10,2)` como texto: vem `"50.00"` em vez de `50`. Converter com `Number()` no DTO de resposta.
-- `horario_inicial` é `TIME` e volta como `"08:00:00"`. O contrato espera `"08:00"`: cortar os segundos.
-- Paciente sem dose nenhuma divide por zero na adesão. Devolver `percentual: 0`, igual ao `demo.js`.
+- O mysql2 devolve `DECIMAL(10,2)` como texto, "50.00". O value object `Dosagem` converte para número.
+- `horario_inicial` é `TIME` e volta como "08:00:00". O SQL corta os segundos, porque o contrato usa "08:00".
+- Paciente sem dose nenhuma dividiria por zero na adesão. A conta devolve 0.
