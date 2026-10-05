@@ -1,12 +1,13 @@
 # BioShield
 
-> Aplicativo de saúde preventiva e segurança medicamentosa. Um QR Code que mostra as informações vitais de alguém quando essa pessoa não consegue falar por si.
+Ficha médica de emergência em QR Code e alarme de remédios para quem não pode contar com a própria memória ou com a própria voz.
 
-![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
+![Versão](https://img.shields.io/badge/vers%C3%A3o-1.0-0E3C39)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?logo=nodedotjs&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-000000?logo=express&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white)
+![Android](https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white)
 
 <p align="center">
   <img src="docs/img/emergencia.png" alt="Ficha de emergência aberta pelo QR Code, com alergias em vermelho, tipo sanguíneo, remédios em uso e botões para ligar" width="300">
@@ -15,48 +16,51 @@
 </p>
 
 <p align="center">
-  À esquerda, a ficha que um desconhecido vê ao escanear o QR Code. À direita, a tela de entrada. As duas imagens usam dados fictícios do modo demonstração.
+  À esquerda, a ficha que um desconhecido vê ao escanear o QR Code. À direita, a tela de entrada. As duas imagens usam dados fictícios.
 </p>
 
 ---
 
 ## O problema
 
-Quando alguém desmaia, tem uma crise ou se perde na rua, quem chega primeiro não é o socorrista. É um desconhecido. E esse desconhecido não tem como saber se a pessoa é alérgica a dipirona, se tem epilepsia ou para quem ligar.
+Quando alguém desmaia, tem uma crise ou se perde na rua, quem chega primeiro quase nunca é o socorrista. É um desconhecido, que não tem como saber se a pessoa é alérgica a dipirona, se tem epilepsia ou para quem ligar.
 
-Existem pulseiras de identificação que tentam resolver isso, e Manaus chegou a criar uma lei municipal para distribuir pulseiras com QR Code a idosos e pessoas com deficiência. Mas elas são de gravação fixa: mudou o remédio, tem que trocar a pulseira.
+Existem pulseiras de identificação para isso, e Manaus chegou a criar uma lei municipal para distribuir pulseiras com QR Code a idosos e pessoas com deficiência. O problema é que elas são gravadas uma vez só: mudou o remédio, tem que trocar a pulseira.
 
-O BioShield resolve por software. O usuário gera o próprio QR Code, atualiza os dados quando quiser e imprime onde preferir: cartão na carteira, adesivo, chaveiro ou pulseira.
+O BioShield resolve isso por software. A própria pessoa gera o QR Code, atualiza a ficha quando quiser e imprime onde preferir: cartão na carteira, adesivo, chaveiro ou pulseira. O código continua o mesmo; o que muda é a ficha por trás dele.
 
 ## O que o app faz
 
-**QR Code de emergência.** Quem escaneia vê alergias a medicamento, remédios em uso, tipo sanguíneo, condições de saúde e o contato de emergência com botão de ligar. Abre no navegador, sem login e sem instalar nada, porque quem escaneia é um estranho no meio de uma emergência.
+**Ficha de emergência pelo QR Code.** Quem escaneia vê, em poucos segundos, as alergias a medicamento (as graves em vermelho, primeiro), os remédios em uso, o tipo sanguíneo, as condições de saúde e os contatos de emergência com botão de ligar. Abre direto no navegador, sem login e sem instalar nada. Se a pessoa perder o chaveiro, cancela o código pelo app, e quem escanear o papel perdido vê só um aviso de código cancelado. Toda leitura fica registrada, e o dono da ficha vê quando e de que tipo de aparelho ela foi aberta.
 
-**Lembrete de medicamentos.** Cadastro de remédio com dosagem e frequência, agenda de doses gerada automaticamente e confirmação de cada tomada, com percentual de adesão. O remédio pode ser suspenso e reativado sem perder o histórico de doses. No app Android, o celular toca um alarme na hora de cada dose e repete a cada 5 minutos até a pessoa confirmar, com os botões Tomei e Lembrar em 5 min na própria notificação, mesmo com a tela bloqueada e o app fechado.
+**Remédios e alarme.** A pessoa cadastra o remédio com dose, intervalo e horário da primeira tomada, e o BioShield monta a agenda sozinho. Na hora de cada dose o celular toca um alarme, com som próprio e vibração, e repete a cada 5 minutos até a pessoa tocar em **Tomei**, inclusive com a tela bloqueada e o app fechado. A tela de doses mostra a agenda do dia e a adesão de hoje e da semana. Remédio pode ser suspenso e reativado sem perder o histórico.
 
-**Modo cuidador.** O familiar acompanha de longe se as doses estão sendo tomadas. O vínculo só existe depois de autorização explícita do paciente, e o cuidador vê acompanhamento sem editar a ficha médica.
+**Modo cuidador.** O familiar acompanha de longe a adesão da semana, as doses perdidas e a próxima dose. O vínculo só existe depois que o próprio paciente gera um código de autorização e entrega para o cuidador, e o cuidador não vê nem edita a ficha médica.
 
-## Público
+**Folha de etiquetas.** Uma folha A4 com o QR Code em quatro tamanhos, do cartão de carteira ao mini adesivo de pulseira, pronta para imprimir e recortar.
 
-Idosos, pessoas com doenças crônicas, pessoas com alergia severa a medicamento, pessoas autistas com maior necessidade de suporte e os cuidadores dessas pessoas.
+## Para quem
 
-Isso define as escolhas de interface: fonte grande, contraste alto, poucos passos por tela e nada de jargão médico.
+Idosos, pessoas com doenças crônicas, pessoas com alergia grave a medicamento, pessoas autistas com maior necessidade de suporte e os cuidadores de todas elas.
+
+Esse público decidiu a interface: letra grande, contraste alto, poucos passos por tela e nenhum termo médico sem explicação. Em toda tela há um botão de acessibilidade que aumenta a letra em quatro tamanhos e liga um modo de contraste reforçado.
 
 ## Tecnologias
 
-| Camada | Tecnologia |
+| Parte | O que usa |
 |---|---|
-| Backend | Node.js, Express, TypeScript |
-| Banco | MySQL 8 ou MariaDB 10.4 (a do XAMPP), com mysql2 e pool de conexão |
-| Segurança | bcryptjs para o hash da senha e jsonwebtoken para a sessão |
-| Front | HTML, CSS e JavaScript |
-| Execução | tsx |
+| Backend | Node.js, Express e TypeScript, rodando com tsx |
+| Banco | MySQL 8 ou o MariaDB 10.4 do XAMPP, acessado com mysql2 e pool de conexões |
+| Segurança | bcryptjs para guardar a senha e jsonwebtoken para a sessão |
+| Telas | HTML, CSS e JavaScript, sem framework |
+| App Android | Capacitor 8, com os plugins oficiais `@capacitor/app` e `@capacitor/local-notifications` |
+| Testes | Jest |
 
-Sem ORM. O SQL é escrito na mão e fica isolado na camada de infraestrutura.
+Não há ORM: o SQL é escrito à mão e fica todo na camada de infraestrutura. O gerador de QR Code também é do projeto, sem biblioteca externa.
 
 ## Arquitetura
 
-Arquitetura em camadas seguindo princípios de DDD e Clean Architecture. O caminho de uma requisição é sempre o mesmo:
+O backend segue camadas inspiradas em DDD e Clean Architecture, e toda requisição faz o mesmo caminho:
 
 ```
 rota  ->  controller  ->  service  ->  infrastructure  ->  banco
@@ -65,51 +69,34 @@ rota  ->  controller  ->  service  ->  infrastructure  ->  banco
                   entidade + value object
 ```
 
-| Camada | Responsabilidade |
+| Pasta | Papel |
 |---|---|
-| `routes/` | Mapeia o caminho HTTP para o controller |
-| `middleware/` | Confere o token de sessão antes do controller |
-| `controllers/` | Lê a requisição, chama o service, devolve a resposta |
-| `services/` | Regra de negócio e orquestração |
-| `repository/` | Interfaces que definem o contrato com o banco |
-| `infrastructure/` | Implementação das interfaces com SQL |
-| `models/entidade/` | Objetos de domínio |
-| `models/valueObjects/` | Valores que se validam sozinhos |
-| `models/dto/` | Contratos de entrada e saída |
+| `routes/` | Liga cada caminho HTTP ao seu controller |
+| `middleware/` | Confere o token de sessão |
+| `controllers/` | Lê a requisição, chama o service e devolve a resposta com o status certo |
+| `services/` | Regras de negócio, validação e permissões |
+| `repository/` | Interfaces que dizem o que o service precisa do banco |
+| `infrastructure/` | O SQL que implementa essas interfaces |
+| `models/entidade/` | Objetos de domínio, como Paciente, Medicamento e Dose |
+| `models/valueObjects/` | Valores que se validam sozinhos, como Email, Telefone e TipoSanguineo |
+| `models/dto/` | O formato exato do que entra e do que sai da API |
 
-A dependência aponta sempre para dentro. O service conhece a interface do repositório, nunca a implementação concreta.
-
-## Estrutura de pastas
+As dependências apontam sempre para dentro: o service conhece só a interface do repositório, nunca o SQL. O detalhe de cada classe está em [`docs/DICIONARIO_DETALHADO.md`](docs/DICIONARIO_DETALHADO.md).
 
 ```
-BioShield/
-├── backend/
-│   ├── config/            conexão com o banco e fuso horário
-│   ├── routes/            caminhos da API
-│   ├── middleware/        autenticação por token
-│   ├── controllers/       entrada e saída HTTP
-│   ├── services/          regra de negócio
-│   ├── repository/        interfaces dos repositórios
-│   ├── infrastructure/    implementações MySQL
-│   ├── models/            entidades, value objects e DTOs
-│   └── server.ts
-├── android/               projeto do app Android, gerado pelo Capacitor
-├── database/              schema e dados fictícios
-├── docs/                  roadmap, dicionário detalhado e imagens
-└── frontEnd/              telas do app
+bioshield/
+├── backend/        API (server.ts, camadas acima e tests/)
+├── frontEnd/       telas do site e do app
+├── android/        projeto Android gerado pelo Capacitor
+├── database/       script do banco, dados fictícios e dicionário de dados
+└── docs/           guias, decisões e imagens
 ```
 
 ## Como rodar
 
-### O que você precisa ter instalado
+Você vai precisar do Node.js 20 ou mais novo (22 para gerar o app Android) e do MySQL 8.0.16 ou mais novo, ou do MariaDB que vem no XAMPP. Os passos abaixo são para Windows. Para montar o servidor no Linux Mint, ligado a um roteador, siga o [`docs/SERVIDOR_LINUX.md`](docs/SERVIDOR_LINUX.md).
 
-- Node.js 20 ou superior (22 ou superior para gerar o app Android)
-- MySQL 8.0.16 ou superior, ou o MariaDB que vem no XAMPP
-- VS Code com a extensão REST Client, que é opcional
-
-Estes passos são para o Windows. Para subir o servidor no Linux Mint, com os celulares acessando pelo roteador, o passo a passo está em [`docs/SERVIDOR_LINUX.md`](docs/SERVIDOR_LINUX.md).
-
-### 1. Baixar o projeto
+**1. Baixar o projeto e as dependências**
 
 ```bash
 git clone https://github.com/Erikfrvr/bioshield.git
@@ -117,56 +104,41 @@ cd bioshield/backend
 npm install
 ```
 
-### 2. Criar o banco
-
-Com o MySQL ligado, execute os dois scripts nesta ordem:
-
-1. `database/bioshield.sql`, que cria o banco e as tabelas
-2. `database/dados_ficticios.sql`, que preenche com pessoas inventadas para teste e para a apresentação
-
-Pode ser pelo phpMyAdmin (aba Importar), pelo MySQL Workbench ou pelo terminal:
+**2. Criar o banco.** Com o MySQL ligado, rode os dois scripts, nesta ordem. O primeiro cria o banco e as tabelas; o segundo coloca as pessoas fictícias usadas nos testes e na apresentação.
 
 ```bash
 mysql -u root -p --default-character-set=utf8mb4 < ../database/bioshield.sql
 mysql -u root -p --default-character-set=utf8mb4 < ../database/dados_ficticios.sql
 ```
 
-No XAMPP o `root` vem sem senha: quando o terminal pedir, só aperte Enter. O `--default-character-set=utf8mb4` garante que os acentos dos nomes entrem certos.
+No XAMPP o `root` não tem senha, então é só apertar Enter quando ela for pedida. Também dá para importar os dois arquivos pelo phpMyAdmin ou pelo MySQL Workbench. O `bioshield.sql` só funciona num banco que ainda não existe. O `dados_ficticios.sql` pode ser rodado quantas vezes quiser: ele apaga tudo e recria, com as doses montadas em volta da hora em que rodou. Vale rodar de novo no dia da apresentação, para o histórico ficar com cara de hoje.
 
-O `bioshield.sql` só roda num banco que ainda não existe. Se o `bioshield` já estiver criado, apague ele antes ou rode só o `dados_ficticios.sql`.
-
-O `dados_ficticios.sql` pode ser rodado de novo quando quiser: ele apaga todos os dados e recria do zero. As doses são montadas em volta da hora em que o script roda, então rode de novo no dia da apresentação para o histórico ficar com cara de hoje.
-
-### 3. Configurar o ambiente
-
-Ainda dentro da pasta `backend`:
+**3. Configurar o ambiente**
 
 ```bash
 cp .env.example .env
 ```
 
-Abra o `.env` e preencha:
-
-| Variável | Para que serve | Valor de exemplo |
+| Variável | Para que serve | Exemplo |
 |---|---|---|
 | `DB_HOST` | Endereço do MySQL | `127.0.0.1` |
 | `DB_USER` | Usuário do MySQL | `root` |
 | `DB_PASSWORD` | Senha do MySQL | vazio no XAMPP |
 | `DB_NAME` | Nome do banco | `bioshield` |
 | `DB_PORT` | Porta do MySQL | `3306` |
-| `PORT` | Porta do BioShield. Site, app e API usam a mesma | `3000` |
-| `JWT_SECRET` | Segredo que assina o token de sessão | um texto longo e só seu |
-| `URL_PUBLICA` | Opcional. Endereço de rede do servidor, o que vai dentro do QR Code. Vazio, o servidor descobre sozinho | vazio |
+| `PORT` | Porta do BioShield, a mesma para site, app e API | `3000` |
+| `JWT_SECRET` | Segredo que assina o login. Use um texto longo e só seu | |
+| `URL_PUBLICA` | Opcional. Endereço de rede do servidor, que vai dentro do QR Code. Vazio, o servidor descobre sozinho | |
 
-No XAMPP o usuário `root` vem sem senha, então nesse caso deixe `DB_PASSWORD=` vazio. O `.env` real nunca vai para o Git.
+O `.env` de verdade nunca vai para o Git.
 
-### 4. Subir o servidor
+**4. Ligar o servidor**
 
 ```bash
 npm run dev
 ```
 
-O mesmo servidor entrega a API e as telas, na mesma porta. O terminal mostra o endereço para usar neste computador e o endereço para os celulares da mesma rede:
+O mesmo servidor entrega a API e as telas. O terminal mostra o endereço deste computador e o endereço para os celulares da mesma rede:
 
 ```
 Servidor rodando em http://localhost:3000
@@ -174,59 +146,38 @@ Nos celulares e nos outros computadores da mesma rede, use:
   http://192.168.0.10:3000
 ```
 
-`npm run dev` reinicia sozinho quando um arquivo muda. Para deixar ligado sem isso, use `npm start`.
+O `npm run dev` reinicia sozinho quando um arquivo muda; para deixar só ligado, use `npm start`. Depois é abrir `http://localhost:3000` no navegador.
 
-### 5. Abrir o BioShield
-
-Abra `http://localhost:3000` no navegador. Não precisa de mais nada: o front é estático e quem entrega é o próprio backend.
-
-Abrir o `frontEnd/index.html` pelo Live Server do VS Code continua funcionando. Nesse caso o front procura a API em `http://localhost:3000`.
-
-Para testar as rotas sem o front, use o arquivo `backend/requests.http` com a extensão REST Client do VS Code. Cada bloco tem o status esperado escrito no comentário.
+Para testar as rotas sem as telas, o arquivo `backend/requests.http` tem uma requisição pronta para cada caso, com o status esperado no comentário. Ele roda com a extensão REST Client do VS Code.
 
 ### Contas de teste
 
-Criadas pelo `dados_ficticios.sql`. A senha de todas é `123456`.
+Criadas pelo `dados_ficticios.sql`, todas com a senha `123456`.
 
-| Conta | O que dá para mostrar com ela |
+| Conta | O que dá para mostrar |
 |---|---|
-| `maria.souza@exemplo.com` | Paciente principal. Ficha completa, uma semana de doses em dia e acessos ao QR no histórico. Na tela de remédios tem um em uso, um suspenso e um encerrado |
-| `patricia.martins@exemplo.com` | Cuidadora. Acompanha a Maria, que está em dia, e o Lucas, que tem doses perdidas. Não tem ficha própria |
-| `joana.lima@exemplo.com` | Duas alergias graves em destaque na ficha de emergência. Ninguém acompanha a Joana, então dá para criar o vínculo com a Patrícia ao vivo |
+| `maria.souza@exemplo.com` | A paciente principal: ficha completa, uma semana de doses em dia e leituras do QR no histórico. Tem um remédio em uso, um suspenso e um encerrado |
+| `patricia.martins@exemplo.com` | Cuidadora da Maria, que está em dia, e do Lucas, que tem doses perdidas. Não tem ficha própria |
+| `joana.lima@exemplo.com` | Duas alergias graves em destaque na ficha de emergência. Ninguém acompanha a Joana, então dá para criar o vínculo com a Patrícia na hora |
 | `lucas.andrade@exemplo.com` | Tratamento com data para acabar e adesão baixa |
-| `roberto.nunes@exemplo.com` | QR Code cancelado. Escanear o código dele mostra a tela de aviso de código cancelado |
+| `roberto.nunes@exemplo.com` | QR Code cancelado: escanear o código dele mostra o aviso de código cancelado |
 
-A senha `123456` só funciona porque essas contas foram criadas direto no banco. Uma conta nova, criada pela tela de cadastro, precisa seguir a regra de senha forte.
+A senha `123456` só funciona porque essas contas foram criadas direto no banco. Uma conta nova precisa de senha forte: pelo menos 8 caracteres, com letra maiúscula, letra minúscula, número e um destes símbolos: `@ $ ! % * ? & #`.
 
-## Modo demonstração
+## Testes
 
-O front consegue rodar sozinho, sem backend e sem banco. Nesse caso ele usa dados fictícios guardados no próprio navegador e avisa isso na tela: um cartão "Modo demonstração" na entrada e um selo no cabeçalho das outras páginas. Serve para apresentar o app, gravar vídeo ou mexer no front enquanto a API está fora do ar.
+```bash
+cd backend
+npm test
+```
 
-Quem decide é o campo `MODO` do arquivo `frontEnd/js/config.js`:
+São 45 testes com Jest, em 8 arquivos, cobrindo os value objects (Email, Senha, Telefone, TipoSanguineo e TokenQR) e as entidades Alergia, Cuidador e FichaEmergencia. Eles não usam o banco.
 
-| MODO | O que acontece |
-|---|---|
-| `auto` | Padrão. O front procura o servidor. Se achar, usa a API. Se nenhum responder, cai no modo demonstração |
-| `api` | Sempre a API. Se ela não responder, aparece erro na tela e o front não cai na demonstração |
-| `demo` | Sempre a demonstração, mesmo com a API no ar |
-
-O projeto vem com `MODO: "auto"`. O front procura o servidor nesta ordem: o endereço salvo no quadro Servidor da tela de entrada, o campo `SERVIDOR` do `config.js`, o endereço da própria página e, por último, `http://localhost:3000`. Só vale o endereço que responder em `GET /api/status`.
-
-Duas proteções para a demonstração não enganar ninguém:
-
-- Quem está logado em uma conta de verdade nunca cai nos dados fictícios. Se o servidor sumir, aparece o aviso de que não deu para falar com ele
-- A ficha de emergência aberta por quem escaneou o QR nunca mostra paciente inventado. Sem servidor, aparece o aviso para ligar para a emergência
-
-O que vale saber sobre o modo demonstração:
-
-- Na tela de entrada aparecem contas de exemplo. Tocar numa delas preenche o formulário
-- Tudo que você cadastra ou altera fica só no `sessionStorage` daquela aba do navegador e some quando ela é fechada. Nada vai para o banco
-- Os dados são os mesmos personagens inventados do `database/dados_ficticios.sql`
-- A página de emergência também funciona para quem está dentro de uma sessão de demonstração, então dá para mostrar a ficha aberta sem a API
+Além deles, o projeto foi conferido de ponta a ponta antes da versão 1.0: todas as rotas da API contra um banco de teste, todas as telas num navegador do tamanho de um celular (como site e simulando o app), o QR Code lido por um leitor independente e o APK rodando num Android de verdade, com o alarme disparando com o app fechado.
 
 ## App Android
 
-O mesmo front vira app Android com o Capacitor. O projeto nativo está na pasta `android/` e o passo a passo para gerar o APK pelo Android Studio está em [`docs/GUIA_APK.md`](docs/GUIA_APK.md).
+O mesmo conjunto de telas vira app Android com o Capacitor. O projeto nativo fica na pasta `android/`, e o passo a passo para gerar o APK, inclusive pelo Android Studio, está em [`docs/GUIA_APK.md`](docs/GUIA_APK.md).
 
 ```bash
 npm install
@@ -234,47 +185,60 @@ npm run app:sync
 npm run app:abrir
 ```
 
-O app não leva o backend junto. Na primeira vez, a pessoa escreve o endereço do servidor no quadro Servidor da tela de entrada, e o celular precisa estar no mesmo wifi dele.
+O app não carrega o servidor dentro dele. Na primeira vez, a pessoa escreve o endereço do servidor no quadro Servidor da tela de entrada, e o celular precisa estar no mesmo wifi. No app, o botão Voltar do Android volta de tela em tela e fecha o app na primeira, e o alarme dos remédios toca pelo próprio sistema, mesmo com o app fechado.
 
-## Rotas prontas
+## Modo demonstração
 
-Tirando as marcadas como públicas, todas pedem o header `Authorization: Bearer <token>`, com o token devolvido pelo login.
+As telas também funcionam sozinhas, sem servidor e sem banco. Nesse caso usam os mesmos personagens fictícios do `dados_ficticios.sql`, guardados só naquela aba do navegador, e avisam isso na tela. Serve para apresentar, gravar vídeo ou mexer nas telas com a API desligada. O alarme dos remédios funciona igual na demonstração.
+
+Quem decide é o campo `MODO` do `frontEnd/js/config.js`:
+
+| `MODO` | Comportamento |
+|---|---|
+| `auto` | O padrão. Procura o servidor e, se nenhum responder, entra na demonstração |
+| `api` | Sempre o servidor. Se ele cair, aparece o erro na tela |
+| `demo` | Sempre a demonstração, mesmo com o servidor no ar |
+
+A demonstração tem duas travas para não enganar ninguém. Quem está logado numa conta de verdade nunca cai nos dados fictícios: se o servidor sumir, aparece o aviso de que não deu para falar com ele. E quem escaneia um QR Code nunca vê paciente inventado: sem servidor, a página orienta a ligar para o SAMU.
+
+## API
+
+Com exceção das rotas públicas, todas pedem o cabeçalho `Authorization: Bearer <token>`, com o token que o login devolve.
 
 | Método | Rota | O que faz |
 |---|---|---|
-| `GET` | `/api/status` | Pública. Confirma que a API está de pé e informa o endereço de rede do servidor |
-| `POST` | `/api/usuarios` | Pública. Cadastra uma conta com nome, email e senha |
-| `POST` | `/api/usuarios/login` | Pública. Confere email e senha e devolve o token de sessão |
-| `GET` | `/api/usuarios/:id` | Busca uma conta pelo id |
-| `POST` | `/api/pacientes` | Cria a ficha médica |
-| `GET` | `/api/pacientes/:id` | Busca a ficha médica |
+| `GET` | `/api/status` | Pública. Diz que a API está no ar e qual é o endereço de rede do servidor |
+| `POST` | `/api/usuarios` | Pública. Cria uma conta |
+| `POST` | `/api/usuarios/login` | Pública. Confere email e senha e devolve o token |
+| `GET` | `/api/usuarios/:id` | Dados da própria conta |
+| `POST` | `/api/pacientes` | Cria a ficha médica e o primeiro QR Code |
+| `GET` | `/api/pacientes/:id` | Lê a ficha médica |
 | `PUT` | `/api/pacientes/:id` | Atualiza a ficha médica |
-| `POST` | `/api/pacientes/:id/qr/rotacionar` | Gera um token novo de QR e invalida o anterior |
-| `DELETE` | `/api/pacientes/:id/qr` | Cancela o QR |
-| `POST` | `/api/pacientes/:id/qr/reativar` | Reativa o QR com um token novo. O código cancelado continua sem abrir a ficha |
-| `GET` | `/api/pacientes/:id/acessos` | Lista quem abriu a ficha pública |
-| `POST` | `/api/pacientes/:id/codigo` | Gera o código de 7 caracteres que o paciente entrega ao cuidador, válido por 24 horas |
-| `GET` | `/api/emergencia/:token` | Pública. Devolve a ficha de emergência do QR |
-| `GET` | `/api/medicamentos` | Lista os medicamentos com a próxima dose de cada um |
-| `POST` | `/api/medicamentos` | Cadastra um medicamento |
-| `PUT` | `/api/medicamentos/:id` | Atualiza um medicamento. Com `ativo` suspende ou reativa. Refaz a agenda futura quando o horário, o período ou o `ativo` mudam |
-| `DELETE` | `/api/medicamentos/:id` | Apaga um medicamento |
-| `GET` | `/api/doses/hoje` | Lista as doses do dia, já marcando como perdida a que passou 60 minutos do horário |
+| `POST` | `/api/pacientes/:id/qr/rotacionar` | Troca o QR Code; o anterior para de funcionar na hora |
+| `DELETE` | `/api/pacientes/:id/qr` | Cancela o QR Code (chaveiro perdido) |
+| `POST` | `/api/pacientes/:id/qr/reativar` | Gera um QR novo depois de um cancelamento; o cancelado continua sem abrir |
+| `GET` | `/api/pacientes/:id/acessos` | Quem abriu a ficha pelo QR |
+| `POST` | `/api/pacientes/:id/codigo` | Gera o código de 7 caracteres para autorizar um cuidador, válido por 24 horas |
+| `GET` | `/api/emergencia/:token` | Pública. A ficha de emergência que o QR abre |
+| `GET` | `/api/medicamentos` | Remédios do paciente, com a próxima dose de cada um |
+| `POST` | `/api/medicamentos` | Cadastra um remédio e monta a agenda de doses |
+| `PUT` | `/api/medicamentos/:id` | Altera um remédio. Com `ativo` suspende ou reativa, e a agenda futura é refeita quando horário ou período mudam |
+| `DELETE` | `/api/medicamentos/:id` | Apaga um remédio e as doses dele |
+| `GET` | `/api/doses/hoje` | Doses do dia |
+| `GET` | `/api/doses/proximas` | Doses previstas dos próximos 2 dias, que o app usa para agendar o alarme |
 | `POST` | `/api/doses/:id/confirmar` | Confirma que a dose foi tomada |
-| `GET` | `/api/doses/adesao` | Percentual de adesão de hoje e dos últimos 7 dias |
-| `POST` | `/api/cuidadores/vincular` | Cria o vínculo de cuidador a partir do código que o paciente gerou |
-| `GET` | `/api/cuidadores/:id/pacientes` | Lista quem o cuidador acompanha, com adesão da semana, doses perdidas e próxima dose |
-| `DELETE` | `/api/cuidadores/vinculo/:id` | Desfaz o vínculo. A linha fica no banco como inativa, para registro de quem teve acesso |
+| `GET` | `/api/doses/adesao` | Adesão de hoje e dos últimos 7 dias |
+| `POST` | `/api/cuidadores/vincular` | Cria o vínculo de cuidador a partir do código do paciente |
+| `GET` | `/api/cuidadores/:id/pacientes` | Quem o cuidador acompanha, com adesão, doses perdidas e próxima dose |
+| `DELETE` | `/api/cuidadores/vinculo/:id` | Desfaz o vínculo, guardando o registro de que ele existiu |
 
-As rotas de dose, de adesão, de medicamentos e a lista do cuidador completam a agenda antes de responder. Por isso a agenda não depende de nenhuma rotina rodando no servidor.
+A agenda de doses não depende de nenhuma rotina rodando no servidor: antes de responder, as rotas de dose, de remédios e do cuidador completam os dias que faltam e marcam como perdida a dose que passou 60 minutos sem confirmação.
 
-A senha precisa ter pelo menos 8 caracteres, com letra maiúscula, letra minúscula, número e um caractere especial (`@ $ ! % * ? & #`). Ela é gravada só como hash bcrypt e nunca volta em nenhuma resposta. O email é guardado em minúsculo, então `Maria@Exemplo.com` e `maria@exemplo.com` são a mesma conta.
-
-O contrato completo, com corpo de requisição e respostas, está em [`frontEnd/CONTRATO_API.md`](frontEnd/CONTRATO_API.md).
+Corpo de cada requisição, respostas e códigos de erro estão em [`frontEnd/CONTRATO_API.md`](frontEnd/CONTRATO_API.md).
 
 ## Banco de dados
 
-Oito tabelas. A documentação completa, campo por campo, está em [`database/DICIONARIO_DADOS.md`](database/DICIONARIO_DADOS.md).
+Oito tabelas, descritas campo por campo em [`database/DICIONARIO_DADOS.md`](database/DICIONARIO_DADOS.md).
 
 ```
 usuarios 1 ─── 1 pacientes 1 ─── N alergias
@@ -286,44 +250,48 @@ usuarios N ─── N pacientes  (via cuidador_paciente)
 
 ## Privacidade
 
-O BioShield lida com dado sensível de saúde, e isso guia decisões de projeto:
+Dado de saúde é dado sensível pela LGPD, e isso pesou em várias decisões:
 
-- A ficha pública devolve apenas o que ajuda a socorrer. Email, senha e histórico completo nunca saem pela rota do QR
-- Senha é armazenada com hash bcrypt
-- O token do QR é aleatório e rotativo: o usuário pode invalidar o anterior quando quiser
-- Todo acesso à ficha pública fica registrado e é visível para o dono da ficha
-- O repositório contém apenas dados fictícios
+- A ficha pública mostra só o que ajuda a socorrer. Email, senha, endereço e histórico nunca saem pela rota do QR
+- A senha é guardada como hash bcrypt e não aparece em nenhuma resposta nem em log
+- O token do QR é aleatório, com 128 bits, e pode ser trocado ou cancelado a qualquer momento
+- Toda leitura da ficha pública fica registrada e visível para o dono
+- Cuidador só enxerga um paciente depois de autorizado por ele, e mesmo assim só o acompanhamento das doses
+- O servidor não registra o corpo das requisições, e o repositório só tem dados fictícios
 
-## Status
+## Documentação
 
-Em desenvolvimento. O andamento por fase está em [`docs/ROADMAP.md`](docs/ROADMAP.md).
+| Documento | O que tem |
+|---|---|
+| [`frontEnd/CONTRATO_API.md`](frontEnd/CONTRATO_API.md) | Todas as rotas, com exemplos de requisição e resposta |
+| [`database/DICIONARIO_DADOS.md`](database/DICIONARIO_DADOS.md) | Cada tabela e cada coluna do banco |
+| [`docs/DICIONARIO_DETALHADO.md`](docs/DICIONARIO_DETALHADO.md) | Cada classe do backend: entidades, value objects, DTOs, services e rotas |
+| [`docs/DUVIDAS_CONTRATO.md`](docs/DUVIDAS_CONTRATO.md) | As decisões de regra de negócio e o porquê de cada uma |
+| [`docs/GUIA_APK.md`](docs/GUIA_APK.md) | Como gerar e usar o app Android, e como funciona o alarme |
+| [`docs/SERVIDOR_LINUX.md`](docs/SERVIDOR_LINUX.md) | Como montar o servidor no Linux Mint para a rede do roteador |
+| [`docs/DIA_DO_EVENTO.md`](docs/DIA_DO_EVENTO.md) | O plano da mesa de QR Codes no Empreenda |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Como o projeto foi construído e o que ainda falta |
 
-- [x] Estrutura do projeto
-- [x] Modelagem e dicionário de dados
-- [x] Banco de dados
-- [x] Cadastro de usuário
-- [x] Login e autenticação com JWT
-- [x] Ficha médica
-- [x] QR Code de emergência
-- [x] Medicamentos
-- [x] Doses e adesão
-- [x] Rotas do modo cuidador
-- [x] Interface, navegável de ponta a ponta com o banco e no modo demonstração
-- [x] Dados fictícios prontos para a apresentação
-- [ ] Testes automatizados com Jest
-- [ ] APK do app Android testado num celular
+## Situação
+
+Versão 1.0. As três funcionalidades estão completas e testadas, no site e no app Android.
+
+O que ainda depende da equipe é a preparação do evento: montar o servidor na rede do Senac, imprimir os QR Codes da mesa e gravar o vídeo da demonstração. A lista está no [`docs/ROADMAP.md`](docs/ROADMAP.md).
+
+Limites conhecidos desta versão:
+
+- O QR Code abre para quem está na mesma rede do servidor. Para abrir pelo 4G, o BioShield precisaria estar hospedado na internet
+- O app trabalha no horário de Brasília. Um paciente em outro fuso recebe o alarme no horário de Brasília
+- O APK é de depuração, para instalar direto no celular. Publicar na Play Store pede conta de desenvolvedor, assinatura própria e a revisão de algumas permissões
 
 ## Contexto
 
-Projeto desenvolvido para o Empreenda Senac 2026, na categoria Cursos Técnicos, dentro do Curso Técnico em Informática do Senac SP.
-
-Áreas de atuação: Saúde Preventiva e Segurança Medicamentosa. Alinhado aos ODS 3 (Saúde e Bem Estar), 10 (Redução das Desigualdades) e 17 (Parcerias e Meios de Implementação).
+Projeto do Empreenda Senac 2026, categoria Cursos Técnicos, feito no Curso Técnico em Informática do Senac SP. Áreas de atuação: Saúde Preventiva e Segurança Medicamentosa. Ligado aos ODS 3 (Saúde e Bem Estar), 10 (Redução das Desigualdades) e 17 (Parcerias e Meios de Implementação).
 
 ## Equipe
 
-**Erik Mauricio Silva** — [@Erikfrvr](https://github.com/Erikfrvr)
-
-**Daiane Duarte** — [@DaiHoss](https://github.com/DaiHoss)
+- **Erik Mauricio Silva** ([@Erikfrvr](https://github.com/Erikfrvr))
+- **Daiane Duarte** ([@DaiHoss](https://github.com/DaiHoss))
 
 ## Licença
 

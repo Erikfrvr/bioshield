@@ -331,11 +331,55 @@
     await prepararNativo();
     await cancelarAgendados(true);
     avisosAgendados = 0;
+    try {
+      await arrumarBarra(doses);
+    } catch (erro) {
+      // A barra fica como esta ate a proxima vez.
+    }
     if ((await permissao()) !== "granted") return;
     var exato = await exatoLiberado();
     var avisos = montarAvisos(doses, Date.now()).map(function (aviso) { return paraNotificacao(aviso, exato); });
     if (avisos.length) await plugin("schedule", { notifications: avisos });
     avisosAgendados = avisos.length;
+  }
+
+  // Cada lembrete que toca fica na barra do Android. Sem arrumar, uma hora sem confirmar daria
+  // 13 avisos da mesma dose empilhados, e o Android esconde os botoes quando junta varios num grupo.
+  // Fica um aviso so por dose ainda prevista (a repeticao mais avancada; o adiado so quando e o unico),
+  // e sai o aviso de dose que ja foi tomada, que passou da tolerancia ou que saiu da agenda.
+  async function arrumarBarra(doses) {
+    var resposta = await plugin("getDeliveredNotifications");
+    var entregues = ((resposta && resposta.notifications) || [])
+      .map(function (aviso) { return aviso.id; })
+      .filter(function (id) { return id !== ID_TESTE && id >= IDS_POR_DOSE; });
+    var previstas = {};
+    (doses || []).forEach(function (dose) { previstas[dose.id] = true; });
+
+    var fica = {};
+    entregues.forEach(function (id) {
+      var idDose = Math.floor(id / IDS_POR_DOSE);
+      if (!previstas[idDose]) return;
+      var posicao = id % IDS_POR_DOSE;
+      var atual = fica[idDose];
+      var atualAdiado = atual !== undefined && atual % IDS_POR_DOSE === POSICAO_ADIADA;
+      if (atual === undefined || atualAdiado || (posicao !== POSICAO_ADIADA && posicao > atual % IDS_POR_DOSE)) {
+        fica[idDose] = id;
+      }
+    });
+
+    var tirar = entregues.filter(function (id) { return fica[Math.floor(id / IDS_POR_DOSE)] !== id; });
+    if (tirar.length) await plugin("removeDeliveredNotificationsById", { ids: tirar });
+  }
+
+  // Lembrete novo chegou com o app vivo: os avisos anteriores da mesma dose saem da barra na hora.
+  function deixarSoOUltimo(aviso) {
+    if (!aviso || !aviso.extra || !aviso.extra.idDose) return;
+    var outros = [];
+    for (var posicao = 0; posicao < IDS_POR_DOSE; posicao++) {
+      var id = idDoAviso(aviso.extra.idDose, posicao);
+      if (id !== aviso.id) outros.push(id);
+    }
+    plugin("removeDeliveredNotificationsById", { ids: outros }).catch(function () { /* fica para a proxima arrumacao */ });
   }
 
   async function tirarDaBarra(idDose) {
@@ -424,6 +468,8 @@
     if (nativo) {
       try {
         await cancelarAgendados(false);
+        // Os avisos que ja tocaram tambem saem da barra: sao da conta de quem saiu.
+        await plugin("removeAllDeliveredNotifications");
       } catch (erro) {
         // Na proxima abertura tento de novo.
       }
@@ -912,6 +958,7 @@
       });
       escopo.Capacitor.addListener(PLUGIN, "localNotificationReceived", function (dados, erro) {
         if (erro || !dados || !dados.extra || !dados.extra.bioshield) return;
+        if (!dados.extra.teste) deixarSoOUltimo(dados);
         if (!naEntrada() && sessaoComFicha()) {
           tocarNaTela(dados.extra.teste ? DOSE_TESTE : dados.extra.dose, dados.extra.posicao || 0, { origem: "aviso" });
         }
