@@ -617,6 +617,40 @@
       return pronto(lista);
     },
 
+    // Igual ao GET /cuidadores/:id/alertas: doses perdidas das ultimas 24 horas de quem o cuidador acompanha,
+    // so as de depois do vinculo, e os momentos em que as doses previstas viram perdidas.
+    alertasDoCuidador: function (idCuidador) {
+      var banco = carregar();
+      var agora = Date.now();
+      var umDia = 24 * 60 * 60 * 1000;
+      var vinculos = banco.vinculos.filter(function (v) { return v.idCuidador === Number(idCuidador) && v.ativo; });
+      var perdidas = [];
+      var verificacoes = [];
+      vinculos.forEach(function (v) {
+        var paciente = banco.pacientes.find(function (p) { return p.id === v.idPaciente; });
+        var usuario = banco.usuarios.find(function (u) { return u.id === paciente.idUsuario; });
+        completarAgenda(banco, paciente.id);
+        marcarPerdidas(banco, paciente.id);
+        var desde = Math.max(agora - umDia, new Date(v.autorizadoEm).getTime());
+        dosesDoPaciente(banco, paciente.id).forEach(function (d) {
+          var marca = new Date(d.horarioPrevisto).getTime();
+          if (d.status === "perdida" && marca >= desde && marca <= agora) {
+            perdidas.push({ idDose: d.id, idPaciente: paciente.id, nomePaciente: usuario.nome, nomeMedicamento: d.nomeMedicamento, horarioPrevisto: d.horarioPrevisto });
+          } else if (d.status === "prevista") {
+            var quando = marca + TOLERANCIA_ATRASO_MS + 30000;
+            if (quando > agora && quando <= agora + umDia && verificacoes.indexOf(quando) === -1) verificacoes.push(quando);
+          }
+        });
+      });
+      perdidas.sort(function (a, b) { return new Date(b.horarioPrevisto) - new Date(a.horarioPrevisto); });
+      return pronto({
+        acompanha: vinculos.length,
+        perdidas: perdidas,
+        proximasVerificacoes: verificacoes.sort(function (a, b) { return a - b; }).slice(0, 30)
+          .map(function (quando) { return new Date(quando).toISOString(); })
+      });
+    },
+
     desvincularCuidador: function (idVinculo) {
       var banco = carregar();
       var vinculo = banco.vinculos.find(function (v) { return v.id === Number(idVinculo); });

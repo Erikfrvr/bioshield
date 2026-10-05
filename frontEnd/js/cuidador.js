@@ -56,6 +56,8 @@
       try {
         await Api.desvincularCuidador(paciente.idVinculo);
         UI.recado("Vínculo encerrado.");
+        // Quem deixou de ser acompanhado nao gera mais aviso no celular.
+        if (window.AvisosCuidador) AvisosCuidador.conferir(true);
         carregar();
       } catch (erro) {
         UI.recado("Não consegui encerrar o vínculo. " + erro.message, "erro");
@@ -98,6 +100,8 @@
       await Api.vincularCuidador({ idCuidador: sessao.usuario.id, codigo: codigo });
       UI.elemento("#codigo").value = "";
       UI.recado("Vínculo criado. Agora você acompanha as doses dessa pessoa.");
+      // Vinculo novo ja liga os avisos de dose perdida no celular.
+      if (window.AvisosCuidador) AvisosCuidador.conferir(true);
       carregar();
     } catch (erro) {
       var mensagem = erro.status === 404
@@ -109,6 +113,12 @@
       botao.textContent = "Acompanhar";
     }
   });
+
+  // O cartao dos avisos de dose perdida. Quando chega um aviso novo, o painel recarrega junto.
+  if (window.AvisosCuidador) {
+    AvisosCuidador.montarCartao(UI.elemento("#cartaoAvisos"));
+    document.addEventListener("bioshield:cuidador-mudou", carregar);
+  }
 
   carregar();
 })();

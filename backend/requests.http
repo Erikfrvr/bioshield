@@ -781,6 +781,16 @@ Authorization: Bearer {{loginMaria.response.body.token}}
 ### Painel sem token (esperado 401)
 GET {{baseUrl}}/cuidadores/4/pacientes
 
+### Avisos de dose perdida da Patricia (esperado 200). Conferir: acompanha 2, perdidas so com idDose,
+### idPaciente, nomePaciente, nomeMedicamento e horarioPrevisto, so de depois do vinculo e das ultimas 24 horas,
+### e proximasVerificacoes com o horario de cada dose prevista mais 60 minutos
+GET {{baseUrl}}/cuidadores/4/alertas
+Authorization: Bearer {{loginPatricia.response.body.token}}
+
+### Avisos de outro cuidador (esperado 403)
+GET {{baseUrl}}/cuidadores/4/alertas
+Authorization: Bearer {{loginMaria.response.body.token}}
+
 ### Cuidadora tentando ler a ficha medica de quem acompanha (esperado 403). Vinculo nao abre a ficha
 GET {{baseUrl}}/pacientes/1
 Authorization: Bearer {{loginPatricia.response.body.token}}

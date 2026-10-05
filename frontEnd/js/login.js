@@ -60,6 +60,7 @@
       // Conta de um servidor nao vale no outro, e o alarme dela tambem nao.
       Api.encerrarSessao();
       if (window.Lembretes) Lembretes.desligar();
+      if (window.AvisosCuidador) AvisosCuidador.desligar();
       formularioServidor.hidden = true;
       botaoAbrirServidor.hidden = false;
       mostrarConexao(await Api.conectar());
@@ -94,13 +95,38 @@
     });
   });
 
+  // No app fechado, o toque numa notificacao abre o app por esta tela, e o toque chega pelo plugin como evento
+  // guardado. Ele so e entregue depois que o pedido de ouvir (addListener, feito pelo lembretes.js e pelo
+  // avisosCuidador.js) chega no Android. Normalmente sao milissegundos, mas com o app abrindo do zero num
+  // celular lento ja vi passar de 2 segundos. Se esta tela trocar de pagina antes, o evento vai para uma pagina
+  // que ja nao existe e se perde. O Android atende as chamadas dos plugins numa fila so, em ordem: quando a
+  // resposta de uma chamada qualquer volta, os eventos guardados ja chegaram aqui.
+  // O limite de tempo so vale se a ponte com o Android quebrar; sem o plugin, a chamada falha na hora.
+  function esperarAberturaPeloAviso() {
+    var cap = window.Capacitor;
+    if (!cap || typeof cap.isNativePlatform !== "function" || !cap.isNativePlatform() || typeof cap.nativePromise !== "function") {
+      return Promise.resolve();
+    }
+    var idaEVolta;
+    try {
+      idaEVolta = Promise.resolve(cap.nativePromise("App", "getState", {})).catch(function () { /* segue mesmo assim */ });
+    } catch (erro) {
+      return Promise.resolve();
+    }
+    var limite = new Promise(function (resolver) { setTimeout(resolver, 10000); });
+    return Promise.race([idaEVolta, limite]);
+  }
+
   // Ja esta logado: vai direto pra ficha. Espero a procura do servidor porque ela pode descartar
   // uma sessao de demonstracao que sobrou no aparelho.
   // Se o app abriu pelo toque numa notificacao do alarme, vai para as doses, onde o toque e tratado.
-  Api.conectar().then(function () {
+  // Se abriu pelo aviso de dose perdida de quem a pessoa acompanha, vai para o painel do cuidador.
+  Promise.all([Api.conectar(), esperarAberturaPeloAviso()]).then(function () {
     if (!Api.sessao()) return;
-    var veioDoAlarme = window.Lembretes && Lembretes.temAcaoPendente();
-    location.replace(veioDoAlarme ? "pages/doses.html" : "pages/perfil.html");
+    var destino = "pages/perfil.html";
+    if (window.Lembretes && Lembretes.temAcaoPendente()) destino = "pages/doses.html";
+    else if (window.AvisosCuidador && AvisosCuidador.temAcaoPendente()) destino = "pages/cuidador.html";
+    location.replace(destino);
   });
 
   formulario.addEventListener("submit", async function (evento) {
