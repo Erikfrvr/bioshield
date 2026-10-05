@@ -261,6 +261,9 @@
       var janelaAberta = todos(".sobreposicao").filter(function (janela) { return !janela.hidden; })[0];
       if (janelaAberta) {
         janelaAberta.hidden = true;
+        // Quem abriu a janela fica sabendo. A janela de alarme usa isso pra parar o som na hora
+        // e abrir o proximo remedio que estava esperando na fila.
+        janelaAberta.dispatchEvent(new CustomEvent("bioshield:janela-fechada"));
         return;
       }
 

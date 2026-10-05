@@ -6,7 +6,7 @@ import android.app.job.JobService;
 /**
  * Checagem periodica dos avisos de dose perdida do cuidador, chamada pelo JobScheduler do Android
  * a cada 15 minutos ou mais (o Android decide o momento exato).
- * Nao exige rede com internet: no roteador do evento, sem internet, ela roda do mesmo jeito.
+ * Nao exige rede com internet: com o servidor numa rede local sem internet, ela roda do mesmo jeito.
  * A logica fica toda no VerificadorCuidador.
  */
 public class CuidadorChecagem extends JobService {

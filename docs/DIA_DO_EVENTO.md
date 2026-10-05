@@ -29,6 +29,7 @@ Tudo depende de uma condição: **um celular no 4G precisa conseguir abrir o end
 - **Os QR Codes dos pacientes**, com o do paciente cancelado marcado.
 - **O notebook**, que é o servidor. Ele pode ficar na mesa mostrando a aba Privacidade, onde cada leitura aparece na hora.
 - **O app instalado num celular**, com uma dose cadastrada para poucos minutos à frente, para mostrar o alarme tocando. O botão "Testar o alarme", na tela de Doses, faz o celular tocar em 5 segundos.
+- **O app no celular de um cuidador**, na conta da Patrícia, para mostrar o aviso de dose perdida. Ele só chega 1 hora depois do horário da dose: uma hora antes do momento em que quiserem mostrar, cadastrem na conta do Lucas um remédio para dali a poucos minutos e não confirmem. O passo a passo está em "Testar os avisos no celular", no [`GUIA_APK.md`](GUIA_APK.md).
 
 ## O que pode dar errado
 
