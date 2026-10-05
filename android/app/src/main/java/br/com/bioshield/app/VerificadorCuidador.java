@@ -47,7 +47,8 @@ import org.json.JSONObject;
  *    alarme perder (celular reiniciado, servidor fora do ar na hora) e refaz os alarmes.
  *
  * Nenhum dos dois exige rede com internet. O plugin oficial de tarefa em segundo plano exige, e por isso nao
- * serviria no evento, onde o roteador nao tem internet.
+ * serviria com o servidor numa rede local sem internet. Com o Tailscale Funnel funciona igual: o endereco
+ * guardado e o https://....ts.net, e o HttpURLConnection fala HTTPS sem nada a mais.
  *
  * O endereco do servidor, o token de login e o id do cuidador ficam guardados no proprio aparelho
  * (SharedPreferences), e saem de la quando a pessoa sai da conta.

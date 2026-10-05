@@ -78,7 +78,7 @@ Sem plugin, o Capacitor fecha o app no primeiro toque em Voltar, em qualquer tel
 2. se dá para voltar, volta para a tela anterior
 3. na primeira tela, fecha o app
 
-Fechar a janela de alarme com o Voltar não desliga o alarme: o próximo lembrete toca do mesmo jeito.
+Fechar a janela de alarme com o Voltar não desliga o alarme: o som da janela para na hora, o próximo lembrete toca do mesmo jeito e, se outro remédio estava esperando na fila da janela, ele aparece em seguida.
 
 ## Alarme dos remédios
 
@@ -192,9 +192,95 @@ Recados (a faixa que aparece no rodapé da tela por alguns segundos):
 | Permissão negada pelo cartão | O celular não deixou ligar o alarme. Siga o passo a passo do cartão. |
 | Teste sem permissão | O celular não deixou o BioShield mostrar avisos. Veja o cartão do alarme na tela de doses. |
 
+## Avisos do cuidador
+
+Quando alguém que o cuidador acompanha passa **1 hora** sem confirmar uma dose, o celular do cuidador avisa, mesmo com o app fechado e a tela bloqueada. É a mesma tolerância de 60 minutos do backend: o aviso sai quando a dose vira perdida.
+
+### Como funciona
+
+No app com servidor, quem confere é um pedaço nativo do próprio projeto, o plugin `BioShieldCuidador` (pasta `android/app/src/main/java/br/com/bioshield/app`). O `frontEnd/js/avisosCuidador.js` só entrega para ele o endereço do servidor, o login e o id do cuidador, toda vez que uma tela abre (no máximo a cada 2 minutos; a tela do Cuidador sempre). Dali em diante o Android confere sozinho, consultando `GET /api/cuidadores/:id/alertas`, de dois jeitos:
+
+1. **Alarme exato** em cada momento que o servidor informa: o horário de cada dose prevista mais 60 minutos e 30 segundos. É o que faz o aviso chegar logo depois de a dose virar perdida.
+2. **Checagem periódica** pelo agendador do Android, a cada 15 minutos ou mais (o Android escolhe o momento). Ela pega o que o alarme perder, como celular reiniciado ou servidor fora do ar na hora, e refaz os alarmes. Volta sozinha depois que o celular reinicia.
+
+Nenhum dos dois exige internet: funcionam com o servidor do Tailscale Funnel e também com um servidor só na rede local. O plugin oficial de tarefa em segundo plano exigiria internet, e por isso não foi usado.
+
+Regras:
+
+- Cada dose perdida vira **um aviso só**. Com dois avisos ou mais, o Android junta tudo num grupo "Doses não confirmadas"
+- Tocar no aviso, ou no grupo, abre o app direto no **painel do cuidador**, inclusive com o app fechado
+- Se o paciente confirmar depois, no "Tomei mesmo assim", o aviso sai da barra na conferência seguinte. O aviso também sai quando a dose fica com mais de 24 horas
+- Só entram doses de **depois do vínculo**. Quem começa a acompanhar agora não recebe aviso de coisa antiga
+- Quem não acompanha ninguém não tem checagem rodando. Desfazer o último vínculo desliga
+- Sair da conta, ou o login vencer, desliga tudo e tira os avisos da barra
+- Com a tela bloqueada, o texto fica escondido, porque tem nome de pessoa e de remédio. O som e a vibração tocam do mesmo jeito
+- O som é o mesmo do alarme dos remédios, num canal próprio, **Avisos do cuidador**
+
+No navegador, o aviso aparece como recado vermelho no rodapé enquanto o BioShield estiver aberto, conferindo a cada 2 minutos. No modo demonstração dentro do app, o aviso sai como notificação de verdade, mas só enquanto o app está aberto, porque não tem servidor para o Android consultar.
+
+A permissão é a mesma de notificação do alarme dos remédios. Se o app ainda não tiver pedido, a tela do Cuidador pede sozinha na primeira vez em que a conta acompanha alguém. Depois disso, quem pede é o botão do cartão.
+
+### Testar os avisos no celular
+
+Precisa de duas contas: a do paciente e a do cuidador, já vinculadas (com os dados fictícios, o Lucas e a Patrícia).
+
+1. No celular do cuidador, entre como Patrícia, abra a tela **Cuidador** e permita as notificações. O cartão tem que mostrar "Avisos ligados".
+2. Na conta do Lucas (no site ou em outro celular), cadastre um remédio com a primeira dose 2 ou 3 minutos à frente e não confirme.
+3. Feche o app da Patrícia e bloqueie a tela.
+4. Uma hora depois do horário da dose, o celular da Patrícia avisa "Dose não confirmada".
+5. Toque no aviso: o app abre no painel do cuidador.
+6. Na conta do Lucas, toque em "Tomei mesmo assim". Na conferência seguinte o aviso sai da barra.
+
+Para mostrar ao vivo numa apresentação, cadastre o remédio uma hora antes do momento em que quer o aviso.
+
+### Onde cada parte mora
+
+| Arquivo | O que tem |
+|---|---|
+| `frontEnd/js/avisosCuidador.js` | Liga e desliga o lado nativo, o aviso no navegador e o cartão da tela do Cuidador |
+| `android/.../CuidadorPlugin.java` | A ponte com as telas: `configurar`, `mostrarAlertas`, `desligar` e o evento `avisoTocado` |
+| `android/.../VerificadorCuidador.java` | A consulta ao servidor, os avisos, os alarmes exatos e a checagem periódica |
+| `android/.../CuidadorAlarme.java` | O que roda quando um alarme exato toca |
+| `android/.../CuidadorChecagem.java` | O que roda na checagem periódica |
+| `backend/services/CuidadorService.ts` | A rota de alertas (`listarAlertas`) |
+
+### Textos dos avisos do cuidador
+
+Na notificação, `{nome}` é o nome do paciente, `{primeiro nome}` só o primeiro, `{remédio}` o nome do remédio e `{hora}` o horário da dose.
+
+| Quando | Título | Texto |
+|---|---|---|
+| Uma dose perdida | Dose não confirmada | {primeiro nome} não confirmou a dose de {remédio} das {hora}. |
+| O mesmo aviso aberto | Dose não confirmada | {nome} não confirmou a dose de {remédio} das {hora}, e já passou 1 hora do horário. Vale conferir se está tudo bem. |
+| Grupo, com dois avisos ou mais | Doses não confirmadas | Quem você acompanha não confirmou algumas doses. Toque para ver o painel do cuidador. |
+
+Nas configurações do Android, o canal aparece como **Avisos do cuidador**, com a descrição "Avisa quando alguém que você acompanha passa 1 hora sem confirmar uma dose."
+
+No cartão de avisos, na tela do Cuidador:
+
+| Situação | Título | Texto | Botões |
+|---|---|---|---|
+| Não acompanha ninguém | Avisos de dose perdida | Quando você acompanhar alguém, o celular avisa se essa pessoa passar 1 hora sem confirmar uma dose. | |
+| Tudo certo | Avisos ligados | Se alguém que você acompanha passar 1 hora sem confirmar uma dose, o celular avisa, mesmo com o app fechado. Quando o celular está economizando bateria, o aviso pode demorar alguns minutos a mais. | |
+| Ainda sem permissão | Avisos desligados | Para o celular avisar quando alguém que você acompanha perder uma dose, permita as notificações do BioShield. | Ligar os avisos |
+| Permissão negada | Notificações bloqueadas | O celular está bloqueando os avisos do BioShield. Abra as Configurações do celular, toque em Apps, depois em BioShield, depois em Notificações, e permita. | Já permiti, conferir de novo |
+| No navegador | Avisos com a tela aberta | No navegador, o aviso de dose perdida aparece enquanto o BioShield estiver aberto. No app Android ele chega mesmo com o celular bloqueado. | |
+| Demonstração | Avisos com o app aberto | Na demonstração, o aviso de dose perdida aparece enquanto o BioShield estiver aberto. Com o servidor, o celular avisa mesmo fechado. | |
+
+Embaixo do texto aparece "Última dose não confirmada: {primeiro nome} não confirmou a dose de {remédio} das {hora}." ou "Nenhuma dose perdida nas últimas 24 horas."
+
+Recados:
+
+| Quando | Recado |
+|---|---|
+| Uma dose perdida, no navegador | {primeiro nome} não confirmou a dose de {remédio} das {hora}. |
+| Várias de uma vez, no navegador | {n} doses não foram confirmadas por quem você acompanha. Veja o painel do cuidador. |
+| Permissão concedida pelo cartão | Avisos ligados. |
+| Permissão negada pelo cartão | O celular não deixou ligar os avisos. Siga o passo a passo do cartão. |
+
 ## O que o app não faz
 
-- **Baixar a imagem do QR Code e imprimir as etiquetas.** As duas coisas dependem do navegador. No app, os botões dão lugar a um recado com o endereço para abrir o BioShield no computador, onde a impressão funciona.
+- **Imprimir as etiquetas.** A impressão depende do navegador. No app, o botão dá lugar a um recado com o endereço para abrir o BioShield no computador, onde a impressão funciona.
 - **Ícone no Android 7.** O ícone do BioShield aparece do Android 8 em diante. No Android 7 fica o ícone padrão do Capacitor.
 
 ## Problemas comuns
@@ -213,6 +299,8 @@ Recados (a faixa que aparece no rodapé da tela por alguns segundos):
 | O alarme toca atrasado | O celular está segurando alarmes para economizar bateria |
 | O alarme toca sem som | Volume de notificação no zero ou modo "Não perturbe" ligado |
 | Trocou o som e continua o antigo | O Android guarda o som no canal; troque também o nome do canal no `lembretes.js` |
+| O cuidador não recebe aviso de dose perdida | Notificações bloqueadas (veja o cartão da tela Cuidador), vínculo desfeito, dose que ainda não passou 1 hora, ou o cuidador não abriu o app depois de trocar de servidor |
+| O aviso do cuidador chega atrasado | O celular está segurando alarmes para economizar bateria. Nesse caso o aviso chega na checagem periódica, em até uns 15 minutos |
 
 ## O que foi testado
 
@@ -229,6 +317,8 @@ Ele também rodou num celular virtual do Android Studio, com a API 37 do Android
 - ao abrir o app depois de dois avisos acumulados, ficou só o lembrete mais recente na barra
 
 O resto (o botão Voltar, o adiar, as permissões negadas, a demonstração, sair da conta) foi testado no navegador, simulando o Android.
+
+Nos avisos do cuidador, o lado do servidor foi testado de ponta a ponta contra um banco com os dados fictícios: a dose atrasada há mais de 1 hora aparece nos alertas e a de 59 minutos não, o momento da próxima conferência sai certo, o "Tomei mesmo assim" tira a dose dos alertas, outra conta recebe `403`, o vínculo desfeito para de gerar aviso e o vínculo refeito não traz aviso antigo. A resposta do modo demonstração foi conferida no mesmo formato. O lado do Android (aviso com o app fechado, alarme exato, toque abrindo o painel) segue o passo a passo de "Testar os avisos no celular" e não tem teste registrado aqui.
 
 Ainda não foi feito o teste num celular físico de marca, que é onde aparecem as diferenças de economia de bateria de cada fabricante.
 

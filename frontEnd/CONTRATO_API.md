@@ -105,7 +105,7 @@ O token carrega só o id do usuário. O middleware `autenticar` põe esse id em 
 |---|---|
 | `/pacientes/:id` e tudo abaixo (QR, acessos, código), `/medicamentos` | Só o dono da ficha (`garantirDono`) |
 | `/doses/hoje`, `/doses/proximas`, `/doses/:id/confirmar`, `/doses/adesao` | O dono ou um cuidador com vínculo `ativo = TRUE` (`garantirAcompanhamento`) |
-| `/usuarios/:id`, `/cuidadores/:id/pacientes` | Só quando `:id` é o próprio usuário logado (`garantirMesmoUsuario`) |
+| `/usuarios/:id`, `/cuidadores/:id/pacientes`, `/cuidadores/:id/alertas` | Só quando `:id` é o próprio usuário logado (`garantirMesmoUsuario`) |
 
 Fora disso a resposta é `403`. Paciente que não existe também devolve `403`, com a mesma mensagem, para que ninguém descubra quais ids existem trocando o número na URL. `404` fica para o recurso da própria rota (remédio ou dose que não existe).
 
@@ -510,6 +510,34 @@ Protegida. `:id` é o id do usuário cuidador e precisa ser o do usuário logado
 
 O cuidador vê acompanhamento de dose. Ele **não** recebe a ficha médica nem o histórico de acessos de quem acompanha.
 
+### GET /api/cuidadores/:id/alertas
+
+Protegida. `:id` é o id do usuário cuidador e precisa ser o do usuário logado, senão `403`. É a rota dos **avisos de dose perdida** no celular do cuidador: o app Android consulta de tempos em tempos (`VerificadorCuidador.java`) e o navegador consulta enquanto o BioShield está aberto (`frontEnd/js/avisosCuidador.js`).
+
+```json
+{
+  "acompanha": 2,
+  "perdidas": [
+    {
+      "idDose": 177,
+      "idPaciente": 3,
+      "nomePaciente": "Lucas Andrade Ferraz",
+      "nomeMedicamento": "Risperidona",
+      "horarioPrevisto": "2026-10-05T13:19:00.000Z"
+    }
+  ],
+  "proximasVerificacoes": ["2026-10-05T19:00:30.000Z", "2026-10-06T00:00:30.000Z"]
+}
+```
+
+- `acompanha`: quantos pacientes o cuidador acompanha, só vínculos ativos. Zero desliga a checagem no celular
+- `perdidas`: doses perdidas das **últimas 24 horas**, só as de depois do vínculo (`autorizado_em`), mais recente primeiro. Dose confirmada depois, no "Tomei mesmo assim", sai da lista, e o aviso dela sai da barra do celular
+- `proximasVerificacoes`: quando o celular deve conferir de novo, até 24 horas para a frente e no máximo 30. Cada momento é o horário de uma dose ainda prevista mais a tolerância de 60 minutos e mais 30 segundos de folga, que é quando ela vira perdida se ninguém confirmar. O app marca um alarme exato em cada um
+
+Sai só o que o aviso precisa: quem, qual remédio e de que horário. Nada da ficha médica. Antes de responder, o backend completa a agenda e aplica a tolerância de cada paciente acompanhado, como nas outras leituras de dose.
+
+No modo demonstração, o `demo.js` responde a mesma estrutura com os dados fictícios.
+
 ### DELETE /api/cuidadores/vinculo/:id
 
 Protegida. Pode ser chamada pelo próprio cuidador ou pelo dono da ficha. Marca `ativo = FALSE` e responde `204`. A linha não é apagada, porque quem teve acesso a dado de saúde precisa ficar registrado.
@@ -526,7 +554,7 @@ Protegida. Pode ser chamada pelo próprio cuidador ou pelo dono da ficha. Marca 
 | `pages/imprimir.html` | Folha A4 com as etiquetas | `GET /pacientes/:id` |
 | `pages/medicamentos.html` | Lista e cadastro de remédios | `GET/POST/DELETE /medicamentos` |
 | `pages/doses.html` | Agenda do dia, adesão e cartão do alarme | `GET /doses/hoje`, `POST /doses/:id/confirmar`, `GET /doses/adesao`, `GET /doses/proximas` |
-| `pages/cuidador.html` | Painel do cuidador | `POST /cuidadores/vincular`, `GET /cuidadores/:id/pacientes`, `DELETE /cuidadores/vinculo/:id` |
+| `pages/cuidador.html` | Painel do cuidador e cartão dos avisos de dose perdida | `POST /cuidadores/vincular`, `GET /cuidadores/:id/pacientes`, `GET /cuidadores/:id/alertas`, `DELETE /cuidadores/vinculo/:id` |
 | `pages/emergencia.html` | Ficha pública do QR | `GET /emergencia/:token` |
 
 Arquivos de apoio em `frontEnd/js/`:
@@ -539,3 +567,4 @@ Arquivos de apoio em `frontEnd/js/`:
 | `qrcode.js` | Gerador de QR Code próprio, sem CDN |
 | `demo.js` | Dados fictícios do modo demonstração |
 | `lembretes.js` | Alarme dos remédios: agenda os avisos no celular, janela de alarme com som e o cartão da tela de doses. Usa `GET /doses/proximas` e `POST /doses/:id/confirmar`. Detalhes em `docs/GUIA_APK.md` |
+| `avisosCuidador.js` | Avisos de dose perdida para o cuidador: liga o lado nativo do Android (plugin `BioShieldCuidador`) e, no navegador, mostra o aviso com a tela aberta. Usa `GET /cuidadores/:id/alertas`. Detalhes em `docs/GUIA_APK.md` |
