@@ -51,6 +51,8 @@ Para o evento (o plano completo está no [`DIA_DO_EVENTO.md`](DIA_DO_EVENTO.md))
 - [x] Escolher o nome da máquina e da rede no Tailscale, para o endereço não mudar depois de imprimir
 - [x] Abrir o BioShield pelo 4G antes de gerar qualquer QR
 - [ ] Escanear um QR com outro celular no 4G e ver a leitura no histórico de acessos, com o IP de quem escaneou
+- [x] Escolher os QR Codes da apresentação e criar os perfis fictícios que faltavam (Davi, autista; Renata, ciclista; e Diego, motoboy, de reserva)
+- [ ] Daiane criar a ficha dela no app, no servidor do evento
 - [ ] Trocar a senha das contas fictícias, porque o endereço está aberto na internet
 - [ ] Gerar e imprimir os QR Codes só depois disso, e testar cada papel com dois celulares
 - [ ] Separar o papel do Roberto, com o QR cancelado, para mostrar o aviso

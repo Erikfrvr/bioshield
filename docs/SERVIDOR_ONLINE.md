@@ -230,8 +230,8 @@ Se a internet do notebook cair, nenhum QR abre. Troquem para o 4G roteado de um 
 
 ## Cuidados
 
-- **Só dados fictícios.** O endereço é público, então qualquer pessoa na internet pode chegar na tela de entrada. Nada de dado de saúde real no banco que estiver no ar
-- **Cadastro aberto.** Qualquer pessoa consegue criar conta enquanto o Funnel estiver ligado. Depois do evento, rodar o `dados_ficticios.sql` limpa tudo
+- **Só dados fictícios, fora as fichas da equipe.** O endereço é público, então qualquer pessoa na internet pode chegar na tela de entrada. As fichas do Erik e da Daiane, que vão para a mesa, têm só o que cada um aceita mostrar. Nenhum outro dado de saúde real no banco que estiver no ar
+- **Cadastro aberto.** Qualquer pessoa consegue criar conta enquanto o Funnel estiver ligado. O `dados_ficticios.sql` só recria as contas `@exemplo.com` e não apaga as outras. Para limpar tudo depois do evento, apaguem as contas que não forem da equipe, ou recriem o banco do zero com o `bioshield.sql` e o `dados_ficticios.sql`
 - **`JWT_SECRET` forte.** Um texto longo e só de vocês, de 32 letras ou mais. O servidor avisa no terminal se ele ficar com o valor do exemplo ou curto demais
 - **Senha das contas fictícias trocada** (passo 8)
 - **Desligar o Funnel depois do evento** com `tailscale funnel reset`, se não forem mais usar
