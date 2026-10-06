@@ -368,6 +368,10 @@ Antes do ajuste, o nome do paciente e o da alergia quebravam letra por letra na 
 Os dados fictícios do `database/dados_ficticios.sql` contam a história da apresentação: a Maria em dia, o Lucas com doses perdidas, a Joana com alergias graves, o Roberto com o QR cancelado e a Patrícia como cuidadora.
 
 - [x] Banco com um caso de exemplo bom para gravar · Daiane
+- [x] Três perfis fictícios novos para a mesa, com código de QR fixo no script (06/10): o Davi, autista que não fala e pode se perder; o Diego, motoboy; e a Renata, ciclista com diabetes tipo 1
+- [x] O `dados_ficticios.sql` passou a apagar e recriar só as contas `@exemplo.com`. Antes ele apagava todas, e rodar o script na véspera teria trocado o QR das fichas reais da equipe
+- [x] Escolhemos os cinco QR Codes da apresentação: Maria, Davi, Renata, Erik e Daiane, com o Diego de reserva (lista no README)
+- [ ] Daiane criar a ficha dela no app, no servidor do evento
 - [ ] Imprimir a folha de etiquetas e colar uma num chaveiro para aparecer na demonstração · Erik
 - [ ] Gravar o fluxo completo: cadastro, ficha, QR, escanear com o celular, remédio, alarme e dose · Erik
 - [ ] Gravar o corte do cancelamento: escaneia e abre, cancela no app, escaneia de novo e aparece o aviso · Erik

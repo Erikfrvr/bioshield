@@ -112,7 +112,7 @@ mysql -u root -p --default-character-set=utf8mb4 < ../database/bioshield.sql
 mysql -u root -p --default-character-set=utf8mb4 < ../database/dados_ficticios.sql
 ```
 
-No XAMPP o `root` não tem senha, então é só apertar Enter quando ela for pedida. Também dá para importar os dois arquivos pelo phpMyAdmin ou pelo MySQL Workbench. O `bioshield.sql` só funciona num banco que ainda não existe. O `dados_ficticios.sql` pode ser rodado quantas vezes quiser: ele apaga tudo e recria, com as doses montadas em volta da hora em que rodou. Vale rodar de novo no dia da apresentação, para o histórico ficar com cara de hoje.
+No XAMPP o `root` não tem senha, então é só apertar Enter quando ela for pedida. Também dá para importar os dois arquivos pelo phpMyAdmin ou pelo MySQL Workbench. O `bioshield.sql` só funciona num banco que ainda não existe. O `dados_ficticios.sql` pode ser rodado quantas vezes quiser: ele apaga e recria só as contas fictícias (as que terminam em `@exemplo.com`), com as doses montadas em volta da hora em que rodou. Contas criadas pelo app ficam como estão, e os QR Codes das contas fictícias têm código fixo no script, então rodar de novo não estraga papel já impresso. Vale rodar de novo no dia da apresentação, para o histórico ficar com cara de hoje.
 
 **3. Configurar o ambiente**
 
@@ -166,8 +166,38 @@ Criadas pelo `dados_ficticios.sql`, todas com a senha `123456`.
 | `joana.lima@exemplo.com` | Duas alergias graves em destaque na ficha de emergência. Ninguém acompanha a Joana, então dá para criar o vínculo com a Patrícia na hora |
 | `lucas.andrade@exemplo.com` | Tratamento com data para acabar e adesão baixa |
 | `roberto.nunes@exemplo.com` | QR Code cancelado: escanear o código dele mostra o aviso de código cancelado |
+| `davi.oliveira@exemplo.com` | Davi, autista com nível 3 de suporte, que não fala e pode se perder. A ficha diz como se aproximar dele e quem chamar. É a conta que a mãe dele usaria |
+| `diego.rocha@exemplo.com` | Diego, motoboy: sangue O negativo, alergia grave a diclofenaco e o aviso de não tirar o capacete depois de um acidente. Não toma remédio nenhum |
+| `renata.moreira@exemplo.com` | Renata, ciclista com diabetes tipo 1: a ficha explica o que fazer se a glicose estiver baixa |
 
 A senha `123456` só funciona porque essas contas foram criadas direto no banco. Uma conta nova precisa de senha forte: pelo menos 8 caracteres, com letra maiúscula, letra minúscula, número e um destes símbolos: `@ $ ! % * ? & #`. No servidor que fica aberto na internet, a senha dessas contas é trocada antes do evento (passo 8 do [`SERVIDOR_ONLINE.md`](docs/SERVIDOR_ONLINE.md)).
+
+### QR Codes da apresentação
+
+No dia do Empreenda, estes são os QR Codes que vamos mostrar. Cada um conta uma situação diferente em que um desconhecido chega primeiro:
+
+| Ficha | A situação | O que o visitante vê ao escanear |
+|---|---|---|
+| Maria Souza | Idosa que mora sozinha, com hipertensão e diabetes | Duas alergias, três remédios em uso, o tipo sanguíneo e a filha como primeiro contato |
+| Davi Oliveira Santos | Autista que se perdeu e não consegue dizer quem é | Que ele não fala, como se aproximar sem assustar, a alergia grave a amendoim e o telefone da mãe e do pai |
+| Renata Alves Moreira | Ciclista que passou mal na rua | Diabetes tipo 1, o que fazer na glicose baixa, a insulina que ela usa e o marido como contato |
+| Erik | Integrante da equipe | A ficha que o próprio Erik montou no app |
+| Daiane | Integrante da equipe | A ficha que a própria Daiane montou no app |
+
+O Diego, o motoboy, fica de reserva: é a melhor ficha para falar de acidente de trânsito.
+
+Para abrir uma ficha fictícia sem escanear, com o servidor ligado, é só usar o mesmo endereço que vai dentro do QR:
+
+| Ficha | Endereço |
+|---|---|
+| Maria Souza | `https://bioshield.bonito-tench.ts.net/pages/emergencia.html?token=a3f81c2d94be47a0b6e15d7c0f29b834` |
+| Davi Oliveira Santos | `https://bioshield.bonito-tench.ts.net/pages/emergencia.html?token=07b94e9b13b9185cca241a9cfe021248` |
+| Renata Alves Moreira | `https://bioshield.bonito-tench.ts.net/pages/emergencia.html?token=0ff92863f327ecc1757776b6eb9077ee` |
+| Diego Ferreira Rocha | `https://bioshield.bonito-tench.ts.net/pages/emergencia.html?token=b52baf6fff61bf1bf7074d6a13120748` |
+
+Cada abertura fica registrada no histórico de acessos da ficha, como uma leitura de verdade.
+
+As fichas do Erik e da Daiane são criadas por eles mesmos no app, no servidor do evento, com o que cada um quiser mostrar. Elas não ficam no `dados_ficticios.sql` nem no repositório, porque são de pessoas reais, e rodar o script não apaga as duas: ele só mexe nas contas que terminam em `@exemplo.com`.
 
 ## Servidor na internet
 
@@ -206,7 +236,7 @@ O que só existe no app: o alarme dos remédios tocando pelo próprio Android, m
 
 ## Modo demonstração
 
-As telas também funcionam sozinhas, sem servidor e sem banco. Nesse caso usam os mesmos personagens fictícios do `dados_ficticios.sql`, guardados só naquela aba do navegador, e avisam isso na tela. Serve para apresentar, gravar vídeo ou mexer nas telas com a API desligada. O alarme dos remédios funciona igual na demonstração.
+As telas também funcionam sozinhas, sem servidor e sem banco. Nesse caso usam quatro dos personagens do `dados_ficticios.sql` (Maria, Joana, Lucas e Patrícia), guardados só naquela aba do navegador, e avisam isso na tela. Serve para apresentar, gravar vídeo ou mexer nas telas com a API desligada. O alarme dos remédios funciona igual na demonstração.
 
 Quem decide é o campo `MODO` do `frontEnd/js/config.js`:
 

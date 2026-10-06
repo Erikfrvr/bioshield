@@ -30,7 +30,7 @@ Tudo depende de uma condição: **um celular no 4G precisa conseguir abrir o end
 
 - **Uma placa simples, na frente dos QR Codes**: "Aponte a câmera do celular para o QR Code". Não precisa de nome nem senha de wifi.
 - **Um celular da equipe**, para emprestar a quem não quiser ou não conseguir escanear.
-- **Os QR Codes dos pacientes**, com o do paciente cancelado marcado.
+- **Os cinco QR Codes da apresentação**: Maria (idosa), Davi (autista que se perde), Renata (ciclista), Erik e Daiane. A lista, com o que cada um mostra, está no README. O do Diego (motoboy) fica de reserva, e o do Roberto, cancelado, fica marcado à parte para mostrar o aviso.
 - **O notebook**, que é o servidor. Ele pode ficar na mesa mostrando a aba Privacidade, onde cada leitura aparece na hora.
 - **O app instalado num celular**, com uma dose cadastrada para poucos minutos à frente, para mostrar o alarme tocando. O botão "Testar o alarme", na tela de Doses, faz o celular tocar em 5 segundos.
 - **O app no celular de um cuidador**, na conta da Patrícia, para mostrar o aviso de dose perdida. Ele só chega 1 hora depois do horário da dose: uma hora antes do momento em que quiserem mostrar, cadastrem na conta do Lucas um remédio para dali a poucos minutos e não confirmem. O passo a passo está em "Testar os avisos no celular", no [`GUIA_APK.md`](GUIA_APK.md).
@@ -41,7 +41,7 @@ Tudo depende de uma condição: **um celular no 4G precisa conseguir abrir o end
 
 **Endereço que muda depois de impresso.** Trocar o nome da máquina ou o nome da rede no painel do Tailscale, desinstalar o Tailscale ou trocar de conta muda o endereço, e todos os papéis da mesa param de funcionar de uma vez. Mudou o endereço, imprime tudo de novo.
 
-**Código que muda depois de impresso.** Trocar, cancelar ou reativar o QR de um paciente invalida o código antigo, e o papel impresso fica com ele. Depois de imprimir, ninguém mexe no QR dos pacientes da mesa; para mostrar o cancelamento, use o Roberto, que já vem cancelado nos dados fictícios. Os quatro pacientes do `dados_ficticios.sql` (Maria, Joana, Lucas e Roberto) têm código fixo no script, então rodar o script de novo mantém os mesmos QR Codes. Já apagar um paciente e criar de novo pelo app gera um código novo.
+**Código que muda depois de impresso.** Trocar, cancelar ou reativar o QR de um paciente invalida o código antigo, e o papel impresso fica com ele. Depois de imprimir, ninguém mexe no QR dos pacientes da mesa; para mostrar o cancelamento, use o Roberto, que já vem cancelado nos dados fictícios. Os pacientes do `dados_ficticios.sql` têm código fixo no script, então rodar o script de novo mantém os mesmos QR Codes. E o script só apaga e recria as contas que terminam em `@exemplo.com`: as fichas do Erik e da Daiane, criadas pelo app, ficam como estão. Já apagar um paciente e criar de novo pelo app gera um código novo.
 
 **Um estranho cancelando o QR da mesa.** O endereço é público e as contas fictícias vêm com a senha `123456`. Quem entrasse como a Maria poderia cancelar o QR dela. Por isso a senha das contas fictícias é trocada antes de imprimir (passo 8 do `SERVIDOR_ONLINE.md`), e trocada de novo sempre que o script de dados rodar.
 
@@ -59,7 +59,7 @@ Tudo depende de uma condição: **um celular no 4G precisa conseguir abrir o end
 
 **Servidor sem o `.env` certo.** Sem o `URL_PUBLICA`, o QR sai com o IP do wifi. Sem o `JWT_SECRET`, o login quebra. Com os dados do banco errados, nada carrega. O terminal do backend avisa dos três na subida. O `.env` nunca vai para o Git.
 
-**Dado real na mesa.** A ficha fica aberta para qualquer pessoa que escanear, e o papel pode ser fotografado e levado embora. Só pacientes fictícios: nenhum nome, telefone ou dado de saúde de pessoa real, nem o da equipe.
+**Dado real na mesa.** A ficha fica aberta para qualquer pessoa que escanear, e o papel pode ser fotografado e levado embora. Por isso, os pacientes do script são todos fictícios. As únicas fichas reais são as do Erik e da Daiane, que eles mesmos criam no app e decidem mostrar: cada um coloca ali só o que aceita que qualquer visitante leia. Nada de telefone ou dado de saúde de outra pessoa real.
 
 **QR que a câmera não lê.** QR pequeno demais, impressão clara, plástico com reflexo ou papel dobrado em cima do código. Imprima grande, em papel fosco, e teste cada papel com dois celulares diferentes.
 
@@ -82,7 +82,7 @@ O `frontEnd/js/config.js` não precisa de nenhuma mudança: as telas acham o ser
 
 **Antes de tudo.** Instalar o Tailscale no notebook, escolher o nome da máquina, ligar o Funnel e abrir o BioShield pelo 4G. Feito em 06/10.
 
-**Uma semana antes.** Banco com os dados fictícios, `.env` completo e o teste completo do passo 6 do `SERVIDOR_ONLINE.md`: dois celulares no 4G, um mostrando o QR e o outro escaneando. Decidir quantos pacientes vão para a mesa; se precisar de mais que os quatro do script, criar agora.
+**Uma semana antes.** Banco com os dados fictícios, `.env` completo e o teste completo do passo 6 do `SERVIDOR_ONLINE.md`: dois celulares no 4G, um mostrando o QR e o outro escaneando. Os pacientes da mesa já estão decididos (lista no README); falta a Daiane criar a ficha dela no app, no servidor do evento.
 
 **Dois dias antes.** Trocar a senha das contas fictícias. Gerar os QR Codes pela tela de etiquetas, no navegador do notebook ou no app (os dois dão o mesmo resultado), conferindo que não aparece aviso vermelho. O PDF da folha, no tamanho real, também serve para imprimir numa gráfica. Imprimir os QR Codes e a placa. Testar cada papel com dois celulares no 4G. A partir daqui, ninguém troca, cancela ou recria paciente da mesa, e ninguém mexe no nome da máquina no Tailscale.
 
