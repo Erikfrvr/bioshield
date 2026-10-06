@@ -23,6 +23,8 @@ O front não tem endereço de API fixo. O `js/api.js` procura o servidor nesta o
 3. o endereço da própria página, quando as telas são entregues pelo backend
 4. `http://localhost:3000`
 
+O campo `SERVIDOR_SUGERIDO` do `config.js` não entra nessa lista. Ele só deixa o endereço do evento (`bioshield.bonito-tench.ts.net`) escrito no quadro Servidor, e o app conecta quando a pessoa toca em **Testar e salvar**.
+
 Quem está logado em uma conta de verdade não cai na demonstração, e a ficha de emergência de quem escaneou o QR nunca mostra dado fictício.
 
 Um `401` em rota protegida apaga a sessão guardada e manda a pessoa de volta para a tela de entrada, com o aviso de que a sessão terminou.
@@ -63,40 +65,6 @@ Status que o front trata de forma diferente:
 
 ---
 
-## Para quem criou o banco antes
-
-O `database/bioshield.sql` atual já cria tudo certo. Os comandos abaixo servem só para quem criou o banco numa versão antiga e não quer recriar do zero.
-
-As duas colunas do cancelamento do QR Code:
-
-```sql
-ALTER TABLE pacientes
-  ADD COLUMN qr_ativo BOOLEAN NOT NULL DEFAULT TRUE AFTER token_gerado_em,
-  ADD COLUMN qr_cancelado_em TIMESTAMP NULL AFTER qr_ativo;
-```
-
-Por que coluna nova, em vez de apagar o token: o índice único em `token_qr` impede token nulo repetido, e apagar o token destrói o rastro de qual código foi impresso. Marcar como inativo mantém a auditoria e deixa o cancelamento reversível pela geração de um token novo.
-
-As colunas do código do cuidador (`POST /api/pacientes/:id/codigo`):
-
-```sql
-ALTER TABLE pacientes
-  ADD COLUMN codigo_cuidador CHAR(7) NULL AFTER qr_cancelado_em,
-  ADD COLUMN codigo_valido_ate TIMESTAMP NULL AFTER codigo_cuidador,
-  ADD CONSTRAINT uk_pacientes_codigo UNIQUE (codigo_cuidador);
-```
-
-E o índice da agenda de doses, que virou único para o mesmo remédio nunca ter duas doses no mesmo horário:
-
-```sql
-ALTER TABLE doses
-  DROP INDEX idx_doses_agenda,
-  ADD CONSTRAINT uk_doses_agenda UNIQUE (id_medicamento, horario_previsto);
-```
-
-
----
-
 ## Quem pode ver o quê
 
 O token carrega só o id do usuário. O middleware `autenticar` põe esse id em `req.idUsuario`, e cada service confere o acesso com `services/AutorizacaoService.ts` antes de ler ou gravar:
@@ -118,7 +86,7 @@ Fora disso a resposta é `403`. Paciente que não existe também devolve `403`, 
 Rota pública, sem token. É ela que decide se o front usa a API ou a demonstração.
 
 ```json
-{ "status": "ok", "urlPublica": "https://bioshield.tail1234ab.ts.net", "banco": "ok" }
+{ "status": "ok", "urlPublica": "https://bioshield.bonito-tench.ts.net", "banco": "ok" }
 ```
 
 `urlPublica` é o endereço pelo qual os outros aparelhos enxergam o servidor. Vem do `URL_PUBLICA` do `.env` ou, sem ele, do IP da placa de rede (`http://192.168.0.10:3000`). Vem `null` quando o computador não está em rede nenhuma e o `URL_PUBLICA` está vazio.
@@ -551,7 +519,7 @@ Protegida. Pode ser chamada pelo próprio cuidador ou pelo dono da ficha. Marca 
 | `index.html` | Login | `POST /usuarios/login` |
 | `pages/cadastro.html` | Criar conta | `POST /usuarios`, `POST /usuarios/login` |
 | `pages/perfil.html` | Ficha médica, QR Code, cancelamento, acessos, código do cuidador | `GET/POST/PUT /pacientes`, as três rotas de QR, `/acessos`, `/codigo` |
-| `pages/imprimir.html` | Folha A4 com as etiquetas | `GET /pacientes/:id` |
+| `pages/imprimir.html` | Etiquetas do QR Code: prévia da folha A4, impressão, PDF e imagem de cada modelo | `GET /pacientes/:id` |
 | `pages/medicamentos.html` | Lista e cadastro de remédios | `GET/POST/DELETE /medicamentos` |
 | `pages/doses.html` | Agenda do dia, adesão e cartão do alarme | `GET /doses/hoje`, `POST /doses/:id/confirmar`, `GET /doses/adesao`, `GET /doses/proximas` |
 | `pages/cuidador.html` | Painel do cuidador e cartão dos avisos de dose perdida | `POST /cuidadores/vincular`, `GET /cuidadores/:id/pacientes`, `GET /cuidadores/:id/alertas`, `DELETE /cuidadores/vinculo/:id` |
@@ -561,10 +529,11 @@ Arquivos de apoio em `frontEnd/js/`:
 
 | Arquivo | O que é |
 |---|---|
-| `config.js` | Modo (auto, api, demo), tempo limite e, se precisar travar, o endereço do servidor |
+| `config.js` | Modo (auto, api, demo), tempo limite, o endereço que já vem escrito no quadro Servidor e, se precisar travar, o endereço do servidor |
 | `api.js` | Todas as chamadas em um lugar só |
 | `ui.js` | Guarda de sessão, navegação, recados e formatação |
 | `qrcode.js` | Gerador de QR Code próprio, sem CDN |
+| `etiquetas.js` | Desenho das etiquetas e da folha A4, e o PDF, sem biblioteca. Não chama a API: usa o endereço do QR que a tela de etiquetas monta a partir da ficha |
 | `demo.js` | Dados fictícios do modo demonstração |
 | `lembretes.js` | Alarme dos remédios: agenda os avisos no celular, janela de alarme com som e o cartão da tela de doses. Usa `GET /doses/proximas` e `POST /doses/:id/confirmar`. Detalhes em `docs/GUIA_APK.md` |
 | `avisosCuidador.js` | Avisos de dose perdida para o cuidador: liga o lado nativo do Android (plugin `BioShieldCuidador`) e, no navegador, mostra o aviso com a tela aberta. Usa `GET /cuidadores/:id/alertas`. Detalhes em `docs/GUIA_APK.md` |

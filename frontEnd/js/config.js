@@ -13,9 +13,15 @@
 //
 // URL_PUBLICA_EMERGENCIA e o endereco da pagina emergencia.html que vai dentro do QR Code.
 // Vazio, o front monta sozinho a partir do servidor. Preencha so se a ficha publica morar em outro lugar.
+//
+// SERVIDOR_SUGERIDO e o endereco que ja vem escrito no quadro Servidor da tela de entrada.
+// No app, enquanto nenhum servidor foi salvo, o quadro abre sozinho no topo da tela com esse endereco,
+// e a pessoa so confere e toca em "Testar e salvar". Ele nao conecta sozinho e nao trava nada:
+// diferente do SERVIDOR, o site continua achando o proprio backend. Vazio, o campo vem em branco.
 
 window.BioShieldConfig = {
   SERVIDOR: "",
+  SERVIDOR_SUGERIDO: "bioshield.bonito-tench.ts.net",
   MODO: "auto",
   // Quanto tempo esperar uma resposta normal da API antes de desistir.
   TEMPO_LIMITE_MS: 8000,

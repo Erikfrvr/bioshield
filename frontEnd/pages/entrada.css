@@ -268,3 +268,14 @@
 }
 
 .entrada-servidor .entrada-apoio[data-estado="ligado"]::before { background: var(--sucesso); }
+
+/* App recem instalado, sem servidor salvo: o quadro vem antes do formulario de entrada,
+   ja aberto com o endereco escrito, e ganha uma borda coral para ser a primeira coisa que a pessoa ve. */
+.entrada-servidor.servidor-primeiro {
+  order: -1;
+  border: 2px solid var(--coral);
+  scroll-margin-top: 1rem;
+}
+
+/* Com o endereco ja escrito, a explicacao longa so empurraria o botao para fora da tela. */
+.entrada-servidor.servidor-primeiro .ajuda-servidor { display: none; }

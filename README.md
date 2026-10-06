@@ -31,13 +31,13 @@ O BioShield resolve isso por software. A própria pessoa gera o QR Code, atualiz
 
 ## O que o app faz
 
-**Ficha de emergência pelo QR Code.** Quem escaneia vê, em poucos segundos, as alergias a medicamento (as graves em vermelho, primeiro), os remédios em uso, o tipo sanguíneo, as condições de saúde e os contatos de emergência com botão de ligar. Abre direto no navegador, sem login e sem instalar nada. Se a pessoa perder o chaveiro, cancela o código pelo app, e quem escanear o papel perdido vê só um aviso de código cancelado. Toda leitura fica registrada, e o dono da ficha vê quando e de que tipo de aparelho ela foi aberta.
+**Ficha de emergência pelo QR Code.** Quem escaneia vê, em poucos segundos, as alergias a medicamento (as graves em vermelho, primeiro), os remédios em uso, o tipo sanguíneo, as condições de saúde e os contatos de emergência com botão de ligar. Abre direto no navegador, sem login e sem instalar nada, em qualquer celular com internet. Se a pessoa perder o chaveiro, cancela o código pelo app, e quem escanear o papel perdido vê só um aviso de código cancelado. Toda leitura fica registrada, e o dono da ficha vê quando e de que tipo de aparelho ela foi aberta.
 
 **Remédios e alarme.** A pessoa cadastra o remédio com dose, intervalo e horário da primeira tomada, e o BioShield monta a agenda sozinho. Na hora de cada dose o celular toca um alarme, com som próprio e vibração, e repete a cada 5 minutos até a pessoa tocar em **Tomei**, inclusive com a tela bloqueada e o app fechado. A tela de doses mostra a agenda do dia e a adesão de hoje e da semana. Remédio pode ser suspenso e reativado sem perder o histórico.
 
-**Modo cuidador.** O familiar acompanha de longe a adesão da semana, as doses perdidas e a próxima dose. O vínculo só existe depois que o próprio paciente gera um código de autorização e entrega para o cuidador, e o cuidador não vê nem edita a ficha médica.
+**Modo cuidador.** O familiar acompanha de longe a adesão da semana, as doses perdidas e a próxima dose. Quando alguém que ele acompanha passa 1 hora sem confirmar uma dose, o celular do cuidador avisa, mesmo com o app fechado. O vínculo só existe depois que o próprio paciente gera um código de autorização e entrega para o cuidador, e o cuidador não vê nem edita a ficha médica.
 
-**Folha de etiquetas.** Uma folha A4 com o QR Code em quatro tamanhos, do cartão de carteira ao mini adesivo de pulseira, pronta para imprimir e recortar.
+**Etiquetas do QR Code.** Uma folha A4 com o QR Code em quatro modelos, do cartão de carteira ao mini adesivo de pulseira. A pessoa escreve a frase de destaque que quiser (em branco, sai "EM CASO DE EMERGÊNCIA ESCANEIE ME") e, se quiser, uma informação extra, como "diabética, usa insulina". Dá para imprimir, salvar a folha em PDF no tamanho real ou baixar cada modelo como imagem, no computador e no celular.
 
 ## Para quem
 
@@ -53,10 +53,11 @@ Esse público decidiu a interface: letra grande, contraste alto, poucos passos p
 | Banco | MySQL 8 ou o MariaDB 10.4 do XAMPP, acessado com mysql2 e pool de conexões |
 | Segurança | bcryptjs para guardar a senha e jsonwebtoken para a sessão |
 | Telas | HTML, CSS e JavaScript, sem framework |
-| App Android | Capacitor 8, com os plugins oficiais `@capacitor/app` e `@capacitor/local-notifications` |
+| App Android | Capacitor 8, com os plugins oficiais `@capacitor/app` e `@capacitor/local-notifications` e dois plugins nativos do projeto, em Java: os avisos do cuidador e a impressão e o salvamento de arquivos |
+| Servidor na internet | Tailscale Funnel, no notebook da equipe, sem hospedagem paga |
 | Testes | Jest |
 
-Não há ORM: o SQL é escrito à mão e fica todo na camada de infraestrutura. O gerador de QR Code também é do projeto, sem biblioteca externa.
+Não há ORM: o SQL é escrito à mão e fica todo na camada de infraestrutura. O gerador de QR Code e o PDF das etiquetas também são do projeto, sem biblioteca externa.
 
 ## Arquitetura
 
@@ -87,9 +88,9 @@ As dependências apontam sempre para dentro: o service conhece só a interface d
 bioshield/
 ├── backend/        API (server.ts, camadas acima e tests/)
 ├── frontEnd/       telas do site e do app
-├── android/        projeto Android gerado pelo Capacitor
+├── android/        projeto Android gerado pelo Capacitor, com os plugins nativos do projeto
 ├── database/       script do banco, dados fictícios e dicionário de dados
-└── docs/           guias, decisões e imagens
+└── docs/           guias, decisões, roadmap e imagens
 ```
 
 ## Como rodar
@@ -127,8 +128,8 @@ cp .env.example .env
 | `DB_NAME` | Nome do banco | `bioshield` |
 | `DB_PORT` | Porta do MySQL | `3306` |
 | `PORT` | Porta do BioShield, a mesma para site, app e API | `3000` |
-| `JWT_SECRET` | Segredo que assina o login. Use um texto longo e só seu | |
-| `URL_PUBLICA` | Endereço público do servidor, que vai dentro do QR Code. Com o Tailscale Funnel, é o endereço `.ts.net`. Vazio, o servidor usa o IP da rede e o QR só abre no mesmo wifi | `https://bioshield.tail1234ab.ts.net` |
+| `JWT_SECRET` | Segredo que assina o login. Use um texto longo e só seu, de 32 letras ou mais | |
+| `URL_PUBLICA` | Endereço público do servidor, que vai dentro do QR Code. Com o Tailscale Funnel, é o endereço `.ts.net`. Vazio, o servidor usa o IP da rede e o QR só abre no mesmo wifi | `https://bioshield.bonito-tench.ts.net` |
 
 O `.env` de verdade nunca vai para o Git.
 
@@ -138,12 +139,16 @@ O `.env` de verdade nunca vai para o Git.
 npm run dev
 ```
 
-O mesmo servidor entrega a API e as telas. O terminal mostra o endereço deste computador e o endereço para os celulares da mesma rede:
+O mesmo servidor entrega a API e as telas. O terminal mostra o endereço deste computador, o endereço para os celulares da mesma rede e o endereço que vai dentro do QR Code:
 
 ```
 Servidor rodando em http://localhost:3000
 Nos celulares e nos outros computadores da mesma rede, use:
   http://192.168.0.10:3000
+Endereco que vai dentro do QR Code: http://192.168.0.10:3000
+  Esse endereco so abre para quem estiver no mesmo wifi. Para abrir pelo 4G com o Tailscale Funnel,
+  coloque o endereco dele no URL_PUBLICA do .env (veja docs/SERVIDOR_ONLINE.md).
+Conexao com o banco MySQL estabelecida com sucesso.
 ```
 
 O `npm run dev` reinicia sozinho quando um arquivo muda; para deixar só ligado, use `npm start`. Depois é abrir `http://localhost:3000` no navegador.
@@ -162,7 +167,17 @@ Criadas pelo `dados_ficticios.sql`, todas com a senha `123456`.
 | `lucas.andrade@exemplo.com` | Tratamento com data para acabar e adesão baixa |
 | `roberto.nunes@exemplo.com` | QR Code cancelado: escanear o código dele mostra o aviso de código cancelado |
 
-A senha `123456` só funciona porque essas contas foram criadas direto no banco. Uma conta nova precisa de senha forte: pelo menos 8 caracteres, com letra maiúscula, letra minúscula, número e um destes símbolos: `@ $ ! % * ? & #`.
+A senha `123456` só funciona porque essas contas foram criadas direto no banco. Uma conta nova precisa de senha forte: pelo menos 8 caracteres, com letra maiúscula, letra minúscula, número e um destes símbolos: `@ $ ! % * ? & #`. No servidor que fica aberto na internet, a senha dessas contas é trocada antes do evento (passo 8 do [`SERVIDOR_ONLINE.md`](docs/SERVIDOR_ONLINE.md)).
+
+## Servidor na internet
+
+No Empreenda, o BioShield roda no notebook do Erik, e o Tailscale Funnel dá a ele um endereço público com HTTPS:
+
+```
+https://bioshield.bonito-tench.ts.net
+```
+
+É esse endereço que vai dentro dos QR Codes da mesa. O visitante escaneia pelo 4G ou por qualquer wifi, sem instalar nada, e o endereço não muda quando o notebook troca de rede. Ele está no ar desde 06/10/2026, mas só responde enquanto o notebook estiver ligado com o backend rodando. A montagem, passo a passo, está no [`docs/SERVIDOR_ONLINE.md`](docs/SERVIDOR_ONLINE.md).
 
 ## Testes
 
@@ -173,11 +188,11 @@ npm test
 
 São 45 testes com Jest, em 8 arquivos, cobrindo os value objects (Email, Senha, Telefone, TipoSanguineo e TokenQR) e as entidades Alergia, Cuidador e FichaEmergencia. Eles não usam o banco.
 
-Além deles, o projeto foi conferido de ponta a ponta antes da versão 1.0: todas as rotas da API contra um banco de teste, todas as telas num navegador do tamanho de um celular (como site e simulando o app), o QR Code lido por um leitor independente e o APK rodando num Android de verdade, com o alarme disparando com o app fechado.
+Além deles, conferimos o projeto de ponta a ponta: todas as rotas da API contra um banco de teste, todas as telas num navegador do tamanho de um celular (como site e simulando o app), o QR Code das telas e dos PDFs lido por um leitor independente, o APK rodando num celular virtual (com o alarme disparando com o app fechado e o PDF das etiquetas salvo na pasta Download) e o app instalado num celular de verdade, conectando no servidor pelo 4G.
 
 ## App Android
 
-O mesmo conjunto de telas vira app Android com o Capacitor. O projeto nativo fica na pasta `android/`, e o passo a passo para gerar o APK, inclusive pelo Android Studio, está em [`docs/GUIA_APK.md`](docs/GUIA_APK.md).
+O mesmo conjunto de telas vira app Android com o Capacitor. O projeto nativo fica na pasta `android/`, e o passo a passo para gerar o APK, pelo Android Studio ou pela linha de comando, está em [`docs/GUIA_APK.md`](docs/GUIA_APK.md).
 
 ```bash
 npm install
@@ -185,7 +200,9 @@ npm run app:sync
 npm run app:abrir
 ```
 
-O app não carrega o servidor dentro dele. Na primeira vez, a pessoa escreve o endereço do servidor no quadro Servidor da tela de entrada. Com o endereço `.ts.net` do Tailscale Funnel, o celular funciona em qualquer internet; com o IP da rede local, precisa estar no mesmo wifi do servidor. No app, o botão Voltar do Android volta de tela em tela e fecha o app na primeira, e o alarme dos remédios toca pelo próprio sistema, mesmo com o app fechado.
+O app não carrega o servidor dentro dele. Na primeira vez que abre, o quadro Servidor da tela de entrada já vem com o endereço do evento escrito, e basta tocar em **Testar e salvar**. Com o endereço `.ts.net` do Tailscale Funnel, o celular funciona em qualquer internet; com o IP da rede local, precisa estar no mesmo wifi do servidor.
+
+O que só existe no app: o alarme dos remédios tocando pelo próprio Android, mesmo com o app fechado; o aviso de dose perdida no celular do cuidador; e a impressão e o salvamento das etiquetas, que abrem a janela de impressão do Android e gravam o PDF e as imagens na pasta Download/BioShield. O botão Voltar do Android volta de tela em tela e fecha o app na primeira.
 
 ## Modo demonstração
 
@@ -207,7 +224,7 @@ Com exceção das rotas públicas, todas pedem o cabeçalho `Authorization: Bear
 
 | Método | Rota | O que faz |
 |---|---|---|
-| `GET` | `/api/status` | Pública. Diz que a API está no ar e qual é o endereço de rede do servidor |
+| `GET` | `/api/status` | Pública. Diz que a API está no ar, qual é o endereço público do servidor e se o banco respondeu |
 | `POST` | `/api/usuarios` | Pública. Cria uma conta |
 | `POST` | `/api/usuarios/login` | Pública. Confere email e senha e devolve o token |
 | `GET` | `/api/usuarios/:id` | Dados da própria conta |
@@ -230,6 +247,7 @@ Com exceção das rotas públicas, todas pedem o cabeçalho `Authorization: Bear
 | `GET` | `/api/doses/adesao` | Adesão de hoje e dos últimos 7 dias |
 | `POST` | `/api/cuidadores/vincular` | Cria o vínculo de cuidador a partir do código do paciente |
 | `GET` | `/api/cuidadores/:id/pacientes` | Quem o cuidador acompanha, com adesão, doses perdidas e próxima dose |
+| `GET` | `/api/cuidadores/:id/alertas` | Doses perdidas das últimas 24 horas de quem o cuidador acompanha, para o aviso no celular |
 | `DELETE` | `/api/cuidadores/vinculo/:id` | Desfaz o vínculo, guardando o registro de que ele existiu |
 
 A agenda de doses não depende de nenhuma rotina rodando no servidor: antes de responder, as rotas de dose, de remédios e do cuidador completam os dias que faltam e marcam como perdida a dose que passou 60 minutos sem confirmação.
@@ -255,33 +273,36 @@ Dado de saúde é dado sensível pela LGPD, e isso pesou em várias decisões:
 - A ficha pública mostra só o que ajuda a socorrer. Email, senha, endereço e histórico nunca saem pela rota do QR
 - A senha é guardada como hash bcrypt e não aparece em nenhuma resposta nem em log
 - O token do QR é aleatório, com 128 bits, e pode ser trocado ou cancelado a qualquer momento
-- Toda leitura da ficha pública fica registrada e visível para o dono
-- Cuidador só enxerga um paciente depois de autorizado por ele, e mesmo assim só o acompanhamento das doses
+- Toda leitura da ficha pública fica registrada e visível para o dono, com o IP verdadeiro de quem escaneou, mesmo passando pelo Tailscale Funnel
+- Cuidador só enxerga um paciente depois de autorizado por ele, e mesmo assim só o acompanhamento das doses. O aviso de dose perdida diz só quem, qual remédio e de que horário
+- A informação extra das etiquetas é escrita pela própria pessoa, que é avisada de que quem pegar a etiqueta vai ler
 - O servidor não registra o corpo das requisições, e o repositório só tem dados fictícios
 
 ## Documentação
 
 | Documento | O que tem |
 |---|---|
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | O resumo do projeto: a linha do tempo de todas as fases, onde estamos e o que falta |
+| [`docs/ROADMAP_FASES.md`](docs/ROADMAP_FASES.md) | Cada fase, tarefa por tarefa, com quem fez e quando |
 | [`frontEnd/CONTRATO_API.md`](frontEnd/CONTRATO_API.md) | Todas as rotas, com exemplos de requisição e resposta |
 | [`database/DICIONARIO_DADOS.md`](database/DICIONARIO_DADOS.md) | Cada tabela e cada coluna do banco |
-| [`docs/DICIONARIO_DETALHADO.md`](docs/DICIONARIO_DETALHADO.md) | Cada classe do backend: entidades, value objects, DTOs, services e rotas |
+| [`docs/DICIONARIO_DETALHADO.md`](docs/DICIONARIO_DETALHADO.md) | Cada classe do backend, cada script das telas e o código nativo do Android |
 | [`docs/DUVIDAS_CONTRATO.md`](docs/DUVIDAS_CONTRATO.md) | As decisões de regra de negócio e o porquê de cada uma |
-| [`docs/GUIA_APK.md`](docs/GUIA_APK.md) | Como gerar e usar o app Android, e como funciona o alarme |
-| [`docs/SERVIDOR_ONLINE.md`](docs/SERVIDOR_ONLINE.md) | Como abrir o BioShield na internet com o Tailscale Funnel, no notebook do evento |
+| [`docs/GUIA_APK.md`](docs/GUIA_APK.md) | Como gerar e usar o app Android, o alarme, os avisos do cuidador e as etiquetas no celular |
+| [`docs/SERVIDOR_ONLINE.md`](docs/SERVIDOR_ONLINE.md) | Como colocamos o BioShield na internet com o Tailscale Funnel, no notebook do evento |
 | [`docs/DIA_DO_EVENTO.md`](docs/DIA_DO_EVENTO.md) | O plano da mesa de QR Codes no Empreenda |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Como o projeto foi construído e o que ainda falta |
 
 ## Situação
 
-Versão 1.0. As três funcionalidades estão completas e testadas, no site e no app Android.
+Versão 1.0, de 04/10/2026, com as três funcionalidades completas e testadas no site e no app Android. Depois dela vieram o aviso de dose perdida no celular do cuidador, o servidor na internet com o Tailscale Funnel e as etiquetas no celular, com PDF e imagens.
 
-O que ainda depende da equipe é a preparação do evento: deixar o notebook servidor pronto com o Tailscale Funnel, imprimir os QR Codes da mesa e gravar o vídeo da demonstração. A lista está no [`docs/ROADMAP.md`](docs/ROADMAP.md).
+O que ainda depende da equipe é a preparação do evento: trocar a senha das contas fictícias, imprimir e testar os QR Codes da mesa e gravar o vídeo da demonstração. A lista completa está no [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 Limites conhecidos desta versão:
 
-- O QR Code abre para quem está na mesma rede do servidor. Para abrir pelo 4G, o BioShield precisaria estar hospedado na internet
+- O servidor do evento é um notebook. Se ele desligar ou ficar sem internet, nenhum QR abre; o plano B está no [`docs/DIA_DO_EVENTO.md`](docs/DIA_DO_EVENTO.md)
 - O app trabalha no horário de Brasília. Um paciente em outro fuso recebe o alarme no horário de Brasília
+- No Android 9 ou mais antigo, o app não grava direto na pasta Download: abre a janela de compartilhar para a pessoa escolher onde guardar o arquivo
 - O APK é de depuração, para instalar direto no celular. Publicar na Play Store pede conta de desenvolvedor, assinatura própria e a revisão de algumas permissões
 
 ## Contexto
