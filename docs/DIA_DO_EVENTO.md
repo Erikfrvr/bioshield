@@ -4,17 +4,21 @@ A ideia é deixar na mesa os QR Codes de alguns pacientes fictícios. Quem passa
 
 ## A decisão
 
-O BioShield vai rodar no notebook do Erik, levado no dia da apresentação, com o Tailscale Funnel ligado. O Funnel dá ao notebook um endereço público com HTTPS, terminado em `.ts.net`, e é esse endereço que vai dentro dos QR Codes.
+O BioShield vai rodar no notebook do Erik, levado no dia da apresentação, com o Tailscale Funnel ligado. O Funnel dá ao notebook um endereço público com HTTPS, e é esse endereço que vai dentro dos QR Codes:
+
+```
+https://bioshield.bonito-tench.ts.net
+```
 
 Com isso, o visitante escaneia pelo 4G ou por qualquer wifi, sem precisar entrar numa rede antes. O notebook só precisa de internet, e pode ser qualquer uma: wifi do Senac, cabo ou o 4G de um celular roteando. O endereço não muda quando a rede muda, então dá para imprimir os QR Codes em casa.
 
-Escolhemos esse caminho por ser o mais simples para o visitante e por não ter custo. O preço é depender da internet do notebook e de um serviço de fora (o Tailscale). A montagem completa está em [`SERVIDOR_ONLINE.md`](SERVIDOR_ONLINE.md).
+Escolhemos esse caminho por ser o mais simples para o visitante e por não ter custo. O preço é depender da internet do notebook e de um serviço de fora (o Tailscale). A montagem foi feita em 05/10 e 06/10, e está completa em [`SERVIDOR_ONLINE.md`](SERVIDOR_ONLINE.md).
 
 ## Como funciona
 
 O backend e o banco ficam no notebook, e o backend entrega também as telas, tudo na porta 3000. O Funnel recebe os acessos da internet e repassa para essa porta. Cada QR Code guarda o endereço completo da página da ficha de emergência, com o código do paciente no final. O visitante aponta a câmera, o navegador abre a página e a ficha aparece.
 
-Tudo depende de uma condição: **um celular no 4G precisa conseguir abrir o endereço `.ts.net`.** Para tirar a dúvida, basta desligar o wifi de um celular e abrir no navegador `https://bioshield.NOME.ts.net/api/status`. Se aparecer `"status":"ok"` e `"banco":"ok"`, o plano funciona.
+Tudo depende de uma condição: **um celular no 4G precisa conseguir abrir o endereço `.ts.net`.** Para conferir, basta desligar o wifi de um celular e abrir no navegador `https://bioshield.bonito-tench.ts.net/api/status`. Se aparecer `"status":"ok"` e `"banco":"ok"`, o plano funciona. Em 06/10, o app no celular do Erik conectou por esse endereço com o wifi desligado.
 
 ## Perguntas para o professor ou para a organização
 
@@ -33,7 +37,7 @@ Tudo depende de uma condição: **um celular no 4G precisa conseguir abrir o end
 
 ## O que pode dar errado
 
-**QR Code impresso antes da hora.** O QR não guarda só o código do paciente: guarda o endereço inteiro do servidor. Antes de imprimir, confira o endereço que aparece embaixo do QR na tela da ficha: ele tem que começar com `https://` e terminar com `.ts.net`. Se o endereço só abrir no wifi ou no próprio notebook, a tela da ficha e a folha de impressão mostram um aviso.
+**QR Code impresso antes da hora.** O QR não guarda só o código do paciente: guarda o endereço inteiro do servidor. Antes de imprimir, confira o endereço que aparece embaixo do QR na tela da ficha: ele tem que começar com `https://` e terminar com `.ts.net`. Se o endereço só abrir no wifi ou no próprio notebook, a tela da ficha e a tela de etiquetas mostram um aviso.
 
 **Endereço que muda depois de impresso.** Trocar o nome da máquina ou o nome da rede no painel do Tailscale, desinstalar o Tailscale ou trocar de conta muda o endereço, e todos os papéis da mesa param de funcionar de uma vez. Mudou o endereço, imprime tudo de novo.
 
@@ -63,21 +67,24 @@ Tudo depende de uma condição: **um celular no 4G precisa conseguir abrir o end
 
 Seguindo o `SERVIDOR_ONLINE.md`:
 
-1. Banco criado com o `bioshield.sql` e preenchido com o `dados_ficticios.sql`.
-2. `.env` do backend preenchido, com `URL_PUBLICA` no endereço do Funnel e um `JWT_SECRET` forte.
-3. Tailscale instalado, com o nome da máquina definido e o Funnel ligado.
-4. Senha das contas fictícias trocada.
-5. Energia e atualizações configuradas para o notebook não dormir nem reiniciar.
+| O quê | Situação |
+|---|---|
+| Banco criado com o `bioshield.sql` e preenchido com o `dados_ficticios.sql` | Feito |
+| `.env` do backend com `URL_PUBLICA` no endereço do Funnel e um `JWT_SECRET` forte | Feito em 06/10 |
+| Tailscale instalado, com o nome da máquina e da rede definidos e o Funnel ligado | Feito em 06/10 |
+| Senha das contas fictícias trocada | Falta |
+| Energia e atualizações configuradas para o notebook não dormir nem reiniciar | Em parte: a suspensão já está em "Nunca"; faltam a tampa e as atualizações |
+| MySQL ligando sozinho ao abrir o XAMPP | Falta |
 
-O `frontEnd/js/config.js` não precisa de nenhuma mudança: as telas acham o servidor sozinhas e montam o endereço do QR a partir do que o backend informa.
+O `frontEnd/js/config.js` não precisa de nenhuma mudança: as telas acham o servidor sozinhas e montam o endereço do QR a partir do que o backend informa. No app, o endereço do evento já vem escrito na tela de entrada.
 
 ## Linha do tempo
 
-**Antes de tudo.** Instalar o Tailscale no notebook, escolher o nome da máquina, ligar o Funnel e abrir o `/api/status` pelo 4G.
+**Antes de tudo.** Instalar o Tailscale no notebook, escolher o nome da máquina, ligar o Funnel e abrir o BioShield pelo 4G. Feito em 06/10.
 
 **Uma semana antes.** Banco com os dados fictícios, `.env` completo e o teste completo do passo 6 do `SERVIDOR_ONLINE.md`: dois celulares no 4G, um mostrando o QR e o outro escaneando. Decidir quantos pacientes vão para a mesa; se precisar de mais que os quatro do script, criar agora.
 
-**Dois dias antes.** Trocar a senha das contas fictícias. Gerar os QR Codes pela folha de impressão, no navegador do notebook (no app, a impressão não existe), conferindo que não aparece aviso vermelho. Imprimir os QR Codes e a placa. Testar cada papel com dois celulares no 4G. A partir daqui, ninguém troca, cancela ou recria paciente da mesa, e ninguém mexe no nome da máquina no Tailscale.
+**Dois dias antes.** Trocar a senha das contas fictícias. Gerar os QR Codes pela tela de etiquetas, no navegador do notebook ou no app (os dois dão o mesmo resultado), conferindo que não aparece aviso vermelho. O PDF da folha, no tamanho real, também serve para imprimir numa gráfica. Imprimir os QR Codes e a placa. Testar cada papel com dois celulares no 4G. A partir daqui, ninguém troca, cancela ou recria paciente da mesa, e ninguém mexe no nome da máquina no Tailscale.
 
 **Na véspera.** Rodar o `dados_ficticios.sql` de novo, para o histórico de doses ficar com cara de hoje (os QR Codes continuam os mesmos), e trocar de novo a senha das contas fictícias. Escanear todos os papéis, conferir que cada leitura aparece no histórico de acessos da ficha e deixar o plano B pronto. Carregar o notebook e o celular que vai rotear.
 

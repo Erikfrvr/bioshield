@@ -141,18 +141,11 @@
       ? "Código criado em " + UI.formatarDataHora(ficha.tokenGeradoEm)
       : "Cancelado em " + UI.formatarDataHora(ficha.qrCanceladoEm);
 
-    // Dentro do app Android nao existe imprimir pelo navegador.
-    // No lugar do botao fica o recado de onde fazer isso.
-    if (Api.noApp) {
-      var conexao = Api.conexao();
-      var ondeAbrir = UI.enderecoPublico(conexao);
-      UI.elemento("#notaApp").hidden = !ativo;
-      UI.elemento("#notaApp").textContent = "Para imprimir as etiquetas, abra o BioShield no navegador de um computador" +
-        (ondeAbrir ? ", no endereço " + ondeAbrir + "." : ".");
-    }
+    // O botao das etiquetas vale no site e no app. No app, a tela imprimir.html imprime e salva
+    // os arquivos pelo plugin nativo BioShieldArquivos (android/.../ArquivosPlugin.java).
     UI.elemento("#rotacionarQr").disabled = !ativo;
     UI.elemento("#cancelarQr").classList.toggle("oculto", !ativo);
-    UI.elemento("#irImprimir").classList.toggle("oculto", !ativo || Api.noApp);
+    UI.elemento("#irImprimir").classList.toggle("oculto", !ativo);
     UI.elemento("#reativarQr").classList.toggle("oculto", ativo);
     UI.elemento("#rotacionarQr").classList.toggle("oculto", !ativo);
     UI.elemento("#verFicha").classList.toggle("oculto", !ativo);

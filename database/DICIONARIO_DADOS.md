@@ -184,7 +184,7 @@ Log de cada abertura da ficha pública. Existe por causa da LGPD: dado sensível
 
 Chaves: PK `id` | FK `id_paciente` → `pacientes(id)` ON DELETE CASCADE | INDEX `id_paciente, acessado_em`
 
-Regras: o paciente vê esse histórico dentro do app, na aba Privacidade da ficha, com as 100 leituras mais recentes. É o que responde "quem andou olhando a minha ficha". O ideal seria apagar os registros antigos depois de um tempo, já que eles só servem para auditoria recente; o app ainda não tem essa limpeza.
+Regras: o `ip` é o de quem escaneou, mesmo quando o acesso chega pelo Tailscale Funnel. O Funnel entrega o acesso de dentro do próprio servidor e avisa qual é o IP do visitante, e o backend só aceita esse aviso quando o acesso vem do próprio servidor; assim um celular da rede local não consegue inventar um IP. O paciente vê esse histórico dentro do app, na aba Privacidade da ficha, com as 100 leituras mais recentes. É o que responde "quem andou olhando a minha ficha". O ideal seria apagar os registros antigos depois de um tempo, já que eles só servem para auditoria recente; o app ainda não tem essa limpeza.
 
 ---
 
