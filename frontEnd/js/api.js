@@ -69,14 +69,22 @@
 
   // ===== Em qual endereco o servidor esta =====
 
+  // Endereco do Tailscale Funnel: termina em .ts.net, e sempre HTTPS e nunca tem porta.
+  function ehTailscale(hostname) {
+    return /\.ts\.net$/i.test(String(hostname || ""));
+  }
+
   // Aceita "192.168.0.10", "192.168.0.10:3000" ou "http://192.168.0.10:3000/qualquer/coisa"
   // e devolve sempre "http://192.168.0.10:3000". Sem porta, vale a 3000, que e a do backend.
+  // Endereco do Tailscale ("bioshield.tail1234ab.ts.net") vira "https://bioshield.tail1234ab.ts.net",
+  // mesmo escrito sem o https:// ou com http://, porque o Funnel so atende HTTPS na porta padrao.
   function normalizarServidor(texto) {
     var limpo = String(texto || "").trim();
     if (!limpo) return "";
     var temProtocolo = /^https?:\/\//i.test(limpo);
     try {
       var url = new URL(temProtocolo ? limpo : "http://" + limpo);
+      if (ehTailscale(url.hostname)) return "https://" + url.hostname.toLowerCase();
       var porta = url.port || (temProtocolo ? "" : PORTA_PADRAO);
       return url.protocol + "//" + url.hostname + (porta ? ":" + porta : "");
     } catch (erro) {
@@ -187,9 +195,14 @@
   // Testa o endereco digitado e so salva se o BioShield responder nele.
   async function salvarServidor(texto) {
     var origem = normalizarServidor(texto);
-    if (!origem) throw ErroApi("Escreva o endereço do servidor, por exemplo 192.168.0.10", 0, null);
+    if (!origem) throw ErroApi("Escreva o endereço do servidor, por exemplo bioshield.tail1234ab.ts.net", 0, null);
     var achado = await sondar(origem);
-    if (!achado) throw ErroApi("O BioShield não respondeu em " + origem + ". Confira o endereço e se este aparelho está no mesmo wifi do servidor.", 0, null);
+    if (!achado) {
+      var dica = origem.indexOf("https://") === 0
+        ? " Confira o endereço, a internet deste aparelho e se o servidor e o Tailscale Funnel estão ligados."
+        : " Confira o endereço e se este aparelho está no mesmo wifi do servidor.";
+      throw ErroApi("O BioShield não respondeu em " + origem + "." + dica, 0, null);
+    }
     gravar(localStorage, CHAVE_SERVIDOR, origem);
     esquecerConexao();
     return achado;

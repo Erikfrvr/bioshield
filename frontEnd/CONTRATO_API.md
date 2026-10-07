@@ -23,6 +23,8 @@ O front não tem endereço de API fixo. O `js/api.js` procura o servidor nesta o
 3. o endereço da própria página, quando as telas são entregues pelo backend
 4. `http://localhost:3000`
 
+O campo `SERVIDOR_SUGERIDO` do `config.js` não entra nessa lista. Ele só deixa o endereço do evento (`bioshield.bonito-tench.ts.net`) escrito no quadro Servidor, e o app conecta quando a pessoa toca em **Testar e salvar**.
+
 Quem está logado em uma conta de verdade não cai na demonstração, e a ficha de emergência de quem escaneou o QR nunca mostra dado fictício.
 
 Um `401` em rota protegida apaga a sessão guardada e manda a pessoa de volta para a tela de entrada, com o aviso de que a sessão terminou.
@@ -63,40 +65,6 @@ Status que o front trata de forma diferente:
 
 ---
 
-## Para quem criou o banco antes
-
-O `database/bioshield.sql` atual já cria tudo certo. Os comandos abaixo servem só para quem criou o banco numa versão antiga e não quer recriar do zero.
-
-As duas colunas do cancelamento do QR Code:
-
-```sql
-ALTER TABLE pacientes
-  ADD COLUMN qr_ativo BOOLEAN NOT NULL DEFAULT TRUE AFTER token_gerado_em,
-  ADD COLUMN qr_cancelado_em TIMESTAMP NULL AFTER qr_ativo;
-```
-
-Por que coluna nova, em vez de apagar o token: o índice único em `token_qr` impede token nulo repetido, e apagar o token destrói o rastro de qual código foi impresso. Marcar como inativo mantém a auditoria e deixa o cancelamento reversível pela geração de um token novo.
-
-As colunas do código do cuidador (`POST /api/pacientes/:id/codigo`):
-
-```sql
-ALTER TABLE pacientes
-  ADD COLUMN codigo_cuidador CHAR(7) NULL AFTER qr_cancelado_em,
-  ADD COLUMN codigo_valido_ate TIMESTAMP NULL AFTER codigo_cuidador,
-  ADD CONSTRAINT uk_pacientes_codigo UNIQUE (codigo_cuidador);
-```
-
-E o índice da agenda de doses, que virou único para o mesmo remédio nunca ter duas doses no mesmo horário:
-
-```sql
-ALTER TABLE doses
-  DROP INDEX idx_doses_agenda,
-  ADD CONSTRAINT uk_doses_agenda UNIQUE (id_medicamento, horario_previsto);
-```
-
-
----
-
 ## Quem pode ver o quê
 
 O token carrega só o id do usuário. O middleware `autenticar` põe esse id em `req.idUsuario`, e cada service confere o acesso com `services/AutorizacaoService.ts` antes de ler ou gravar:
@@ -105,7 +73,7 @@ O token carrega só o id do usuário. O middleware `autenticar` põe esse id em 
 |---|---|
 | `/pacientes/:id` e tudo abaixo (QR, acessos, código), `/medicamentos` | Só o dono da ficha (`garantirDono`) |
 | `/doses/hoje`, `/doses/proximas`, `/doses/:id/confirmar`, `/doses/adesao` | O dono ou um cuidador com vínculo `ativo = TRUE` (`garantirAcompanhamento`) |
-| `/usuarios/:id`, `/cuidadores/:id/pacientes` | Só quando `:id` é o próprio usuário logado (`garantirMesmoUsuario`) |
+| `/usuarios/:id`, `/cuidadores/:id/pacientes`, `/cuidadores/:id/alertas` | Só quando `:id` é o próprio usuário logado (`garantirMesmoUsuario`) |
 
 Fora disso a resposta é `403`. Paciente que não existe também devolve `403`, com a mesma mensagem, para que ninguém descubra quais ids existem trocando o número na URL. `404` fica para o recurso da própria rota (remédio ou dose que não existe).
 
@@ -118,10 +86,18 @@ Fora disso a resposta é `403`. Paciente que não existe também devolve `403`, 
 Rota pública, sem token. É ela que decide se o front usa a API ou a demonstração.
 
 ```json
-{ "status": "ok", "urlPublica": "http://192.168.0.10:3000" }
+{ "status": "ok", "urlPublica": "https://bioshield.bonito-tench.ts.net", "banco": "ok" }
 ```
 
-`urlPublica` é o endereço pelo qual os outros aparelhos da rede enxergam o servidor. O front usa esse valor para montar o QR Code quando chegou ao servidor por `localhost`, assim o código nunca sai apontando para um endereço que só abre no próprio computador. Vem do `URL_PUBLICA` do `.env` ou, sem ele, do IP da placa de rede. Vem `null` quando o computador não está em rede nenhuma.
+`urlPublica` é o endereço pelo qual os outros aparelhos enxergam o servidor. Vem do `URL_PUBLICA` do `.env` ou, sem ele, do IP da placa de rede (`http://192.168.0.10:3000`). Vem `null` quando o computador não está em rede nenhuma e o `URL_PUBLICA` está vazio.
+
+O front usa esse valor para montar o QR Code (`UI.enderecoPublico`, no `ui.js`):
+
+- Chegou ao servidor por `localhost`: usa a `urlPublica`, assim o código nunca sai apontando para um endereço que só abre no próprio computador
+- A `urlPublica` é HTTPS (o Tailscale Funnel): usa ela, mesmo que tenha chegado pelo IP do wifi
+- Chegou por HTTPS e a `urlPublica` é só o IP do wifi: fica com o endereço HTTPS por onde chegou
+
+`banco` vem `"ok"` quando o MySQL respondeu e `"fora do ar"` quando não respondeu em 1,5 segundo. O front não usa esse campo: ele serve para conferir o servidor abrindo esta rota no navegador do celular. Com o banco fora do ar, o `status` continua `"ok"`, porque o servidor em si está de pé.
 
 Caminho de API que não existe devolve `404` com `{ "mensagem": "Rota não encontrada." }`.
 
@@ -134,13 +110,13 @@ Caminho de API que não existe devolve `404` com `{ "mensagem": "Rota não encon
 Cadastro. Público.
 
 ```json
-{ "nome": "Maria Aparecida Souza", "email": "maria@exemplo.com", "senha": "123456" }
+{ "nome": "Maria Aparecida Souza", "email": "maria@bioshield.com", "senha": "@Senac_empreenda2026" }
 ```
 
 Resposta `201`:
 
 ```json
-{ "id": 1, "nome": "Maria Aparecida Souza", "email": "maria@exemplo.com" }
+{ "id": 1, "nome": "Maria Aparecida Souza", "email": "maria@bioshield.com" }
 ```
 
 Email repetido devolve `409`. A senha nunca volta, nem como hash.
@@ -150,7 +126,7 @@ Email repetido devolve `409`. A senha nunca volta, nem como hash.
 Público.
 
 ```json
-{ "email": "maria@exemplo.com", "senha": "123456" }
+{ "email": "maria@bioshield.com", "senha": "@Senac_empreenda2026" }
 ```
 
 Resposta `200`:
@@ -158,7 +134,7 @@ Resposta `200`:
 ```json
 {
   "token": "eyJhbGciOi...",
-  "usuario": { "id": 1, "nome": "Maria Aparecida Souza", "email": "maria@exemplo.com" },
+  "usuario": { "id": 1, "nome": "Maria Aparecida Souza", "email": "maria@bioshield.com" },
   "idPaciente": 1
 }
 ```
@@ -502,6 +478,34 @@ Protegida. `:id` é o id do usuário cuidador e precisa ser o do usuário logado
 
 O cuidador vê acompanhamento de dose. Ele **não** recebe a ficha médica nem o histórico de acessos de quem acompanha.
 
+### GET /api/cuidadores/:id/alertas
+
+Protegida. `:id` é o id do usuário cuidador e precisa ser o do usuário logado, senão `403`. É a rota dos **avisos de dose perdida** no celular do cuidador: o app Android consulta de tempos em tempos (`VerificadorCuidador.java`) e o navegador consulta enquanto o BioShield está aberto (`frontEnd/js/avisosCuidador.js`).
+
+```json
+{
+  "acompanha": 2,
+  "perdidas": [
+    {
+      "idDose": 177,
+      "idPaciente": 3,
+      "nomePaciente": "Lucas Andrade Ferraz",
+      "nomeMedicamento": "Risperidona",
+      "horarioPrevisto": "2026-10-05T13:19:00.000Z"
+    }
+  ],
+  "proximasVerificacoes": ["2026-10-05T19:00:30.000Z", "2026-10-06T00:00:30.000Z"]
+}
+```
+
+- `acompanha`: quantos pacientes o cuidador acompanha, só vínculos ativos. Zero desliga a checagem no celular
+- `perdidas`: doses perdidas das **últimas 24 horas**, só as de depois do vínculo (`autorizado_em`), mais recente primeiro. Dose confirmada depois, no "Tomei mesmo assim", sai da lista, e o aviso dela sai da barra do celular
+- `proximasVerificacoes`: quando o celular deve conferir de novo, até 24 horas para a frente e no máximo 30. Cada momento é o horário de uma dose ainda prevista mais a tolerância de 60 minutos e mais 30 segundos de folga, que é quando ela vira perdida se ninguém confirmar. O app marca um alarme exato em cada um
+
+Sai só o que o aviso precisa: quem, qual remédio e de que horário. Nada da ficha médica. Antes de responder, o backend completa a agenda e aplica a tolerância de cada paciente acompanhado, como nas outras leituras de dose.
+
+No modo demonstração, o `demo.js` responde a mesma estrutura com os dados fictícios.
+
 ### DELETE /api/cuidadores/vinculo/:id
 
 Protegida. Pode ser chamada pelo próprio cuidador ou pelo dono da ficha. Marca `ativo = FALSE` e responde `204`. A linha não é apagada, porque quem teve acesso a dado de saúde precisa ficar registrado.
@@ -515,19 +519,21 @@ Protegida. Pode ser chamada pelo próprio cuidador ou pelo dono da ficha. Marca 
 | `index.html` | Login | `POST /usuarios/login` |
 | `pages/cadastro.html` | Criar conta | `POST /usuarios`, `POST /usuarios/login` |
 | `pages/perfil.html` | Ficha médica, QR Code, cancelamento, acessos, código do cuidador | `GET/POST/PUT /pacientes`, as três rotas de QR, `/acessos`, `/codigo` |
-| `pages/imprimir.html` | Folha A4 com as etiquetas | `GET /pacientes/:id` |
+| `pages/imprimir.html` | Etiquetas do QR Code: prévia da folha A4, impressão, PDF e imagem de cada modelo | `GET /pacientes/:id` |
 | `pages/medicamentos.html` | Lista e cadastro de remédios | `GET/POST/DELETE /medicamentos` |
 | `pages/doses.html` | Agenda do dia, adesão e cartão do alarme | `GET /doses/hoje`, `POST /doses/:id/confirmar`, `GET /doses/adesao`, `GET /doses/proximas` |
-| `pages/cuidador.html` | Painel do cuidador | `POST /cuidadores/vincular`, `GET /cuidadores/:id/pacientes`, `DELETE /cuidadores/vinculo/:id` |
+| `pages/cuidador.html` | Painel do cuidador e cartão dos avisos de dose perdida | `POST /cuidadores/vincular`, `GET /cuidadores/:id/pacientes`, `GET /cuidadores/:id/alertas`, `DELETE /cuidadores/vinculo/:id` |
 | `pages/emergencia.html` | Ficha pública do QR | `GET /emergencia/:token` |
 
 Arquivos de apoio em `frontEnd/js/`:
 
 | Arquivo | O que é |
 |---|---|
-| `config.js` | Modo (auto, api, demo), tempo limite e, se precisar travar, o endereço do servidor |
+| `config.js` | Modo (auto, api, demo), tempo limite, o endereço que já vem escrito no quadro Servidor e, se precisar travar, o endereço do servidor |
 | `api.js` | Todas as chamadas em um lugar só |
 | `ui.js` | Guarda de sessão, navegação, recados e formatação |
 | `qrcode.js` | Gerador de QR Code próprio, sem CDN |
+| `etiquetas.js` | Desenho das etiquetas e da folha A4, e o PDF, sem biblioteca. Não chama a API: usa o endereço do QR que a tela de etiquetas monta a partir da ficha |
 | `demo.js` | Dados fictícios do modo demonstração |
 | `lembretes.js` | Alarme dos remédios: agenda os avisos no celular, janela de alarme com som e o cartão da tela de doses. Usa `GET /doses/proximas` e `POST /doses/:id/confirmar`. Detalhes em `docs/GUIA_APK.md` |
+| `avisosCuidador.js` | Avisos de dose perdida para o cuidador: liga o lado nativo do Android (plugin `BioShieldCuidador`) e, no navegador, mostra o aviso com a tela aberta. Usa `GET /cuidadores/:id/alertas`. Detalhes em `docs/GUIA_APK.md` |

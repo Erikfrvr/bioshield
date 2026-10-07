@@ -702,6 +702,14 @@
       pararSom();
       if (doseNaJanela) adiar(doseNaJanela);
     });
+    // Fechada pelo Voltar do Android (ui.js). A dose continua sem confirmar e o proximo lembrete toca do mesmo jeito.
+    // Sem isto, o remedio que esperava na fila so aparecia no lembrete seguinte, ate 5 minutos depois.
+    janela.addEventListener("bioshield:janela-fechada", function () {
+      pararSom();
+      doseNaJanela = null;
+      var proxima = filaDaJanela.shift();
+      if (proxima) tocarNaTela(proxima.dose, proxima.posicao, {});
+    });
     return janela;
   }
 

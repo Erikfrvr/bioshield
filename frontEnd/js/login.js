@@ -23,6 +23,21 @@
   var erroServidor = UI.elemento("#erroServidor");
   var botaoAbrirServidor = UI.elemento("#abrirServidor");
 
+  // Endereco que ja vem escrito no campo (SERVIDOR_SUGERIDO do config.js).
+  var enderecoSugerido = String((window.BioShieldConfig && window.BioShieldConfig.SERVIDOR_SUGERIDO) || "").trim();
+
+  // Abre o formulario com o endereco salvo, ou com o sugerido quando nada foi salvo ainda.
+  // focar e false quando o formulario abre sozinho: o teclado do celular subiria e cobriria o botao,
+  // e a ideia e a pessoa so tocar em "Testar e salvar".
+  function abrirFormularioServidor(focar) {
+    UI.limparErro(erroServidor);
+    var salvo = Api.servidorSalvo();
+    campoServidor.value = salvo ? salvo.replace("http://", "") : enderecoSugerido;
+    formularioServidor.hidden = false;
+    botaoAbrirServidor.hidden = true;
+    if (focar) campoServidor.focus();
+  }
+
   function mostrarConexao(conexao) {
     var ligado = conexao.modo === "api" && Boolean(conexao.origem);
     UI.elemento("#cartaoDemo").hidden = conexao.modo !== "demo";
@@ -36,16 +51,26 @@
     botaoAbrirServidor.textContent = ligado ? "Trocar de servidor" : "Informar o endereço do servidor";
 
     cartaoServidor.hidden = !(Api.noApp || !ligado || Boolean(Api.servidorSalvo()));
+
+    // App recem instalado: ainda nao tem servidor salvo e nenhum respondeu sozinho.
+    // O quadro sobe para o topo da coluna, ja aberto com o endereco escrito, e a tela rola ate ele,
+    // porque no celular a apresentacao do app ocupa a primeira tela inteira.
+    // So abre se estiver fechado, para nao apagar o que a pessoa esteja digitando.
+    var primeiraVez = Api.noApp && !ligado && !Api.servidorSalvo() && Boolean(enderecoSugerido);
+    cartaoServidor.classList.toggle("servidor-primeiro", primeiraVez);
+    if (primeiraVez) {
+      estadoServidor.textContent = "O endereço do BioShield já está escrito. Confira e toque em Testar e salvar.";
+      if (formularioServidor.hidden) {
+        abrirFormularioServidor(false);
+        requestAnimationFrame(function () { cartaoServidor.scrollIntoView({ block: "start" }); });
+      }
+    }
   }
 
   Api.conectar().then(mostrarConexao);
 
   botaoAbrirServidor.addEventListener("click", function () {
-    UI.limparErro(erroServidor);
-    campoServidor.value = Api.servidorSalvo().replace("http://", "");
-    formularioServidor.hidden = false;
-    botaoAbrirServidor.hidden = true;
-    campoServidor.focus();
+    abrirFormularioServidor(true);
   });
 
   formularioServidor.addEventListener("submit", async function (evento) {
@@ -90,7 +115,7 @@
   UI.todos(".lista-contas button").forEach(function (conta) {
     conta.addEventListener("click", function () {
       campoEmail.value = conta.dataset.email;
-      campoSenha.value = "123456";
+      campoSenha.value = "@Senac_empreenda2026";
       botao.focus();
     });
   });

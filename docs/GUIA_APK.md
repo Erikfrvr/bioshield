@@ -2,13 +2,15 @@
 
 O app Android é o mesmo conjunto de telas do site, empacotado com o Capacitor. Nada foi reescrito: as telas da pasta `frontEnd/` vão para dentro do app, e o servidor continua sendo o mesmo backend que entrega o site.
 
-Este guia explica como gerar o APK, como o app encontra o servidor e como funciona o alarme dos remédios, que é a parte que só existe no app.
+Este guia explica como gerar o APK, como o app encontra o servidor e como funcionam as três partes que só existem no app: o alarme dos remédios, o aviso de dose perdida no celular do cuidador e a impressão e o salvamento das etiquetas do QR Code.
 
 ## Como o app conversa com o servidor
 
-O app leva só as telas. A API e o banco ficam no computador que roda o backend (no evento, o Linux Mint descrito em [`SERVIDOR_LINUX.md`](SERVIDOR_LINUX.md)), e o celular precisa estar no mesmo wifi dele.
+O app leva só as telas. A API e o banco ficam no computador que roda o backend. No evento, é o notebook do Erik com o Tailscale Funnel, no endereço `https://bioshield.bonito-tench.ts.net`, descrito em [`SERVIDOR_ONLINE.md`](SERVIDOR_ONLINE.md), e aí o celular funciona em qualquer internet. Sem o Funnel, usando o IP da rede local, o celular precisa estar no mesmo wifi do computador.
 
-Na primeira vez que o app abre, a tela de entrada mostra o quadro **Servidor**. A pessoa toca em "Informar o endereço do servidor", escreve o número que o terminal do servidor mostrou (por exemplo `192.168.0.10`) e toca em "Testar e salvar". A porta 3000 entra sozinha. Quando aparece "Conectado ao servidor", é só entrar com a conta. O app guarda o endereço; se o servidor mudar de IP, o mesmo quadro tem o botão "Trocar de servidor". Trocar de servidor não exige gerar o APK de novo.
+Na primeira vez que o app abre, ainda sem servidor salvo, a tela de entrada mostra o quadro **Servidor** no topo, já aberto e com o endereço do evento escrito (`bioshield.bonito-tench.ts.net`). A tela rola sozinha até ele e o teclado não sobe, para o botão ficar à vista. É só tocar em **Testar e salvar** e, quando aparecer "Conectado ao servidor", entrar com a conta. Esse endereço que vem escrito fica no campo `SERVIDOR_SUGERIDO` do `frontEnd/js/config.js`; ele não conecta sozinho, só preenche o campo.
+
+Para usar outro servidor, basta apagar o endereço e escrever outro. Com o Funnel, é o endereço `.ts.net`, com ou sem o `https://`. Na rede local, é o número que o terminal do servidor mostrou (por exemplo `192.168.0.10`), e a porta 3000 entra sozinha. O app guarda o endereço; depois de salvo, o mesmo quadro mostra o botão **Trocar de servidor**. Trocar de servidor não exige gerar o APK de novo.
 
 Por trás disso, o `frontEnd/js/api.js` testa os endereços nesta ordem e fica com o primeiro que responder em `/api/status`:
 
@@ -19,7 +21,7 @@ Por trás disso, o `frontEnd/js/api.js` testa os endereços nesta ordem e fica c
 
 Se nenhum responder, o app entra no modo demonstração, com dados fictícios e um aviso na tela. Quem já está logado numa conta de verdade não cai na demonstração: vê o aviso de que não conseguiu falar com o servidor.
 
-O QR Code gerado no app guarda o endereço de rede do servidor, por exemplo `http://192.168.0.10:3000/pages/emergencia.html?token=...`, nunca `localhost` nem o endereço interno do celular. Por isso ele só abre para quem está no mesmo wifi do servidor. Para abrir pelo 4G, o BioShield precisaria estar hospedado na internet.
+O QR Code gerado no app guarda o endereço público do servidor, nunca `localhost` nem o endereço interno do celular. Com o Funnel, é `https://bioshield.bonito-tench.ts.net/pages/emergencia.html?token=...`, que abre em qualquer celular com internet. Com um servidor só na rede local, o QR guarda o IP da rede e só abre para quem está no mesmo wifi; nesse caso, a tela da ficha e a de etiquetas avisam antes de imprimir.
 
 ## O que instalar no computador
 
@@ -56,13 +58,28 @@ android/app/build/outputs/apk/debug/app-debug.apk
 
 É um APK de depuração, assinado com a chave padrão do Android. Serve para instalar direto no celular e apresentar.
 
+### Pela linha de comando
+
+Também dá para gerar sem abrir o Android Studio, que é como geramos os APKs de teste. O Android Studio precisa estar instalado, porque é ele que traz o Android SDK, e o Gradle precisa do Java 21. No PowerShell, na pasta raiz do projeto:
+
+```powershell
+npm run app:sync
+$env:JAVA_HOME = "C:\caminho\do\java21"
+cd android
+.\gradlew.bat assembleDebug
+```
+
+No notebook do Erik, o Java 21 fica em `C:\Users\Admin\.jdks\jbr-21.0.11`. O Java que vem dentro do Android Studio novo é o 25, que o Gradle do projeto não aceita. Quando aparece `BUILD SUCCESSFUL`, o APK está no mesmo caminho de sempre, `android/app/build/outputs/apk/debug/app-debug.apk`.
+
 ## Instalar e testar
 
 **Pelo arquivo:** mande o `app-debug.apk` para o celular (cabo, Drive ou mensagem), toque nele e permita instalar de fonte desconhecida quando o Android perguntar.
 
 **Pelo cabo:** ligue a depuração USB no celular, conecte, escolha o aparelho na lista do topo do Android Studio e toque no triângulo verde. Ele instala e já abre o app.
 
-**No celular virtual:** o mesmo triângulo verde, com o emulador escolhido na lista. Dentro do emulador, o computador aparece no endereço `10.0.2.2`, então no quadro Servidor escreva `10.0.2.2:3000`. O emulador precisa de bastante espaço livre no disco onde ficam os dados do Android Studio (o celular virtual padrão reserva 10 GB). Se ele não abrir por falta de espaço, diminua o armazenamento interno nas configurações do celular virtual (**Device Manager**, depois **Edit**, depois **Advanced Settings**).
+**No celular virtual:** o mesmo triângulo verde, com o emulador escolhido na lista. Com o Funnel ligado, o endereço que já vem escrito funciona também no emulador. Sem o Funnel, use o backend do próprio computador: dentro do emulador ele aparece no endereço `10.0.2.2`, então no quadro Servidor escreva `10.0.2.2:3000`.
+
+O emulador precisa de bastante espaço livre no disco onde ficam os dados do Android Studio (o celular virtual padrão reserva 10 GB). Se ele não abrir por falta de espaço ("Not enough space to create userdata partition"), diminua o armazenamento interno nas configurações do celular virtual (**Device Manager**, depois **Edit**, depois **Advanced Settings**). Pela linha de comando, dá para ligar com menos espaço: `emulator -avd NOME_DO_CELULAR -partition-size 2047`. Atenção: no nosso teste, o emulador gravou o tamanho novo na configuração do celular virtual, então confira depois em **Advanced Settings**.
 
 **Testar sem wifi, pelo cabo:** com a depuração ligada e o backend rodando no próprio computador, o comando abaixo faz o celular enxergar a porta 3000 do computador como se fosse dele. O app acha o servidor sozinho, pelo `localhost:3000`. O comando precisa ser repetido toda vez que o cabo sai.
 
@@ -78,7 +95,7 @@ Sem plugin, o Capacitor fecha o app no primeiro toque em Voltar, em qualquer tel
 2. se dá para voltar, volta para a tela anterior
 3. na primeira tela, fecha o app
 
-Fechar a janela de alarme com o Voltar não desliga o alarme: o próximo lembrete toca do mesmo jeito.
+Fechar a janela de alarme com o Voltar não desliga o alarme: o som da janela para na hora, o próximo lembrete toca do mesmo jeito e, se outro remédio estava esperando na fila da janela, ele aparece em seguida.
 
 ## Alarme dos remédios
 
@@ -192,10 +209,167 @@ Recados (a faixa que aparece no rodapé da tela por alguns segundos):
 | Permissão negada pelo cartão | O celular não deixou ligar o alarme. Siga o passo a passo do cartão. |
 | Teste sem permissão | O celular não deixou o BioShield mostrar avisos. Veja o cartão do alarme na tela de doses. |
 
+## Avisos do cuidador
+
+Quando alguém que o cuidador acompanha passa **1 hora** sem confirmar uma dose, o celular do cuidador avisa, mesmo com o app fechado e a tela bloqueada. É a mesma tolerância de 60 minutos do backend: o aviso sai quando a dose vira perdida.
+
+### Como funciona
+
+No app com servidor, quem confere é um pedaço nativo do próprio projeto, o plugin `BioShieldCuidador` (pasta `android/app/src/main/java/br/com/bioshield/app`). O `frontEnd/js/avisosCuidador.js` só entrega para ele o endereço do servidor, o login e o id do cuidador, toda vez que uma tela abre (no máximo a cada 2 minutos; a tela do Cuidador sempre). Dali em diante o Android confere sozinho, consultando `GET /api/cuidadores/:id/alertas`, de dois jeitos:
+
+1. **Alarme exato** em cada momento que o servidor informa: o horário de cada dose prevista mais 60 minutos e 30 segundos. É o que faz o aviso chegar logo depois de a dose virar perdida.
+2. **Checagem periódica** pelo agendador do Android, a cada 15 minutos ou mais (o Android escolhe o momento). Ela pega o que o alarme perder, como celular reiniciado ou servidor fora do ar na hora, e refaz os alarmes. Volta sozinha depois que o celular reinicia.
+
+Nenhum dos dois exige internet: funcionam com o servidor do Tailscale Funnel e também com um servidor só na rede local. O plugin oficial de tarefa em segundo plano exigiria internet, e por isso não foi usado.
+
+Regras:
+
+- Cada dose perdida vira **um aviso só**. Com dois avisos ou mais, o Android junta tudo num grupo "Doses não confirmadas"
+- Tocar no aviso, ou no grupo, abre o app direto no **painel do cuidador**, inclusive com o app fechado
+- Se o paciente confirmar depois, no "Tomei mesmo assim", o aviso sai da barra na conferência seguinte. O aviso também sai quando a dose fica com mais de 24 horas
+- Só entram doses de **depois do vínculo**. Quem começa a acompanhar agora não recebe aviso de coisa antiga
+- Quem não acompanha ninguém não tem checagem rodando. Desfazer o último vínculo desliga
+- Sair da conta, ou o login vencer, desliga tudo e tira os avisos da barra
+- Com a tela bloqueada, o texto fica escondido, porque tem nome de pessoa e de remédio. O som e a vibração tocam do mesmo jeito
+- O som é o mesmo do alarme dos remédios, num canal próprio, **Avisos do cuidador**
+
+No navegador, o aviso aparece como recado vermelho no rodapé enquanto o BioShield estiver aberto, conferindo a cada 2 minutos. No modo demonstração dentro do app, o aviso sai como notificação de verdade, mas só enquanto o app está aberto, porque não tem servidor para o Android consultar.
+
+A permissão é a mesma de notificação do alarme dos remédios. Se o app ainda não tiver pedido, a tela do Cuidador pede sozinha na primeira vez em que a conta acompanha alguém. Depois disso, quem pede é o botão do cartão.
+
+### Testar os avisos no celular
+
+Precisa de duas contas: a do paciente e a do cuidador, já vinculadas (com os dados fictícios, o Lucas e a Patrícia).
+
+1. No celular do cuidador, entre como Patrícia, abra a tela **Cuidador** e permita as notificações. O cartão tem que mostrar "Avisos ligados".
+2. Na conta do Lucas (no site ou em outro celular), cadastre um remédio com a primeira dose 2 ou 3 minutos à frente e não confirme.
+3. Feche o app da Patrícia e bloqueie a tela.
+4. Uma hora depois do horário da dose, o celular da Patrícia avisa "Dose não confirmada".
+5. Toque no aviso: o app abre no painel do cuidador.
+6. Na conta do Lucas, toque em "Tomei mesmo assim". Na conferência seguinte o aviso sai da barra.
+
+Para mostrar ao vivo numa apresentação, cadastre o remédio uma hora antes do momento em que quer o aviso.
+
+### Onde cada parte mora
+
+| Arquivo | O que tem |
+|---|---|
+| `frontEnd/js/avisosCuidador.js` | Liga e desliga o lado nativo, o aviso no navegador e o cartão da tela do Cuidador |
+| `android/.../CuidadorPlugin.java` | A ponte com as telas: `configurar`, `mostrarAlertas`, `desligar` e o evento `avisoTocado` |
+| `android/.../VerificadorCuidador.java` | A consulta ao servidor, os avisos, os alarmes exatos e a checagem periódica |
+| `android/.../CuidadorAlarme.java` | O que roda quando um alarme exato toca |
+| `android/.../CuidadorChecagem.java` | O que roda na checagem periódica |
+| `backend/services/CuidadorService.ts` | A rota de alertas (`listarAlertas`) |
+
+### Textos dos avisos do cuidador
+
+Na notificação, `{nome}` é o nome do paciente, `{primeiro nome}` só o primeiro, `{remédio}` o nome do remédio e `{hora}` o horário da dose.
+
+| Quando | Título | Texto |
+|---|---|---|
+| Uma dose perdida | Dose não confirmada | {primeiro nome} não confirmou a dose de {remédio} das {hora}. |
+| O mesmo aviso aberto | Dose não confirmada | {nome} não confirmou a dose de {remédio} das {hora}, e já passou 1 hora do horário. Vale conferir se está tudo bem. |
+| Grupo, com dois avisos ou mais | Doses não confirmadas | Quem você acompanha não confirmou algumas doses. Toque para ver o painel do cuidador. |
+
+Nas configurações do Android, o canal aparece como **Avisos do cuidador**, com a descrição "Avisa quando alguém que você acompanha passa 1 hora sem confirmar uma dose."
+
+No cartão de avisos, na tela do Cuidador:
+
+| Situação | Título | Texto | Botões |
+|---|---|---|---|
+| Não acompanha ninguém | Avisos de dose perdida | Quando você acompanhar alguém, o celular avisa se essa pessoa passar 1 hora sem confirmar uma dose. | |
+| Tudo certo | Avisos ligados | Se alguém que você acompanha passar 1 hora sem confirmar uma dose, o celular avisa, mesmo com o app fechado. Quando o celular está economizando bateria, o aviso pode demorar alguns minutos a mais. | |
+| Ainda sem permissão | Avisos desligados | Para o celular avisar quando alguém que você acompanha perder uma dose, permita as notificações do BioShield. | Ligar os avisos |
+| Permissão negada | Notificações bloqueadas | O celular está bloqueando os avisos do BioShield. Abra as Configurações do celular, toque em Apps, depois em BioShield, depois em Notificações, e permita. | Já permiti, conferir de novo |
+| No navegador | Avisos com a tela aberta | No navegador, o aviso de dose perdida aparece enquanto o BioShield estiver aberto. No app Android ele chega mesmo com o celular bloqueado. | |
+| Demonstração | Avisos com o app aberto | Na demonstração, o aviso de dose perdida aparece enquanto o BioShield estiver aberto. Com o servidor, o celular avisa mesmo fechado. | |
+
+Embaixo do texto aparece "Última dose não confirmada: {primeiro nome} não confirmou a dose de {remédio} das {hora}." ou "Nenhuma dose perdida nas últimas 24 horas."
+
+Recados:
+
+| Quando | Recado |
+|---|---|
+| Uma dose perdida, no navegador | {primeiro nome} não confirmou a dose de {remédio} das {hora}. |
+| Várias de uma vez, no navegador | {n} doses não foram confirmadas por quem você acompanha. Veja o painel do cuidador. |
+| Permissão concedida pelo cartão | Avisos ligados. |
+| Permissão negada pelo cartão | O celular não deixou ligar os avisos. Siga o passo a passo do cartão. |
+
+## Etiquetas do QR Code no app
+
+Na tela da ficha, o botão **Imprimir ou baixar etiquetas** abre a tela de etiquetas, a mesma do site. Ela mostra a prévia da folha A4 com o QR Code em quatro modelos: cartão de carteira (85 x 54 mm), adesivo grande (45 x 58 mm), etiqueta de chaveiro (32 x 45 mm) e mini adesivo (25 x 30 mm).
+
+### O que a pessoa escolhe
+
+- **Frase de destaque**, de até 46 letras. Em branco, sai "EM CASO DE EMERGÊNCIA ESCANEIE ME". Frase longa encolhe para caber e nunca vaza da etiqueta
+- **Informação extra**, opcional, de até 60 letras, como "diabética, usa insulina". Aparece no cartão e no adesivo grande, e a tela avisa que quem pegar a etiqueta vai ler
+- **Nome na etiqueta**: o primeiro e o último nome, ou nenhum
+- **Resistência do código**: média, alta ou máxima. Quanto mais alta, mais o QR aguenta risco e sujeira, e mais denso fica o desenho
+- **Quais modelos entram na folha**
+
+### Imprimir e baixar
+
+| Botão | No app | No navegador |
+|---|---|---|
+| Imprimir folha | Abre a janela de impressão do Android, já em A4, com a impressora ou Salvar como PDF | Abre a impressão do navegador |
+| Baixar PDF da folha | Salva o PDF A4, no tamanho real, em Download/BioShield | Baixa o PDF na pasta de downloads do navegador |
+| Imagem, em cada modelo | Salva a imagem daquele modelo, em alta resolução, em Download/BioShield | Baixa a imagem |
+
+Depois de salvar, a tela mostra o nome do arquivo e a pasta, com os botões **Abrir** (abre no leitor de PDF ou de imagem do celular) e **Compartilhar** (WhatsApp, Drive, email ou impressora). Se já existir um arquivo com o mesmo nome, o Android acrescenta um número, como "(1)", e a tela mostra o nome que ficou.
+
+No Android 9 ou mais antigo, gravar na pasta Download pediria uma permissão a mais. Nesse caso o app abre direto a janela de compartilhar, e a pessoa escolhe onde guardar.
+
+### Como funciona
+
+A janela do app não imprime pelo comando de impressão do navegador nem baixa arquivo por link, como o navegador faz. Por isso a tela chama um plugin nativo do projeto, o `BioShieldArquivos` (`ArquivosPlugin.java`, registrado no `MainActivity`), do mesmo jeito que chama o plugin do cuidador:
+
+| Método | O que faz |
+|---|---|
+| `imprimir` | Abre a impressão do Android com a página atual, em A4. O estilo de impressão da página deixa só a folha |
+| `salvar` | Recebe o arquivo e grava em Download/BioShield pelo MediaStore, do Android 10 em diante, sem pedir permissão nenhuma. No Android 9 ou antes, abre a janela de compartilhar |
+| `abrir` | Abre o arquivo salvo com o app que o celular tiver para aquele tipo |
+| `compartilhar` | Grava uma cópia no cache do app e abre a janela de compartilhar, liberando a leitura pelo FileProvider |
+
+As etiquetas são desenhadas pelo `frontEnd/js/etiquetas.js` num canvas, em milímetro de verdade, a cerca de 300 pontos por polegada. O mesmo desenho vai para a prévia, para a impressão, para o PDF e para as imagens, então o que a pessoa vê na tela é o que sai no papel. O PDF é montado no próprio JavaScript, sem biblioteca: a folha vira uma imagem JPEG dentro de um PDF de uma página A4.
+
+Se o app instalado for antigo, sem o plugin, os botões avisam que ele está desatualizado em vez de travar.
+
+### Testar as etiquetas no celular
+
+1. Gere e instale o APK (sempre depois do `npm run app:sync`).
+2. Entre na conta da Maria, abra a ficha e toque em **Imprimir ou baixar etiquetas**.
+3. Escreva uma frase e uma informação extra e veja a prévia mudar.
+4. Toque em **Baixar PDF da folha**. A tela tem que dizer que o PDF foi salvo na pasta Download/BioShield.
+5. Toque em **Abrir**: o PDF abre no leitor do celular. Escaneie um QR da tela com outro celular.
+6. Toque em **Imprimir folha**: a janela de impressão do Android abre com a folha numa página A4.
+
+### Onde cada parte mora
+
+| Arquivo | O que tem |
+|---|---|
+| `frontEnd/pages/imprimir.html` e `imprimir.css` | A tela, pensada primeiro para o celular, e o estilo de impressão |
+| `frontEnd/js/imprimir.js` | Os campos, os botões e a ponte com o plugin |
+| `frontEnd/js/etiquetas.js` | O desenho das etiquetas e da folha, e o PDF |
+| `android/.../ArquivosPlugin.java` | Imprimir, salvar, abrir e compartilhar |
+| `android/.../MainActivity.java` | O registro dos dois plugins do projeto |
+
+### Textos das etiquetas
+
+Recados que aparecem depois de imprimir ou baixar. `{arquivo}` é o nome do arquivo, como `BioShield_etiquetas_2026_10_06.pdf`, e `{modelo}` é o nome do modelo.
+
+| Quando | Recado |
+|---|---|
+| PDF salvo no app | O PDF da folha foi salvo na pasta Download/BioShield, com o nome {arquivo}. |
+| Imagem salva no app | A imagem do {modelo} foi salva na pasta Download/BioShield, com o nome {arquivo}. Na etiqueta de chaveiro, o texto diz "da etiqueta de chaveiro". |
+| PDF baixado no navegador | O PDF da folha foi baixado com o nome {arquivo}. Ele fica na pasta de downloads do navegador. |
+| Android 9 ou mais antigo | Escolha na janela que abriu onde guardar o arquivo {arquivo}, por exemplo no Drive ou nos arquivos do celular. |
+| App antigo, sem o plugin | Este app está desatualizado. Instale a versão nova do BioShield para imprimir pelo celular. |
+| Nenhum app para abrir | Este celular não tem um app para abrir esse arquivo. Ele está na pasta Download, dentro de BioShield. |
+
 ## O que o app não faz
 
-- **Baixar a imagem do QR Code e imprimir as etiquetas.** As duas coisas dependem do navegador. No app, os botões dão lugar a um recado com o endereço para abrir o BioShield no computador, onde a impressão funciona.
 - **Ícone no Android 7.** O ícone do BioShield aparece do Android 8 em diante. No Android 7 fica o ícone padrão do Capacitor.
+- **Gravar direto na pasta Download no Android 9 ou mais antigo.** Nesses aparelhos, as etiquetas saem pela janela de compartilhar.
 
 ## Problemas comuns
 
@@ -205,7 +379,7 @@ Recados (a faixa que aparece no rodapé da tela por alguns segundos):
 | O menu Build não tem a opção de gerar APK | O projeto foi aberto pela pasta `bioshield`, e não pela `android` |
 | "Please Select Gradle JVM" ao abrir | Escolha "Use JVM 21" |
 | O app abre com as telas antigas | Faltou o `npm run app:sync` antes de gerar |
-| "O BioShield não respondeu em..." ao salvar o servidor | Celular fora do wifi do servidor, IP errado, firewall do servidor ou roteador isolando os aparelhos |
+| "O BioShield não respondeu em..." ao salvar o servidor | Com o endereço `.ts.net`: celular sem internet, backend desligado ou Funnel desligado (`tailscale funnel status` no notebook). Com IP da rede local: celular fora do wifi do computador, IP errado ou firewall do Windows barrando a porta 3000 |
 | O app abre no modo demonstração | Nenhum servidor respondeu. Informe o endereço no quadro Servidor |
 | O emulador não abre: "Not enough space to create userdata partition" | Pouco espaço no disco. Diminua o armazenamento do celular virtual ou libere espaço |
 | O `npm run app:sync` reclama da versão do Node | Node abaixo do 22 |
@@ -213,6 +387,12 @@ Recados (a faixa que aparece no rodapé da tela por alguns segundos):
 | O alarme toca atrasado | O celular está segurando alarmes para economizar bateria |
 | O alarme toca sem som | Volume de notificação no zero ou modo "Não perturbe" ligado |
 | Trocou o som e continua o antigo | O Android guarda o som no canal; troque também o nome do canal no `lembretes.js` |
+| O cuidador não recebe aviso de dose perdida | Notificações bloqueadas (veja o cartão da tela Cuidador), vínculo desfeito, dose que ainda não passou 1 hora, ou o cuidador não abriu o app depois de trocar de servidor |
+| O aviso do cuidador chega atrasado | O celular está segurando alarmes para economizar bateria. Nesse caso o aviso chega na checagem periódica, em até uns 15 minutos |
+| O app não conecta no endereço que já vem escrito | No notebook, o Funnel ou o backend estão desligados, ou o celular está sem internet |
+| Imprimir ou baixar avisa que o app está desatualizado | O APK é de antes de 06/10, sem o plugin de arquivos. Instale o APK novo |
+| Não acho o arquivo baixado | Fica na pasta Download, dentro de BioShield. O botão **Abrir** da tela leva direto ao arquivo |
+| O Abrir diz que o celular não tem app para o arquivo | Falta um leitor de PDF, como o do Google Drive. O arquivo continua na pasta |
 
 ## O que foi testado
 
@@ -230,7 +410,16 @@ Ele também rodou num celular virtual do Android Studio, com a API 37 do Android
 
 O resto (o botão Voltar, o adiar, as permissões negadas, a demonstração, sair da conta) foi testado no navegador, simulando o Android.
 
-Ainda não foi feito o teste num celular físico de marca, que é onde aparecem as diferenças de economia de bateria de cada fabricante.
+Nos avisos do cuidador (05/10), o lado do servidor foi testado de ponta a ponta contra um banco com os dados fictícios: a dose atrasada há mais de 1 hora aparece nos alertas e a de 59 minutos não, o momento da próxima conferência sai certo, o "Tomei mesmo assim" tira a dose dos alertas, outra conta recebe `403`, o vínculo desfeito para de gerar aviso e o vínculo refeito não traz aviso antigo. A resposta do modo demonstração foi conferida no mesmo formato. O conjunto passou em 27 de 27 conferências no celular virtual e em 16 de 16 no navegador.
+
+Nas etiquetas e no endereço pronto (06/10):
+
+- no navegador, num tamanho de celular e de computador, 27 de 27 conferências, com um leitor de QR independente lendo as 17 etiquetas do PDF e as imagens dos 4 modelos
+- com uma ponte falsa do Android no navegador, 23 de 23 conferências, incluindo o endereço que já vem escrito conectando no servidor de verdade, pelo Funnel
+- no celular virtual, com o app de verdade: o endereço pronto conectou com um toque, o PDF foi salvo em Download/BioShield, as 17 etiquetas do arquivo tirado do celular foram lidas, o segundo PDF com o mesmo nome ganhou o "(1)", o **Compartilhar** abriu a janela do Android, o **Abrir** abriu o PDF no leitor do Google Drive e a impressão do Android mostrou a folha em uma página A4
+- o botão Voltar, com toques de verdade na tela, voltou da tela de Remédios e da tela de etiquetas para a ficha
+
+Ainda não foi feito o teste num celular físico de marca, que é onde aparecem as diferenças de economia de bateria de cada fabricante. E, como o `lembretes.js` e o `login.js` mudaram depois do último teste do alarme, vale repetir no celular o **Tomei** com o app fechado.
 
 ## O que vai para o Git
 

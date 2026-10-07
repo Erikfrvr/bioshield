@@ -1,6 +1,6 @@
 # Dicionário detalhado do código
 
-Um mapa do backend e das telas do BioShield: o que cada classe guarda, que regra ela faz valer e quem chama quem. Serve para achar rápido onde mora uma regra sem abrir dez arquivos. As tabelas e colunas do banco estão no [`DICIONARIO_DADOS.md`](../database/DICIONARIO_DADOS.md), e o formato de cada rota no [`CONTRATO_API.md`](../frontEnd/CONTRATO_API.md).
+Um mapa do backend, das telas e do código nativo do app Android do BioShield: o que cada classe guarda, que regra ela faz valer e quem chama quem. Serve para achar rápido onde mora uma regra sem abrir dez arquivos. As tabelas e colunas do banco estão no [`DICIONARIO_DADOS.md`](../database/DICIONARIO_DADOS.md), e o formato de cada rota no [`CONTRATO_API.md`](../frontEnd/CONTRATO_API.md).
 
 ## O caminho de uma requisição
 
@@ -52,7 +52,7 @@ O formato exato do que entra e do que sai. Ficam em `models/dto/`, uma pasta por
 | `emergencia` | o token, na URL | `FichaEmergenciaResponseDTO`: nome, tipo sanguíneo, condições, observações, data da última atualização, alergias, remédios em uso e contatos. É o filtro de privacidade do app |
 | `medicamento` | `CadastrarMedicamentoDTO`, `AtualizarMedicamentoDTO` (campos opcionais, mais `ativo` para suspender e reativar) | `MedicamentoResponseDTO`, com a próxima dose |
 | `dose` | `ConfirmarDoseDTO` (a hora real da tomada). `RegistrarDoseDTO` é interno, usado para gravar a agenda | `DoseResponseDTO`, `DoseConfirmadaResponseDTO`, `AdesaoResponseDTO` (hoje e semana) |
-| `cuidador` | `VincularCuidadorDTO` (o código; o id do cuidador que vem no corpo é ignorado) | `VinculoResponseDTO` e `PacienteAcompanhadoResponseDTO` (adesão da semana, doses perdidas e próxima dose, sem nada da ficha médica) |
+| `cuidador` | `VincularCuidadorDTO` (o código; o id do cuidador que vem no corpo é ignorado) | `VinculoResponseDTO`, `PacienteAcompanhadoResponseDTO` (adesão da semana, doses perdidas e próxima dose, sem nada da ficha médica) e `AlertasCuidadorResponseDTO` (quantos pacientes acompanha, as doses perdidas em `DosePerdidaCuidadorDTO`, só com quem, qual remédio e de que horário, e os próximos momentos de conferir) |
 
 ## Repositórios e SQL
 
@@ -77,7 +77,7 @@ Cada interface em `repository/` diz o que o service precisa do banco, e a classe
 | `EmergenciaService` | A ficha pública: valida o token, registra a leitura (inclusive de QR cancelado) e monta a resposta reduzida | `ErroEmergencia`: não encontrado e cancelado |
 | `MedicamentoService` | Remédios, com a agenda gerada no cadastro e refeita quando horário, período ou suspensão mudam | `ErroMedicamento`: validação e não encontrado |
 | `DoseService` | Doses de hoje, próximas doses do alarme, confirmação e adesão. O `prepararAgenda` completa a agenda e marca as perdidas antes de toda leitura. `DIAS_DE_LEMBRETE` vale 2 | `ErroDose`: validação e não encontrado |
-| `CuidadorService` | Vínculo pelo código, painel do cuidador e desvínculo pelo próprio cuidador ou pelo dono da ficha | `ErroCuidador`: validação e não encontrado |
+| `CuidadorService` | Vínculo pelo código, painel do cuidador, desvínculo pelo próprio cuidador ou pelo dono da ficha e os alertas de dose perdida (`listarAlertas`): as doses perdidas das últimas 24 horas, só as de depois do vínculo, e os momentos em que cada dose ainda prevista vira perdida | `ErroCuidador`: validação e não encontrado |
 | `AutorizacaoService` | Quem vê o quê: `garantirDono`, `garantirAcompanhamento` e `garantirMesmoUsuario` | `ErroAcesso` |
 
 Cada service é uma classe exportada como instância única no fim do arquivo. O repositório chega pelo construtor, com a implementação MySQL como padrão.
@@ -106,8 +106,8 @@ O service levanta o erro com um tipo, e o controller só traduz. Erro que nenhum
 | `infrastructure/security/PasswordHasher.ts` | Hash e comparação de senha com bcrypt |
 | `config/db.ts` | O pool do MySQL, com até 10 conexões, e o fuso de Brasília em cada conexão |
 | `config/fuso.ts` | O fuso do Node, carregado antes de qualquer outro arquivo |
-| `config/rede.ts` | Descobre o endereço de rede do servidor, que vai dentro do QR Code, ou usa o `URL_PUBLICA` do `.env` |
-| `server.ts` | Liga as rotas em `/api`, entrega as telas da pasta `frontEnd` na mesma porta e trata os erros gerais sem expor dado |
+| `config/rede.ts` | Descobre o endereço de rede do servidor, que vai dentro do QR Code, ou usa o `URL_PUBLICA` do `.env` (o endereço do Tailscale Funnel, `https://bioshield.bonito-tench.ts.net`) |
+| `server.ts` | Liga as rotas em `/api`, entrega as telas da pasta `frontEnd` na mesma porta e trata os erros gerais sem expor dado. Confia no aviso de IP só quando o acesso vem do próprio computador, que é como o Funnel entrega, para o histórico de leituras gravar o IP verdadeiro do visitante. Na subida, avisa no terminal se o `JWT_SECRET` estiver fraco e qual endereço vai dentro do QR Code |
 
 ## Rotas por arquivo
 
@@ -118,7 +118,7 @@ O service levanta o erro com um tipo, e o controller só traduz. Erro que nenhum
 | `emergenciaRoutes.ts` | `GET /emergencia/:token` | nenhuma, de propósito |
 | `medicamentoRoutes.ts` | CRUD em `/medicamentos` | todas |
 | `doseRoutes.ts` | `/doses/hoje`, `/doses/proximas`, `/doses/adesao` e `/doses/:id/confirmar` | todas |
-| `cuidadorRoutes.ts` | `/cuidadores/vincular`, `/cuidadores/:id/pacientes` e `/cuidadores/vinculo/:id` | todas |
+| `cuidadorRoutes.ts` | `/cuidadores/vincular`, `/cuidadores/:id/pacientes`, `/cuidadores/:id/alertas` e `/cuidadores/vinculo/:id` | todas |
 
 ## Telas e scripts
 
@@ -126,20 +126,22 @@ As telas são HTML, CSS e JavaScript sem framework. Cada tela carrega os scripts
 
 | Arquivo | O que faz |
 |---|---|
-| `js/config.js` | Modo (`auto`, `api` ou `demo`), tempos de espera e, se precisar travar, o endereço do servidor |
+| `js/config.js` | Modo (`auto`, `api` ou `demo`), tempos de espera, o endereço que já vem escrito no quadro Servidor (`SERVIDOR_SUGERIDO`) e, se precisar travar, o endereço do servidor (`SERVIDOR`) |
 | `js/api.js` | Todas as chamadas à API, a procura do servidor, a sessão e a troca automática para o modo demonstração |
 | `js/demo.js` | Responde as mesmas chamadas com os dados fictícios, com as mesmas regras de dose do backend |
 | `js/ui.js` | Sessão, barra de navegação, recados, formatação de data e telefone, endereço do QR e o botão Voltar do Android |
 | `js/acessibilidade.js` | O botão de acessibilidade: quatro tamanhos de letra e o contraste reforçado |
 | `js/qrcode.js` | O gerador de QR Code do projeto, sem biblioteca |
+| `js/etiquetas.js` | O desenho das etiquetas do QR Code em milímetro de verdade, a folha A4 e o PDF, montado sem biblioteca. O mesmo desenho vai para a prévia, a impressão, o PDF e as imagens |
 | `js/lembretes.js` | O alarme dos remédios (detalhes no [`GUIA_APK.md`](GUIA_APK.md)) |
-| `index.html` e `js/login.js` | Entrada, com o quadro Servidor e as contas de exemplo da demonstração |
+| `js/avisosCuidador.js` | Os avisos de dose perdida para o cuidador: liga o lado nativo do Android e, no navegador, mostra o aviso enquanto a tela está aberta |
+| `index.html` e `js/login.js` | Entrada, com o quadro Servidor (no app recém instalado, ele vem no topo, já com o endereço escrito) e as contas de exemplo da demonstração |
 | `pages/cadastro.html` e `js/cadastro.js` | Criar conta, com o medidor de força da senha |
-| `pages/perfil.html` e `js/perfil.js` | A ficha, em três abas: QR Code, Ficha médica e Privacidade (código do cuidador e histórico de leituras) |
-| `pages/imprimir.html` e `js/imprimir.js` | A folha A4 com o QR em quatro tamanhos |
+| `pages/perfil.html` e `js/perfil.js` | A ficha, em três abas: QR Code (com o botão das etiquetas), Ficha médica e Privacidade (código do cuidador e histórico de leituras) |
+| `pages/imprimir.html` e `js/imprimir.js` | As etiquetas: frase de destaque, informação extra, modelos, prévia da folha, imprimir, baixar o PDF e baixar a imagem de cada modelo. No app, usa o plugin `BioShieldArquivos` |
 | `pages/medicamentos.html` e `js/medicamentos.js` | Remédios: cadastrar, suspender, reativar e remover |
 | `pages/doses.html` e `js/doses.js` | Agenda do dia, adesão e o cartão do alarme |
-| `pages/cuidador.html` e `js/cuidador.js` | Painel do cuidador |
+| `pages/cuidador.html` e `js/cuidador.js` | Painel do cuidador e o cartão dos avisos de dose perdida |
 | `pages/emergencia.html` e `js/emergencia.js` | A ficha pública que o QR abre, com os botões de ligar e o SAMU |
 
 ### Mensagens de validação da ficha
@@ -157,7 +159,22 @@ A tela da ficha confere as linhas de alergia e de contato antes de enviar. Linha
 | A ficha não carregou, sem acesso | Esta conta não tem acesso a essa ficha. Toque em Sair e entre de novo. |
 | A ficha não carregou, outro motivo | Não consegui carregar a sua ficha agora. {motivo} |
 
-Nos três últimos casos aparece também o botão **Tentar de novo**. As mensagens do alarme dos remédios estão no [`GUIA_APK.md`](GUIA_APK.md).
+Nos três últimos casos aparece também o botão **Tentar de novo**. As mensagens do alarme dos remédios, dos avisos do cuidador e das etiquetas estão no [`GUIA_APK.md`](GUIA_APK.md).
+
+## App Android: o código nativo
+
+Quase todo o app é a mesma pasta de telas do site, empacotada pelo Capacitor. O que precisou de código Android próprio, em Java, fica em `android/app/src/main/java/br/com/bioshield/app/`. As telas chamam esse código pela ponte do Capacitor, pelo nome de cada plugin.
+
+| Arquivo | O que faz |
+|---|---|
+| `MainActivity.java` | Abre o app e registra os dois plugins do projeto antes de o Capacitor montar a ponte |
+| `CuidadorPlugin.java` | O plugin `BioShieldCuidador`, ponte entre o `avisosCuidador.js` e os avisos: `configurar`, `mostrarAlertas`, `desligar` e o evento `avisoTocado`, quando o app abre pelo toque num aviso |
+| `VerificadorCuidador.java` | Consulta `GET /api/cuidadores/:id/alertas`, mostra um aviso por dose perdida, marca um alarme exato para cada momento informado pelo servidor e agenda a checagem periódica |
+| `CuidadorAlarme.java` | O que roda quando um desses alarmes exatos toca |
+| `CuidadorChecagem.java` | A checagem periódica pelo agendador do Android, a cada 15 minutos ou mais, que volta sozinha depois que o celular reinicia |
+| `ArquivosPlugin.java` | O plugin `BioShieldArquivos`, usado pela tela de etiquetas: `imprimir` (janela de impressão do Android, em A4), `salvar` (pasta Download/BioShield pelo MediaStore, ou a janela de compartilhar no Android 9 ou antes), `abrir` e `compartilhar` |
+
+O alarme dos remédios não precisou de código nativo próprio: usa o plugin oficial `@capacitor/local-notifications`, chamado pelo `lembretes.js`.
 
 ## Convenções de nome
 

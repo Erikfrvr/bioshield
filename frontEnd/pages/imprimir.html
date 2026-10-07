@@ -1,6 +1,10 @@
 <!-- Essa tela monta a folha A4 com o mesmo QR Code repetido em varios tamanhos,
      cada etiqueta ja com o aviso de emergencia do lado. A pessoa imprime, recorta e cola
-     onde quiser: carteira, mochila, chaveiro, pulseira ou geladeira. -->
+     onde quiser: carteira, mochila, chaveiro, pulseira ou geladeira.
+     Funciona no computador, no navegador do celular e no app Android. As etiquetas sao desenhadas
+     pelo etiquetas.js, e o mesmo desenho vai para a previa, para a impressao, para o PDF e para as imagens.
+     No app, imprimir e salvar arquivo passam pelo plugin nativo BioShieldArquivos,
+     porque a janela do app nao imprime nem baixa arquivo sozinha. -->
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -9,7 +13,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0E3C39">
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-  <title>Folha para imprimir | BioShield</title>
+  <title>Etiquetas para imprimir | BioShield</title>
   <link rel="stylesheet" href="../style.css">
   <link rel="stylesheet" href="imprimir.css">
 </head>
@@ -17,14 +21,26 @@
   <div class="painel">
     <header class="painel-topo">
       <a class="voltar-escuro" href="perfil.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Voltar para a ficha</a>
-      <h1>Folha para imprimir</h1>
-      <p>O mesmo QR Code em quatro tamanhos, com o aviso de emergência ao lado. Imprima em papel comum ou em folha adesiva, recorte nas linhas tracejadas e cole onde fizer sentido.</p>
+      <h1>Etiquetas do QR Code</h1>
+      <p>O mesmo QR Code em quatro modelos, com o aviso de emergência. Imprima em papel comum ou em folha adesiva, ou baixe o arquivo para imprimir depois.</p>
     </header>
 
-    <div class="painel-controles">
+    <p class="aviso aviso-erro" id="erro" hidden></p>
+    <p class="aviso aviso-erro" id="avisoEndereco" hidden></p>
+
+    <section class="painel-controles" aria-labelledby="tituloTexto">
+      <h2 id="tituloTexto">O que vai escrito</h2>
+
       <label class="campo">
-        <span>Texto da etiqueta</span>
-        <input type="text" id="textoEtiqueta" value="EM CASO DE EMERGÊNCIA ESCANEIE ME" maxlength="46">
+        <span>Frase de destaque</span>
+        <input type="text" id="textoEtiqueta" maxlength="46" autocomplete="off" placeholder="EM CASO DE EMERGÊNCIA ESCANEIE ME">
+        <small class="dica">Em branco, sai EM CASO DE EMERGÊNCIA ESCANEIE ME.</small>
+      </label>
+
+      <label class="campo">
+        <span>Informação extra <em class="opcional">opcional</em></span>
+        <input type="text" id="extraEtiqueta" maxlength="60" autocomplete="off" placeholder="Exemplo: diabética, usa insulina">
+        <small class="dica">Aparece no cartão e no adesivo grande. Quem pegar a etiqueta vai ler, então escreva só o que quiser mostrar.</small>
       </label>
 
       <div class="grade-dupla">
@@ -45,51 +61,59 @@
           </select>
         </label>
       </div>
+    </section>
 
-      <fieldset class="blocos">
-        <legend>O que entra na folha</legend>
-        <label><input type="checkbox" data-bloco="cartao" checked> Cartão de carteira</label>
-        <label><input type="checkbox" data-bloco="adesivo" checked> Adesivo grande</label>
-        <label><input type="checkbox" data-bloco="chaveiro" checked> Etiqueta de chaveiro</label>
-        <label><input type="checkbox" data-bloco="mini" checked> Mini adesivo</label>
-      </fieldset>
+    <section class="painel-controles" aria-labelledby="tituloModelos">
+      <h2 id="tituloModelos">Modelos</h2>
+      <p class="painel-apoio">Marque os que entram na folha. Cada modelo também pode ser baixado sozinho, como imagem.</p>
 
-      <p class="aviso aviso-erro" id="erro" hidden></p>
+      <ul class="lista-modelos">
+        <li>
+          <label><input type="checkbox" data-bloco="cartao" checked><span><strong>Cartão de carteira</strong><small>85 x 54 mm</small></span></label>
+          <button type="button" class="baixar-imagem" data-modelo="cartao" aria-label="Baixar o cartão de carteira como imagem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/></svg>Imagem</button>
+        </li>
+        <li>
+          <label><input type="checkbox" data-bloco="adesivo" checked><span><strong>Adesivo grande</strong><small>45 x 58 mm, para mochila e geladeira</small></span></label>
+          <button type="button" class="baixar-imagem" data-modelo="adesivo" aria-label="Baixar o adesivo grande como imagem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/></svg>Imagem</button>
+        </li>
+        <li>
+          <label><input type="checkbox" data-bloco="chaveiro" checked><span><strong>Etiqueta de chaveiro</strong><small>32 x 45 mm</small></span></label>
+          <button type="button" class="baixar-imagem" data-modelo="chaveiro" aria-label="Baixar a etiqueta de chaveiro como imagem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/></svg>Imagem</button>
+        </li>
+        <li>
+          <label><input type="checkbox" data-bloco="mini" checked><span><strong>Mini adesivo</strong><small>25 x 30 mm, para pulseira e celular</small></span></label>
+          <button type="button" class="baixar-imagem" data-modelo="mini" aria-label="Baixar o mini adesivo como imagem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/></svg>Imagem</button>
+        </li>
+      </ul>
+    </section>
 
-      <button type="button" class="botao" id="imprimir">Imprimir folha</button>
-      <p class="painel-nota">Na janela de impressão, escolha papel A4, marque a opção de imprimir cores de fundo e deixe a escala em 100%. Não use “ajustar à página”, senão o tamanho real muda.</p>
-    </div>
+    <section class="painel-controles painel-acoes" aria-labelledby="tituloAcoes">
+      <h2 id="tituloAcoes">Imprimir ou baixar</h2>
+
+      <button type="button" class="botao" id="imprimir">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3.5h10V9M7 17.5H4.5v-7a1.5 1.5 0 0 1 1.5-1.5h12a1.5 1.5 0 0 1 1.5 1.5v7H17"/><path d="M7 14h10v6.5H7z"/></svg>
+        Imprimir folha
+      </button>
+      <button type="button" class="botao botao-secundario" id="baixarPdf">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/></svg>
+        Baixar PDF da folha
+      </button>
+
+      <!-- Depois de baixar, fica aqui o nome do arquivo e onde ele foi parar. No app, com os botoes de abrir e compartilhar. -->
+      <div class="aviso aviso-sucesso resultado" id="resultado" role="status" hidden>
+        <p id="resultadoTexto"></p>
+        <div class="resultado-botoes" id="resultadoBotoes" hidden>
+          <button type="button" class="botao botao-pequeno botao-secundario" id="abrirArquivo">Abrir</button>
+          <button type="button" class="botao botao-pequeno botao-secundario" id="compartilharArquivo">Compartilhar</button>
+        </div>
+      </div>
+
+      <p class="painel-nota" id="notaImpressao">Na janela de impressão, escolha papel A4 e deixe a escala em 100%. Não use “ajustar à página”, senão o tamanho real muda.</p>
+    </section>
   </div>
 
   <main class="folha" id="folha">
-    <header class="folha-topo">
-      <p class="marca">Bio<span>Shield</span></p>
-      <p class="folha-instrucao">Recorte nas linhas tracejadas. Todas as etiquetas abrem a mesma ficha de emergência.</p>
-    </header>
-
-    <section class="bloco" data-bloco="cartao">
-      <h2 class="bloco-titulo">Cartão de carteira <span>85 x 54 mm</span></h2>
-      <div class="grade grade-cartao" id="gradeCartao"></div>
-    </section>
-
-    <section class="bloco" data-bloco="adesivo">
-      <h2 class="bloco-titulo">Adesivo grande <span>45 x 58 mm, para mochila e geladeira</span></h2>
-      <div class="grade grade-adesivo" id="gradeAdesivo"></div>
-    </section>
-
-    <section class="bloco" data-bloco="chaveiro">
-      <h2 class="bloco-titulo">Etiqueta de chaveiro <span>32 x 45 mm</span></h2>
-      <div class="grade grade-chaveiro" id="gradeChaveiro"></div>
-    </section>
-
-    <section class="bloco" data-bloco="mini">
-      <h2 class="bloco-titulo">Mini adesivo <span>25 x 30 mm, para pulseira e celular</span></h2>
-      <div class="grade grade-mini" id="gradeMini"></div>
-    </section>
-
-    <footer class="folha-rodape">
-      <p>Ficha de emergência BioShield. Se você perder algum destes itens, cancele o código dentro do aplicativo e imprima uma folha nova.</p>
-    </footer>
+    <canvas id="folhaCanvas" role="img" aria-label="Prévia da folha A4 com as etiquetas do QR Code"></canvas>
   </main>
 
   <script src="../js/config.js"></script>
@@ -97,6 +121,7 @@
   <script src="../js/api.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/qrcode.js"></script>
+  <script src="../js/etiquetas.js"></script>
   <script src="../js/imprimir.js"></script>
 </body>
 </html>

@@ -31,7 +31,7 @@ Content-Type: application/json
 
 {
   "nome": "Maria Repetida",
-  "email": "maria.souza@exemplo.com",
+  "email": "maria@bioshield.com",
   "senha": "SenhaForte123!"
 }
 
@@ -41,7 +41,7 @@ Content-Type: application/json
 
 {
   "nome": "Maria Repetida",
-  "email": "  MARIA.SOUZA@EXEMPLO.COM ",
+  "email": "  MARIA@BIOSHIELD.COM ",
   "senha": "SenhaForte123!"
 }
 
@@ -102,15 +102,15 @@ Content-Type: application/json
 {}
 
 ### Login valido com ficha preenchida (esperado 200, volta token, usuario e idPaciente com numero)
-### A senha dos dados ficticios e 123456
+### A senha dos dados ficticios e @Senac_empreenda2026
 ### O token desta resposta fica guardado em {{token}} e e usado nas rotas protegidas abaixo
 # @name login
 POST {{baseUrl}}/usuarios/login
 Content-Type: application/json
 
 {
-  "email": "maria.souza@exemplo.com",
-  "senha": "123456"
+  "email": "maria@bioshield.com",
+  "senha": "@Senac_empreenda2026"
 }
 
 ### Login de conta recem criada, sem ficha (esperado 200 com idPaciente null)
@@ -128,7 +128,7 @@ POST {{baseUrl}}/usuarios/login
 Content-Type: application/json
 
 {
-  "email": "maria.souza@exemplo.com",
+  "email": "maria@bioshield.com",
   "senha": "senhaErrada1"
 }
 
@@ -146,7 +146,7 @@ POST {{baseUrl}}/usuarios/login
 Content-Type: application/json
 
 {
-  "email": "maria.souza@exemplo.com"
+  "email": "maria@bioshield.com"
 }
 
 ### ==========================
@@ -360,8 +360,8 @@ POST {{baseUrl}}/usuarios/login
 Content-Type: application/json
 
 {
-  "email": "maria.souza@exemplo.com",
-  "senha": "123456"
+  "email": "maria@bioshield.com",
+  "senha": "@Senac_empreenda2026"
 }
 
 ### Listar remedios do paciente 1 (esperado 200, lista com proximaDose em cada um, ativos primeiro)
@@ -746,8 +746,8 @@ POST {{baseUrl}}/usuarios/login
 Content-Type: application/json
 
 {
-  "email": "patricia.martins@exemplo.com",
-  "senha": "123456"
+  "email": "patricia@bioshield.com",
+  "senha": "@Senac_empreenda2026"
 }
 
 ### Cuidadora vendo as doses de hoje de quem ela acompanha (esperado 200)

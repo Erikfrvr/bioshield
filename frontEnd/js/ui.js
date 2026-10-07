@@ -188,6 +188,30 @@
     return /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/i.test(String(endereco || ""));
   }
 
+  // Por qual endereco um aparelho de fora chega neste servidor.
+  // O servidor informa o dele (urlPublica, que vem do URL_PUBLICA do .env ou do IP da rede).
+  // - Cheguei por "localhost": so vale aqui dentro, uso o que o servidor informou.
+  // - O servidor informou um endereco HTTPS (o Tailscale Funnel): ele vence, mesmo que eu tenha chegado
+  //   pelo IP do wifi. Sem isso, quem abre o app pelo wifi gera QR que nao abre no 4G.
+  // - Eu cheguei por HTTPS e o servidor so conhece o IP do wifi: fico com o HTTPS, que abre de qualquer lugar.
+  function enderecoPublico(conexao) {
+    if (!conexao || !conexao.origem) return "";
+    var informado = conexao.urlPublica || "";
+    if (!informado) return conexao.origem;
+    if (ehEnderecoLocal(conexao.origem)) return informado;
+    if (/^https:\/\//i.test(informado)) return informado;
+    return conexao.origem;
+  }
+
+  // Onde o QR com este endereco vai abrir. A ficha e a folha de impressao avisam antes de imprimir.
+  // "local": so neste computador. "wifi": so para quem estiver na mesma rede do servidor (http com IP).
+  // Vazio: abre de qualquer lugar, como o endereco HTTPS do Tailscale Funnel.
+  function alcanceDoEndereco(endereco) {
+    if (ehEnderecoLocal(endereco)) return "local";
+    if (/^http:\/\//i.test(String(endereco || ""))) return "wifi";
+    return "";
+  }
+
   // O endereco que vai dentro do QR Code. Ele precisa abrir no celular de um estranho,
   // entao nunca pode ser "localhost" nem o endereco interno do app.
   function urlDaFicha(tokenQr) {
@@ -196,12 +220,10 @@
       return configurada.replace(/\/$/, "") + "?token=" + tokenQr;
     }
 
-    // Com servidor de verdade, a ficha publica mora nele. Se eu cheguei nele por "localhost"
-    // (estou no proprio servidor, ou no app pelo cabo), uso o endereco de rede que ele informou.
+    // Com servidor de verdade, a ficha publica mora nele, no endereco que abre de fora (enderecoPublico).
     var conexao = escopo.Api && escopo.Api.conexao ? escopo.Api.conexao() : null;
     if (conexao && conexao.modo === "api" && conexao.origem) {
-      var servidor = ehEnderecoLocal(conexao.origem) && conexao.urlPublica ? conexao.urlPublica : conexao.origem;
-      return servidor.replace(/\/$/, "") + "/pages/emergencia.html?token=" + tokenQr;
+      return enderecoPublico(conexao).replace(/\/$/, "") + "/pages/emergencia.html?token=" + tokenQr;
     }
 
     // Modo demonstracao: a ficha abre a partir da propria pasta das telas.
@@ -239,6 +261,9 @@
       var janelaAberta = todos(".sobreposicao").filter(function (janela) { return !janela.hidden; })[0];
       if (janelaAberta) {
         janelaAberta.hidden = true;
+        // Quem abriu a janela fica sabendo. A janela de alarme usa isso pra parar o som na hora
+        // e abrir o proximo remedio que estava esperando na fila.
+        janelaAberta.dispatchEvent(new CustomEvent("bioshield:janela-fechada"));
         return;
       }
 
@@ -274,6 +299,8 @@
     quandoFor: quandoFor,
     urlDaFicha: urlDaFicha,
     ehEnderecoLocal: ehEnderecoLocal,
+    enderecoPublico: enderecoPublico,
+    alcanceDoEndereco: alcanceDoEndereco,
     mostrarErro: mostrarErro,
     limparErro: limparErro
   };

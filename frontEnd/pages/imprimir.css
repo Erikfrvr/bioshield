@@ -1,28 +1,29 @@
-/* Estilo da folha de impressao. Tudo em milimetro, porque o tamanho aqui e tamanho de verdade:
-   o cartao precisa caber na carteira e o mini adesivo precisa caber na pulseira. */
+/* Estilo da tela de etiquetas. As etiquetas em si sao desenhadas pelo etiquetas.js num canvas,
+   em milimetro de verdade: o cartao precisa caber na carteira e o mini adesivo precisa caber na pulseira.
+   Aqui fica a tela em volta: os controles e a previa da folha, que no celular ocupa a largura toda
+   e no computador fica do lado dos controles. Na impressao sobra so a folha, no tamanho A4 real. */
 
 .pagina-imprimir {
   background: var(--menta);
   display: grid;
-  grid-template-columns: minmax(18rem, 22rem) 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  gap: 1rem;
   align-items: start;
-  padding: 1.5rem;
+  padding: 1rem;
   min-height: 100vh;
 }
 
 .painel {
-  position: sticky;
-  top: 1.5rem;
   display: grid;
   gap: 1rem;
+  min-width: 0;
 }
 
 .painel-topo {
   background: var(--teal);
   color: var(--branco);
   border-radius: var(--raio-g);
-  padding: 1.3rem;
+  padding: 1.2rem;
 }
 
 .painel-topo h1 {
@@ -33,28 +34,21 @@
 
 .painel-topo p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 0.93rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
 }
 
 .voltar-escuro {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  color: rgba(255, 255, 255, 0.85);
+  min-height: 2.5rem;
+  color: rgba(255, 255, 255, 0.88);
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: 0.97rem;
 }
 
 .voltar-escuro:hover { color: var(--branco); }
-
-.painel .grade-dupla {
-  grid-template-columns: 1fr;
-  gap: 0;
-}
-
-.painel .grade-dupla .campo,
-.painel .campo { margin-bottom: 1rem; }
 
 .painel-controles {
   background: var(--branco);
@@ -62,261 +56,217 @@
   border-radius: var(--raio-g);
   padding: 1.2rem;
   box-shadow: var(--sombra);
+  min-width: 0;
 }
 
-.blocos {
-  border: 1px solid var(--borda);
-  border-radius: var(--raio);
-  padding: 0.8rem 0.9rem 0.9rem;
-  margin: 0 0 1rem;
+.painel-controles h2 {
+  font-size: 1.12rem;
+  margin-bottom: 0.9rem;
+}
+
+.painel-apoio {
+  margin: -0.4rem 0 0.9rem;
+  font-size: 0.93rem;
+  color: var(--texto-suave);
+}
+
+/* Os dois seletores ficam um embaixo do outro: lado a lado, no celular, o texto das opcoes era cortado. */
+.painel .grade-dupla {
+  grid-template-columns: 1fr;
+  gap: 0;
+  margin-bottom: 0;
+}
+
+.painel .grade-dupla .campo { margin-bottom: 1.05rem; }
+.painel .grade-dupla .campo:last-child { margin-bottom: 0; }
+
+.opcional {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 0.86rem;
+  color: var(--texto-suave);
+  margin-left: 0.25rem;
+}
+
+/* ===== Lista de modelos ===== */
+
+.lista-modelos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: grid;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
-.blocos legend {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--teal);
-  padding: 0 0.35rem;
-}
-
-.blocos label {
+.lista-modelos li {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  font-size: 0.98rem;
-  cursor: pointer;
+  gap: 0.6rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: 0.55rem 0.6rem 0.55rem 0.85rem;
 }
 
-.blocos input {
-  width: 1.25rem;
-  height: 1.25rem;
+.lista-modelos label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  cursor: pointer;
+  min-height: 2.75rem;
+}
+
+.lista-modelos input {
+  width: 1.4rem;
+  height: 1.4rem;
   min-height: 0;
+  margin: 0;
+  padding: 0;
   accent-color: var(--teal);
   flex: none;
 }
 
-.painel-nota {
-  margin: 0.9rem 0 0;
-  font-size: 0.87rem;
+.lista-modelos label span {
+  display: grid;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.lista-modelos strong {
+  font-size: 1rem;
+  color: var(--teal);
+}
+
+.lista-modelos small {
+  font-size: 0.85rem;
   color: var(--texto-suave);
 }
 
-.folha {
-  width: 210mm;
-  min-height: 297mm;
-  margin: 0 auto;
-  padding: 12mm 10mm;
-  background: var(--branco);
-  box-shadow: var(--sombra-alta);
-  color: #0e3c39;
-}
-
-.folha-topo {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  border-bottom: 1px solid var(--borda);
-  padding-bottom: 3mm;
-  margin-bottom: 5mm;
-}
-
-.folha-topo .marca { font-size: 11pt; }
-
-.folha-instrucao {
-  margin: 0;
-  font-size: 8pt;
-  color: var(--texto-suave);
-}
-
-.bloco { margin-bottom: 5mm; }
-.bloco[hidden] { display: none; }
-
-.bloco-titulo {
-  font-size: 8.5pt;
+.baixar-imagem {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 2.75rem;
+  padding: 0.4rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.92rem;
   font-weight: 700;
-  color: var(--teal-medio);
-  margin: 0 0 2.5mm;
-  display: flex;
-  align-items: baseline;
-  gap: 2mm;
+  color: var(--teal);
+  background: var(--menta-claro);
+  border: 1px solid var(--borda-forte);
+  border-radius: 999px;
+  cursor: pointer;
 }
 
-.bloco-titulo span {
-  font-weight: 400;
-  color: var(--texto-suave);
-  font-size: 7.5pt;
+.baixar-imagem svg { width: 1.1rem; height: 1.1rem; }
+.baixar-imagem:hover { background: var(--menta); }
+.baixar-imagem[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+/* ===== Botoes de imprimir e baixar ===== */
+
+.painel-acoes {
+  display: grid;
+  gap: 0.75rem;
 }
 
-.grade {
+.painel-acoes h2 { margin-bottom: 0.15rem; }
+
+.resultado {
+  display: grid;
+  gap: 0.7rem;
+  overflow-wrap: anywhere;
+}
+
+.resultado p { margin: 0; }
+
+.resultado-botoes {
   display: flex;
   flex-wrap: wrap;
-  gap: 3mm;
+  gap: 0.5rem;
 }
 
-.etiqueta-impressa {
-  border: 1px dashed var(--borda-forte);
-  border-radius: 2mm;
-  background: var(--branco);
-  display: flex;
-  overflow: hidden;
-  page-break-inside: avoid;
-  break-inside: avoid;
-}
+.resultado-botoes .botao { min-height: 2.75rem; }
 
-.etiqueta-impressa canvas {
-  display: block;
-  image-rendering: pixelated;
-}
-
-.etiqueta-aviso {
-  font-weight: 900;
-  color: #c3402c;
-  line-height: 1.12;
-  letter-spacing: 0.01em;
-}
-
-.etiqueta-nome {
-  font-weight: 700;
-  color: #0e3c39;
-  line-height: 1.15;
-}
-
-.etiqueta-apoio {
-  color: #526a66;
-  line-height: 1.2;
-}
-
-.etiqueta-marca {
-  font-weight: 900;
-  color: #0e3c39;
-  letter-spacing: -0.02em;
-}
-
-.etiqueta-marca span { font-weight: 300; }
-
-.modelo-cartao {
-  width: 85mm;
-  height: 54mm;
-  align-items: center;
-  gap: 3mm;
-  padding: 4mm;
-}
-
-.modelo-cartao canvas { width: 34mm; height: 34mm; flex: none; }
-
-.modelo-cartao .texto {
-  display: flex;
-  flex-direction: column;
-  gap: 1.6mm;
-  min-width: 0;
-}
-
-.modelo-cartao .etiqueta-aviso { font-size: 10pt; }
-.modelo-cartao .etiqueta-nome { font-size: 9pt; }
-.modelo-cartao .etiqueta-apoio { font-size: 6.6pt; }
-.modelo-cartao .etiqueta-marca { font-size: 8pt; margin-top: auto; }
-
-.modelo-adesivo {
-  width: 45mm;
-  height: 58mm;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 1.5mm;
-  padding: 3mm 2mm;
-}
-
-.modelo-adesivo canvas { width: 34mm; height: 34mm; }
-.modelo-adesivo .etiqueta-aviso { font-size: 7.4pt; }
-.modelo-adesivo .etiqueta-nome { font-size: 7pt; }
-.modelo-adesivo .etiqueta-marca { font-size: 6.6pt; margin-top: auto; }
-
-.modelo-chaveiro {
-  width: 32mm;
-  height: 45mm;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 1.2mm;
-  padding: 2.5mm 1.5mm;
-}
-
-.modelo-chaveiro canvas { width: 25mm; height: 25mm; }
-.modelo-chaveiro .etiqueta-aviso { font-size: 5.6pt; }
-.modelo-chaveiro .etiqueta-nome { font-size: 5.4pt; }
-.modelo-chaveiro .etiqueta-marca { font-size: 5.4pt; margin-top: auto; }
-
-.modelo-mini {
-  width: 25mm;
-  height: 30mm;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.6mm;
-  padding: 1.4mm 1mm;
-}
-
-.modelo-mini canvas { width: 19mm; height: 19mm; }
-.modelo-mini .etiqueta-aviso { font-size: 4.4pt; }
-
-.folha-rodape {
-  border-top: 1px solid var(--borda);
-  padding-top: 3mm;
-  margin-top: 4mm;
-}
-
-.folha-rodape p {
+.painel-nota {
   margin: 0;
-  font-size: 7.5pt;
+  font-size: 0.88rem;
   color: var(--texto-suave);
 }
 
-@media (max-width: 70rem) {
+/* ===== Previa da folha ===== */
+
+.folha {
+  width: 100%;
+  max-width: 210mm;
+  margin: 0 auto;
+  background: var(--branco);
+  box-shadow: var(--sombra-alta);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.folha canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 210 / 297;
+}
+
+/* No computador: controles numa coluna do lado e a folha no tamanho real ao lado.
+   Os controles ficam presos no topo e rolam por dentro quando nao cabem na altura da janela. */
+@media (min-width: 70rem) {
   .pagina-imprimir {
-    grid-template-columns: 1fr;
-    padding: 1rem;
+    grid-template-columns: minmax(20rem, 24rem) 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem;
   }
-  .painel { position: static; }
-  .folha {
-    width: 100%;
-    min-height: 0;
-    padding: 6mm;
-    overflow-x: auto;
+
+  .painel {
+    position: sticky;
+    top: 1.5rem;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    padding-right: 0.25rem;
   }
 }
 
+/* Na impressao sobra so a folha, sem sombra, no tamanho A4 de verdade e numa pagina so. */
 @media print {
   @page {
     size: A4 portrait;
     margin: 0;
   }
 
+  html, body {
+    width: 210mm;
+    height: 297mm;
+    margin: 0;
+    background: #fff;
+    overflow: hidden;
+  }
+
   .pagina-imprimir {
     display: block;
     padding: 0;
+    min-height: 0;
     background: #fff;
   }
 
-  .painel { display: none; }
+  .painel, .recado { display: none !important; }
 
   .folha {
     width: 210mm;
-    min-height: 297mm;
+    max-width: none;
+    height: 297mm;
     margin: 0;
-    padding: 12mm 10mm;
+    border-radius: 0;
     box-shadow: none;
   }
 
-  .etiqueta-impressa {
-    border-color: #b7cdc5;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .etiqueta-aviso, .etiqueta-nome, .etiqueta-marca, .etiqueta-apoio {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  .folha canvas {
+    width: 210mm;
+    height: 297mm;
   }
 }

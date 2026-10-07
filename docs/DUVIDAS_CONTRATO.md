@@ -56,7 +56,7 @@ Três detalhes que vieram junto:
 2. **O buraco do passado também é preenchido, até 7 dias para trás.** Se a agenda acabou há 3 dias, esses dias são gerados e logo marcados como perdidos, porque ninguém confirmou. O limite de 7 dias é o tamanho da janela da adesão.
 3. **Sem dose repetida.** A grade de horários sai sempre do `data_inicio` mais o `horario_inicial`, andando de frequência em frequência. O índice `uk_doses_agenda` é único e o insert usa `INSERT IGNORE`, então duas telas completando a agenda ao mesmo tempo não duplicam nada.
 
-Quem criou o banco antes disso precisa rodar o `ALTER TABLE doses` que está no contrato. O modo demonstração faz a mesma coisa em escala menor: completa 2 dias à frente, o suficiente para o alarme.
+O `database/bioshield.sql` já cria esse índice único; os nossos dois bancos, criados antes dele, foram ajustados com um `ALTER TABLE doses` na Fase 8. O modo demonstração faz a mesma coisa em escala menor: completa 2 dias à frente, o suficiente para o alarme.
 
 ## Regras que o contrato não cobria
 
