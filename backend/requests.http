@@ -41,7 +41,7 @@ Content-Type: application/json
 
 {
   "nome": "Maria Repetida",
-  "email": "  MARIA.SOUZA@EXEMPLO.COM ",
+  "email": "  MARIA@BIOSHIELD.COM ",
   "senha": "SenhaForte123!"
 }
 
