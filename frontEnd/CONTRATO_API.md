@@ -110,13 +110,13 @@ Caminho de API que não existe devolve `404` com `{ "mensagem": "Rota não encon
 Cadastro. Público.
 
 ```json
-{ "nome": "Maria Aparecida Souza", "email": "maria@exemplo.com", "senha": "123456" }
+{ "nome": "Maria Aparecida Souza", "email": "maria@bioshield.com", "senha": "@Senac_empreenda2026" }
 ```
 
 Resposta `201`:
 
 ```json
-{ "id": 1, "nome": "Maria Aparecida Souza", "email": "maria@exemplo.com" }
+{ "id": 1, "nome": "Maria Aparecida Souza", "email": "maria@bioshield.com" }
 ```
 
 Email repetido devolve `409`. A senha nunca volta, nem como hash.
@@ -126,7 +126,7 @@ Email repetido devolve `409`. A senha nunca volta, nem como hash.
 Público.
 
 ```json
-{ "email": "maria@exemplo.com", "senha": "123456" }
+{ "email": "maria@bioshield.com", "senha": "@Senac_empreenda2026" }
 ```
 
 Resposta `200`:
@@ -134,7 +134,7 @@ Resposta `200`:
 ```json
 {
   "token": "eyJhbGciOi...",
-  "usuario": { "id": 1, "nome": "Maria Aparecida Souza", "email": "maria@exemplo.com" },
+  "usuario": { "id": 1, "nome": "Maria Aparecida Souza", "email": "maria@bioshield.com" },
   "idPaciente": 1
 }
 ```

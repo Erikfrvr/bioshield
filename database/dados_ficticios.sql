@@ -1,21 +1,21 @@
 -- Dados ficticios do BioShield, para teste e para a apresentacao.
 -- Rode depois do bioshield.sql. Pode rodar de novo quando quiser: ele apaga e recria so as contas ficticias,
--- as que terminam em @exemplo.com. Contas criadas pelo app, como as fichas reais da equipe, ficam como estao.
+-- pela lista exata dos emails delas. Contas criadas pelo app, como as fichas reais da equipe, ficam como estao.
 -- Os QR Codes das contas ficticias tem codigo fixo aqui, entao rodar de novo nao estraga papel ja impresso.
 --
--- Senha de todas as contas: 123456
+-- Senha de todas as contas: @Senac_empreenda2026
 --
 -- | Conta                          | Para mostrar                                                        |
 -- |--------------------------------|---------------------------------------------------------------------|
--- | maria.souza@exemplo.com        | Paciente principal: ficha completa, remedio em uso, suspenso e encerrado, |
+-- | maria@bioshield.com            | Paciente principal: ficha completa, remedio em uso, suspenso e encerrado, |
 -- |                                | uma semana de doses quase toda em dia e acessos ao QR no historico  |
--- | patricia.martins@exemplo.com   | Cuidadora da Maria (em dia) e do Lucas (com doses perdidas)         |
--- | joana.lima@exemplo.com         | Alergia grave em destaque na ficha de emergencia                    |
--- | lucas.andrade@exemplo.com      | Tratamento com data para acabar e adesao baixa                      |
--- | roberto.nunes@exemplo.com      | QR Code cancelado: mostra a tela de aviso de codigo cancelado       |
--- | davi.oliveira@exemplo.com      | Autista que pode se perder: como agir e quem chamar. Conta da mae   |
--- | diego.rocha@exemplo.com        | Motoboy: sangue O negativo, alergias e o aviso de nao tirar o capacete |
--- | renata.moreira@exemplo.com     | Ciclista com diabetes tipo 1: o que fazer na glicose baixa          |
+-- | patricia@bioshield.com         | Cuidadora da Maria (em dia) e do Lucas (com doses perdidas)         |
+-- | joana@bioshield.com            | Alergia grave em destaque na ficha de emergencia                    |
+-- | lucas@bioshield.com            | Tratamento com data para acabar e adesao baixa                      |
+-- | roberto@bioshield.com          | QR Code cancelado: mostra a tela de aviso de codigo cancelado       |
+-- | davi@bioshield.com             | Autista que pode se perder: como agir e quem chamar. Conta da mae   |
+-- | diego@bioshield.com            | Motoboy: sangue O negativo, alergias e o aviso de nao tirar o capacete |
+-- | renata@bioshield.com           | Ciclista com diabetes tipo 1: o que fazer na glicose baixa          |
 --
 -- As doses sao montadas em volta da hora em que o script roda:
 -- os ultimos 6 dias inteiros e o que ja passou de hoje entram como historico.
@@ -29,21 +29,27 @@ SET time_zone = '-03:00';
 
 -- Apaga so as contas ficticias. Todas as chaves estrangeiras do bioshield.sql sao ON DELETE CASCADE,
 -- entao junto com a conta saem a ficha, as alergias, os contatos, os remedios, as doses, os vinculos
--- de cuidador e o historico de leituras dela. As contas criadas pelo app nao terminam em @exemplo.com e ficam.
+-- de cuidador e o historico de leituras dela.
+-- As contas ficticias usam o mesmo @bioshield.com das contas reais da equipe (erik@ e daiane@), entao o filtro
+-- e a lista exata dos oito emails, nunca o final do email. As contas criadas pelo app ficam.
+-- O LIKE '%@exemplo.com' limpa as contas ficticias de antes de 07/10, que usavam esse final de email.
 -- Os ids abaixo sao fixos: 1 a 5 sao os ficticios de sempre e os novos comecam em 101,
 -- longe dos ids que o app da para as contas criadas por ele.
-DELETE FROM usuarios WHERE email LIKE '%@exemplo.com';
+DELETE FROM usuarios
+WHERE email IN ('maria@bioshield.com', 'joana@bioshield.com', 'lucas@bioshield.com', 'patricia@bioshield.com',
+                'roberto@bioshield.com', 'davi@bioshield.com', 'diego@bioshield.com', 'renata@bioshield.com')
+   OR email LIKE '%@exemplo.com';
 
--- O hash e de "123456". O login nao aplica a regra de senha forte, so o cadastro.
+-- O hash e de "@Senac_empreenda2026", a senha padrao de todas as contas de demonstracao.
 INSERT INTO usuarios (id, nome, email, senha) VALUES
-(1, 'Maria Aparecida Souza', 'maria.souza@exemplo.com', '$2b$10$PGmXy.0R8ZT7yyhxw3jDQOSgiuKj.eOk2Lhh0PORxJW/hgwWIs1w2'),
-(2, 'Joana Beatriz Lima', 'joana.lima@exemplo.com', '$2b$10$PGmXy.0R8ZT7yyhxw3jDQOSgiuKj.eOk2Lhh0PORxJW/hgwWIs1w2'),
-(3, 'Lucas Andrade Ferraz', 'lucas.andrade@exemplo.com', '$2b$10$PGmXy.0R8ZT7yyhxw3jDQOSgiuKj.eOk2Lhh0PORxJW/hgwWIs1w2'),
-(4, 'Patrícia Souza Martins', 'patricia.martins@exemplo.com', '$2b$10$PGmXy.0R8ZT7yyhxw3jDQOSgiuKj.eOk2Lhh0PORxJW/hgwWIs1w2'),
-(5, 'Roberto Carlos Nunes', 'roberto.nunes@exemplo.com', '$2b$10$PGmXy.0R8ZT7yyhxw3jDQOSgiuKj.eOk2Lhh0PORxJW/hgwWIs1w2'),
-(101, 'Davi Oliveira Santos', 'davi.oliveira@exemplo.com', '$2b$10$PGmXy.0R8ZT7yyhxw3jDQOSgiuKj.eOk2Lhh0PORxJW/hgwWIs1w2'),
-(102, 'Diego Ferreira Rocha', 'diego.rocha@exemplo.com', '$2b$10$PGmXy.0R8ZT7yyhxw3jDQOSgiuKj.eOk2Lhh0PORxJW/hgwWIs1w2'),
-(103, 'Renata Alves Moreira', 'renata.moreira@exemplo.com', '$2b$10$PGmXy.0R8ZT7yyhxw3jDQOSgiuKj.eOk2Lhh0PORxJW/hgwWIs1w2');
+(1, 'Maria Aparecida Souza', 'maria@bioshield.com', '$2b$10$oYaJWr9aN.oWxtrO.HwWZuDatO/xvGrQj2D1NGKu662aC1NrClMxu'),
+(2, 'Joana Beatriz Lima', 'joana@bioshield.com', '$2b$10$oYaJWr9aN.oWxtrO.HwWZuDatO/xvGrQj2D1NGKu662aC1NrClMxu'),
+(3, 'Lucas Andrade Ferraz', 'lucas@bioshield.com', '$2b$10$oYaJWr9aN.oWxtrO.HwWZuDatO/xvGrQj2D1NGKu662aC1NrClMxu'),
+(4, 'Patrícia Souza Martins', 'patricia@bioshield.com', '$2b$10$oYaJWr9aN.oWxtrO.HwWZuDatO/xvGrQj2D1NGKu662aC1NrClMxu'),
+(5, 'Roberto Carlos Nunes', 'roberto@bioshield.com', '$2b$10$oYaJWr9aN.oWxtrO.HwWZuDatO/xvGrQj2D1NGKu662aC1NrClMxu'),
+(101, 'Davi Oliveira Santos', 'davi@bioshield.com', '$2b$10$oYaJWr9aN.oWxtrO.HwWZuDatO/xvGrQj2D1NGKu662aC1NrClMxu'),
+(102, 'Diego Ferreira Rocha', 'diego@bioshield.com', '$2b$10$oYaJWr9aN.oWxtrO.HwWZuDatO/xvGrQj2D1NGKu662aC1NrClMxu'),
+(103, 'Renata Alves Moreira', 'renata@bioshield.com', '$2b$10$oYaJWr9aN.oWxtrO.HwWZuDatO/xvGrQj2D1NGKu662aC1NrClMxu');
 
 -- A Patricia (4) nao tem ficha: ela entra so como cuidadora.
 INSERT INTO pacientes (id, id_usuario, tipo_sanguineo, condicoes, observacoes, token_qr, token_gerado_em, qr_ativo, qr_cancelado_em) VALUES

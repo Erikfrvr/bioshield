@@ -115,7 +115,7 @@
   UI.todos(".lista-contas button").forEach(function (conta) {
     conta.addEventListener("click", function () {
       campoEmail.value = conta.dataset.email;
-      campoSenha.value = "123456";
+      campoSenha.value = "@Senac_empreenda2026";
       botao.focus();
     });
   });

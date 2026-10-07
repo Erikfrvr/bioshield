@@ -112,7 +112,7 @@ mysql -u root -p --default-character-set=utf8mb4 < ../database/bioshield.sql
 mysql -u root -p --default-character-set=utf8mb4 < ../database/dados_ficticios.sql
 ```
 
-No XAMPP o `root` não tem senha, então é só apertar Enter quando ela for pedida. Também dá para importar os dois arquivos pelo phpMyAdmin ou pelo MySQL Workbench. O `bioshield.sql` só funciona num banco que ainda não existe. O `dados_ficticios.sql` pode ser rodado quantas vezes quiser: ele apaga e recria só as contas fictícias (as que terminam em `@exemplo.com`), com as doses montadas em volta da hora em que rodou. Contas criadas pelo app ficam como estão, e os QR Codes das contas fictícias têm código fixo no script, então rodar de novo não estraga papel já impresso. Vale rodar de novo no dia da apresentação, para o histórico ficar com cara de hoje.
+No XAMPP o `root` não tem senha, então é só apertar Enter quando ela for pedida. Também dá para importar os dois arquivos pelo phpMyAdmin ou pelo MySQL Workbench. O `bioshield.sql` só funciona num banco que ainda não existe. O `dados_ficticios.sql` pode ser rodado quantas vezes quiser: ele apaga e recria só as oito contas fictícias, pela lista exata dos emails delas, com as doses montadas em volta da hora em que rodou. Contas criadas pelo app ficam como estão, e os QR Codes das contas fictícias têm código fixo no script, então rodar de novo não estraga papel já impresso. Vale rodar de novo no dia da apresentação, para o histórico ficar com cara de hoje.
 
 **3. Configurar o ambiente**
 
@@ -157,20 +157,22 @@ Para testar as rotas sem as telas, o arquivo `backend/requests.http` tem uma req
 
 ### Contas de teste
 
-Criadas pelo `dados_ficticios.sql`, todas com a senha `123456`.
+Todas as contas de demonstração usam o primeiro nome da pessoa com `@bioshield.com` e a mesma senha padrão: `@Senac_empreenda2026`. As fictícias são criadas pelo `dados_ficticios.sql`, que já grava essa senha. As do Erik e da Daiane foram criadas pelo app, no servidor do evento.
 
 | Conta | O que dá para mostrar |
 |---|---|
-| `maria.souza@exemplo.com` | A paciente principal: ficha completa, uma semana de doses em dia e leituras do QR no histórico. Tem um remédio em uso, um suspenso e um encerrado |
-| `patricia.martins@exemplo.com` | Cuidadora da Maria, que está em dia, e do Lucas, que tem doses perdidas. Não tem ficha própria |
-| `joana.lima@exemplo.com` | Duas alergias graves em destaque na ficha de emergência. Ninguém acompanha a Joana, então dá para criar o vínculo com a Patrícia na hora |
-| `lucas.andrade@exemplo.com` | Tratamento com data para acabar e adesão baixa |
-| `roberto.nunes@exemplo.com` | QR Code cancelado: escanear o código dele mostra o aviso de código cancelado |
-| `davi.oliveira@exemplo.com` | Davi, autista com nível 3 de suporte, que não fala e pode se perder. A ficha diz como se aproximar dele e quem chamar. É a conta que a mãe dele usaria |
-| `diego.rocha@exemplo.com` | Diego, motoboy: sangue O negativo, alergia grave a diclofenaco e o aviso de não tirar o capacete depois de um acidente. Não toma remédio nenhum |
-| `renata.moreira@exemplo.com` | Renata, ciclista com diabetes tipo 1: a ficha explica o que fazer se a glicose estiver baixa |
+| `erik@bioshield.com` | A conta do Erik, integrante da equipe. É nela que ele monta a ficha que vai para a mesa |
+| `daiane@bioshield.com` | A conta da Daiane, integrante da equipe. É nela que ela monta a ficha que vai para a mesa |
+| `maria@bioshield.com` | A paciente principal: ficha completa, uma semana de doses em dia e leituras do QR no histórico. Tem um remédio em uso, um suspenso e um encerrado |
+| `patricia@bioshield.com` | Cuidadora da Maria, que está em dia, e do Lucas, que tem doses perdidas. Não tem ficha própria |
+| `joana@bioshield.com` | Duas alergias graves em destaque na ficha de emergência. Ninguém acompanha a Joana, então dá para criar o vínculo com a Patrícia na hora |
+| `lucas@bioshield.com` | Tratamento com data para acabar e adesão baixa |
+| `roberto@bioshield.com` | QR Code cancelado: escanear o código dele mostra o aviso de código cancelado |
+| `davi@bioshield.com` | Davi, autista com nível 3 de suporte, que não fala e pode se perder. A ficha diz como se aproximar dele e quem chamar. É a conta que a mãe dele usaria |
+| `diego@bioshield.com` | Diego, motoboy: sangue O negativo, alergia grave a diclofenaco e o aviso de não tirar o capacete depois de um acidente. Não toma remédio nenhum |
+| `renata@bioshield.com` | Renata, ciclista com diabetes tipo 1: a ficha explica o que fazer se a glicose estiver baixa |
 
-A senha `123456` só funciona porque essas contas foram criadas direto no banco. Uma conta nova precisa de senha forte: pelo menos 8 caracteres, com letra maiúscula, letra minúscula, número e um destes símbolos: `@ $ ! % * ? & #`. No servidor que fica aberto na internet, a senha dessas contas é trocada antes do evento (passo 8 do [`SERVIDOR_ONLINE.md`](docs/SERVIDOR_ONLINE.md)).
+A senha padrão segue a mesma regra que o cadastro exige de qualquer conta nova: pelo menos 8 caracteres, com letra maiúscula, letra minúscula, número e um destes símbolos: `@ $ ! % * ? & #`. Como o `dados_ficticios.sql` já grava essa senha, rodar o script de novo mantém a senha padrão. O modo demonstração, que roda no navegador sem servidor, usa a mesma senha.
 
 ### QR Codes da apresentação
 
@@ -197,7 +199,7 @@ Para abrir uma ficha fictícia sem escanear, com o servidor ligado, é só usar 
 
 Cada abertura fica registrada no histórico de acessos da ficha, como uma leitura de verdade.
 
-As fichas do Erik e da Daiane são criadas por eles mesmos no app, no servidor do evento, com o que cada um quiser mostrar. Elas não ficam no `dados_ficticios.sql` nem no repositório, porque são de pessoas reais, e rodar o script não apaga as duas: ele só mexe nas contas que terminam em `@exemplo.com`.
+As contas do Erik e da Daiane (`erik@bioshield.com` e `daiane@bioshield.com`) foram criadas pelo app, no servidor do evento, e cada um preenche a própria ficha com o que quiser mostrar. Elas não ficam no `dados_ficticios.sql` nem no repositório, porque são de pessoas reais, e rodar o script não apaga as duas: ele só mexe nas oito contas fictícias, pela lista exata dos emails delas, mesmo que todas terminem em `@bioshield.com`.
 
 ## Servidor na internet
 
@@ -326,7 +328,7 @@ Dado de saúde é dado sensível pela LGPD, e isso pesou em várias decisões:
 
 Versão 1.0, de 04/10/2026, com as três funcionalidades completas e testadas no site e no app Android. Depois dela vieram o aviso de dose perdida no celular do cuidador, o servidor na internet com o Tailscale Funnel e as etiquetas no celular, com PDF e imagens.
 
-O que ainda depende da equipe é a preparação do evento: trocar a senha das contas fictícias, imprimir e testar os QR Codes da mesa e gravar o vídeo da demonstração. A lista completa está no [`docs/ROADMAP.md`](docs/ROADMAP.md).
+O que ainda depende da equipe é a preparação do evento: o Erik e a Daiane preencherem as próprias fichas no app, imprimir e testar os QR Codes da mesa e gravar o vídeo da demonstração. A lista completa está no [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 Limites conhecidos desta versão:
 

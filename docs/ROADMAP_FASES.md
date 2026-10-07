@@ -388,7 +388,9 @@ A ideia é deixar QR Codes de pacientes fictícios na mesa para o visitante esca
 - [x] Endereço público no QR, no histórico de acessos e no app, pelo `URL_PUBLICA` do `.env`
 - [x] Endereço do QR montado sozinho a partir do servidor, sem precisar mexer no `config.js`
 - [x] BioShield aberto pelo 4G antes de gerar qualquer QR (o app no celular do Erik, com o wifi desligado)
-- [ ] Trocar a senha das contas fictícias, porque o endereço está aberto na internet
+- [x] Trocar a senha das contas fictícias: desde 07/10, todas as contas de demonstração usam a senha padrão `@Senac_empreenda2026`, já gravada no `dados_ficticios.sql` · Erik
+- [x] Criar as contas do Erik e da Daiane no servidor do evento (`erik@bioshield.com` e `daiane@bioshield.com`), com a mesma senha padrão · Erik
+- [x] Trocar os emails das contas fictícias para o primeiro nome com `@bioshield.com` (`maria@bioshield.com`, `davi@bioshield.com`, `renata@bioshield.com` e as outras), no banco do evento, no script e no modo demonstração. Como agora as fictícias e as da equipe terminam igual, o `dados_ficticios.sql` passou a apagar as fictícias pela lista exata dos oito emails, e não mais pelo final do email · Erik
 - [ ] Só então gerar e imprimir os QR Codes
 - [ ] Testar cada papel com dois celulares no 4G
 - [ ] Depois de impresso, ninguém troca, cancela nem recria paciente da mesa
@@ -545,7 +547,7 @@ Escolhemos não usar o plugin oficial de tarefa em segundo plano porque ele só 
 ### O que ainda falta desta fase
 
 - [ ] Escanear um QR com outro celular, também no 4G, e ver a leitura aparecer na aba Privacidade com o IP de quem escaneou
-- [ ] Trocar a senha das contas fictícias (passo 8 do `SERVIDOR_ONLINE.md`)
+- [x] Trocar a senha das contas fictícias (passo 8 do `SERVIDOR_ONLINE.md`): senha padrão em todas as contas de demonstração, em 07/10
 - [ ] Deixar o MySQL ligando sozinho ao abrir o XAMPP e conferir o que o notebook faz ao fechar a tampa
 - [ ] Pausar as atualizações do Windows na semana do evento
 

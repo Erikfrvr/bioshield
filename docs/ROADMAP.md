@@ -50,22 +50,22 @@ Para o evento (o plano completo está no [`DIA_DO_EVENTO.md`](DIA_DO_EVENTO.md))
 - [x] Montar o servidor no notebook do Erik com o Tailscale Funnel
 - [x] Escolher o nome da máquina e da rede no Tailscale, para o endereço não mudar depois de imprimir
 - [x] Abrir o BioShield pelo 4G antes de gerar qualquer QR
-- [ ] Escanear um QR com outro celular no 4G e ver a leitura no histórico de acessos, com o IP de quem escaneou
+- [X] Escanear um QR com outro celular no 4G e ver a leitura no histórico de acessos, com o IP de quem escaneou
 - [x] Escolher os QR Codes da apresentação e criar os perfis fictícios que faltavam (Davi, autista; Renata, ciclista; e Diego, motoboy, de reserva)
-- [ ] Daiane criar a ficha dela no app, no servidor do evento
-- [ ] Trocar a senha das contas fictícias, porque o endereço está aberto na internet
-- [ ] Gerar e imprimir os QR Codes só depois disso, e testar cada papel com dois celulares
-- [ ] Separar o papel do Roberto, com o QR cancelado, para mostrar o aviso
-- [ ] Imprimir a folha de etiquetas e colar uma num chaveiro para a demonstração · Erik
-- [ ] Gravar o vídeo do fluxo completo: cadastro, ficha, QR, escanear com o celular, remédio, alarme e dose · Erik
-- [ ] Gravar o corte do cancelamento: escaneia e abre, cancela no app, escaneia de novo e aparece o aviso · Erik
-- [ ] Deixar o plano B pronto: vídeo, modo demonstração no notebook e prints
-- [ ] No notebook: MySQL ligando sozinho com o XAMPP, tampa conferida e atualizações do Windows pausadas na semana do evento
+- [x] Daiane criar a ficha dela no app, no servidor do evento
+- [x] Trocar a senha das contas fictícias, porque o endereço está aberto na internet
+- [x] Gerar e imprimir os QR Codes só depois disso, e testar cada papel com dois celulares
+- [x] Separar o papel do Roberto, com o QR cancelado, para mostrar o aviso
+- [x] Imprimir a folha de etiquetas e colar uma num chaveiro para a demonstração · Erik
+- [x] Gravar o vídeo do fluxo completo: cadastro, ficha, QR, escanear com o celular, remédio, alarme e dose · Erik
+- [x] Gravar o corte do cancelamento: escaneia e abre, cancela no app, escaneia de novo e aparece o aviso · Erik
+- [x] Deixar o plano B pronto: vídeo, modo demonstração no notebook e prints
+- [x] No notebook: MySQL ligando sozinho com o XAMPP, tampa conferida e atualizações do Windows pausadas na semana do evento
 
 Testes que ainda queremos fazer num celular de verdade:
 
-- [ ] Repetir o alarme dos remédios com o app fechado e o botão Tomei, porque o `lembretes.js` e o `login.js` mudaram depois do último teste
-- [ ] Conferir o alarme com a tela bloqueada num celular de marca (Samsung, Motorola ou Xiaomi), que é onde a economia de bateria pode atrasar alarmes
+- [x] Repetir o alarme dos remédios com o app fechado e o botão Tomei, porque o `lembretes.js` e o `login.js` mudaram depois do último teste
+- [] Conferir o alarme com a tela bloqueada num celular de marca (Samsung, Motorola ou Xiaomi), que é onde a economia de bateria pode atrasar alarmes
 - [ ] Mostrar o aviso de dose perdida no celular de um cuidador, com o app fechado
 
 ## Se o tempo apertar
