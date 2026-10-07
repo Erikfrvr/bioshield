@@ -19,7 +19,7 @@ Com isso, o QR Code abre em qualquer celular com internet: no 4G, no wifi de vis
 | 5. Endereço no `.env` | Feito em 06/10 |
 | 6. Teste pelo 4G | Em parte: o app conectou pelo 4G no celular do Erik. Falta escanear um QR com outro celular no 4G |
 | 7. App Android | Feito em 06/10: APK novo, com o endereço já escrito na tela de entrada |
-| 8. Senha das contas fictícias | Falta |
+| 8. Senha das contas fictícias | Feito em 07/10: senha padrão em todas as contas de demonstração, já gravada no `dados_ficticios.sql` |
 | 9. Imprimir os QR Codes | Falta |
 
 ## Como funciona
@@ -51,7 +51,7 @@ Antes de tudo, o BioShield precisa funcionar localmente. No Windows, seguindo o 
 
 Confira no navegador do próprio notebook:
 
-- `http://localhost:3000` mostra a tela de entrada, e o login com `maria.souza@exemplo.com` funciona
+- `http://localhost:3000` mostra a tela de entrada, e o login com `maria@bioshield.com` funciona
 - `http://localhost:3000/api/status` mostra `"banco":"ok"`. Se mostrar `"fora do ar"`, o MySQL não está ligado ou o `.env` está errado: o terminal do backend diz qual dos dois
 
 ## 2. Criar a conta e instalar o Tailscale
@@ -164,9 +164,9 @@ O endereço que vem escrito fica no campo `SERVIDOR_SUGERIDO` do `frontEnd/js/co
 
 ## 8. Trocar a senha das contas fictícias
 
-As contas do `dados_ficticios.sql` usam a senha `123456`, e os emails estão no README. Com o Funnel, qualquer pessoa na internet chega na tela de entrada. Alguém que entrasse como a Maria conseguiria cancelar o QR dela, e o papel da mesa pararia de abrir no meio do evento.
+Em 07/10, todas as contas de demonstração passaram a usar a senha padrão `@Senac_empreenda2026`: as oito contas fictícias do `dados_ficticios.sql` e as contas do Erik e da Daiane (`erik@bioshield.com` e `daiane@bioshield.com`), criadas pelo app nesse mesmo dia. O hash dessa senha já está no script, então rodar o `dados_ficticios.sql` de novo (por exemplo na véspera) mantém a senha padrão, sem repetir este passo.
 
-Por isso, depois dos testes e antes de imprimir, troquem a senha de todas as contas fictícias por uma que só a equipe saiba:
+A senha está escrita no README, que é público no GitHub, e na tela de entrada do modo demonstração. Com o Funnel, qualquer pessoa na internet chega na tela de entrada, e quem souber a senha consegue entrar como a Maria e cancelar o QR dela, que pararia de abrir no meio do evento. Se quiserem fechar essa porta durante o evento, troquem no servidor a senha das contas fictícias por uma que só a equipe saiba:
 
 1. Na pasta `backend`, gere o hash da senha nova (troque `SenhaDaEquipe#2026` pela de vocês):
 
@@ -178,12 +178,14 @@ Por isso, depois dos testes e antes de imprimir, troquem a senha de todas as con
 3. No phpMyAdmin (`http://localhost/phpmyadmin`, com o Apache ligado só para isso) ou no Workbench, rode no banco `bioshield`, com o hash entre as aspas:
 
    ```sql
-   UPDATE usuarios SET senha = 'COLE_O_HASH_AQUI' WHERE email LIKE '%@exemplo.com';
+   UPDATE usuarios SET senha = 'COLE_O_HASH_AQUI'
+   WHERE email IN ('maria@bioshield.com', 'joana@bioshield.com', 'lucas@bioshield.com', 'patricia@bioshield.com',
+                   'roberto@bioshield.com', 'davi@bioshield.com', 'diego@bioshield.com', 'renata@bioshield.com');
    ```
 
 4. Confira entrando com a senha nova
 
-**Atenção:** rodar o `dados_ficticios.sql` de novo volta a senha para `123456`. Sempre que rodarem o script (por exemplo na véspera), repitam este passo. Os QR Codes não mudam.
+**Atenção:** uma senha trocada assim vale só para o banco do notebook. Rodar o `dados_ficticios.sql` de novo volta para a senha padrão, então, nesse caso, repitam o `UPDATE` depois do script. Os QR Codes não mudam. As contas do Erik e da Daiane não entram nesse `UPDATE`, porque não estão na lista: cada um troca a própria senha direto no banco, do mesmo jeito, com `WHERE email = 'erik@bioshield.com'`.
 
 ## 9. Imprimir os QR Codes
 
@@ -231,9 +233,9 @@ Se a internet do notebook cair, nenhum QR abre. Troquem para o 4G roteado de um 
 ## Cuidados
 
 - **Só dados fictícios, fora as fichas da equipe.** O endereço é público, então qualquer pessoa na internet pode chegar na tela de entrada. As fichas do Erik e da Daiane, que vão para a mesa, têm só o que cada um aceita mostrar. Nenhum outro dado de saúde real no banco que estiver no ar
-- **Cadastro aberto.** Qualquer pessoa consegue criar conta enquanto o Funnel estiver ligado. O `dados_ficticios.sql` só recria as contas `@exemplo.com` e não apaga as outras. Para limpar tudo depois do evento, apaguem as contas que não forem da equipe, ou recriem o banco do zero com o `bioshield.sql` e o `dados_ficticios.sql`
+- **Cadastro aberto.** Qualquer pessoa consegue criar conta enquanto o Funnel estiver ligado. O `dados_ficticios.sql` só recria as oito contas fictícias, pela lista exata dos emails delas, e não apaga as outras. Para limpar tudo depois do evento, apaguem as contas que não forem da equipe, ou recriem o banco do zero com o `bioshield.sql` e o `dados_ficticios.sql`
 - **`JWT_SECRET` forte.** Um texto longo e só de vocês, de 32 letras ou mais. O servidor avisa no terminal se ele ficar com o valor do exemplo ou curto demais
-- **Senha das contas fictícias trocada** (passo 8)
+- **Senha padrão pública.** As contas de demonstração, inclusive as do Erik e da Daiane, usam a senha escrita no README. Quem entrar numa delas vê a ficha inteira e consegue mudar ou cancelar o QR. Para fechar isso durante o evento, troquem a senha no servidor (passo 8)
 - **Desligar o Funnel depois do evento** com `tailscale funnel reset`, se não forem mais usar
 - **O IP no histórico de acessos.** O Funnel entrega o acesso de dentro do próprio notebook, mas avisa qual é o IP de quem escaneou. O backend lê esse aviso só quando o acesso vem do próprio notebook, então o histórico da LGPD grava o IP verdadeiro do visitante, e um celular do wifi não consegue inventar um IP
 

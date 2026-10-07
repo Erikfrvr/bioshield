@@ -50,10 +50,10 @@
     return {
       proximoId: 500,
       usuarios: [
-        { id: 1, nome: "Maria Aparecida Souza", email: "maria.souza@exemplo.com", senha: "123456" },
-        { id: 2, nome: "Joana Beatriz Lima", email: "joana.lima@exemplo.com", senha: "123456" },
-        { id: 3, nome: "Lucas Andrade Ferraz", email: "lucas.andrade@exemplo.com", senha: "123456" },
-        { id: 4, nome: "Patrícia Souza Martins", email: "patricia.martins@exemplo.com", senha: "123456" }
+        { id: 1, nome: "Maria Aparecida Souza", email: "maria@bioshield.com", senha: "@Senac_empreenda2026" },
+        { id: 2, nome: "Joana Beatriz Lima", email: "joana@bioshield.com", senha: "@Senac_empreenda2026" },
+        { id: 3, nome: "Lucas Andrade Ferraz", email: "lucas@bioshield.com", senha: "@Senac_empreenda2026" },
+        { id: 4, nome: "Patrícia Souza Martins", email: "patricia@bioshield.com", senha: "@Senac_empreenda2026" }
       ],
       pacientes: [
         {

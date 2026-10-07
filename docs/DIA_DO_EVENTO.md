@@ -41,9 +41,9 @@ Tudo depende de uma condição: **um celular no 4G precisa conseguir abrir o end
 
 **Endereço que muda depois de impresso.** Trocar o nome da máquina ou o nome da rede no painel do Tailscale, desinstalar o Tailscale ou trocar de conta muda o endereço, e todos os papéis da mesa param de funcionar de uma vez. Mudou o endereço, imprime tudo de novo.
 
-**Código que muda depois de impresso.** Trocar, cancelar ou reativar o QR de um paciente invalida o código antigo, e o papel impresso fica com ele. Depois de imprimir, ninguém mexe no QR dos pacientes da mesa; para mostrar o cancelamento, use o Roberto, que já vem cancelado nos dados fictícios. Os pacientes do `dados_ficticios.sql` têm código fixo no script, então rodar o script de novo mantém os mesmos QR Codes. E o script só apaga e recria as contas que terminam em `@exemplo.com`: as fichas do Erik e da Daiane, criadas pelo app, ficam como estão. Já apagar um paciente e criar de novo pelo app gera um código novo.
+**Código que muda depois de impresso.** Trocar, cancelar ou reativar o QR de um paciente invalida o código antigo, e o papel impresso fica com ele. Depois de imprimir, ninguém mexe no QR dos pacientes da mesa; para mostrar o cancelamento, use o Roberto, que já vem cancelado nos dados fictícios. Os pacientes do `dados_ficticios.sql` têm código fixo no script, então rodar o script de novo mantém os mesmos QR Codes. E o script só apaga e recria as oito contas fictícias, pela lista exata dos emails delas: as fichas do Erik e da Daiane, criadas pelo app, ficam como estão, mesmo com o mesmo `@bioshield.com`. Já apagar um paciente e criar de novo pelo app gera um código novo.
 
-**Um estranho cancelando o QR da mesa.** O endereço é público e as contas fictícias vêm com a senha `123456`. Quem entrasse como a Maria poderia cancelar o QR dela. Por isso a senha das contas fictícias é trocada antes de imprimir (passo 8 do `SERVIDOR_ONLINE.md`), e trocada de novo sempre que o script de dados rodar.
+**Um estranho cancelando o QR da mesa.** O endereço é público e todas as contas de demonstração usam a senha padrão `@Senac_empreenda2026`, que está escrita no README. Quem entrasse como a Maria poderia cancelar o QR dela, e quem entrasse na conta do Erik ou da Daiane veria a ficha inteira. Para fechar essa porta, troquem a senha no servidor antes de imprimir (passo 8 do `SERVIDOR_ONLINE.md`), e de novo sempre que o script de dados rodar, porque ele volta para a senha padrão.
 
 **Internet do notebook caindo.** Sem internet no notebook, nenhum QR abre. Tenham um celular da equipe pronto para rotear o 4G. Trocar de rede não muda o endereço: em alguns segundos tudo volta.
 
@@ -72,7 +72,8 @@ Seguindo o `SERVIDOR_ONLINE.md`:
 | Banco criado com o `bioshield.sql` e preenchido com o `dados_ficticios.sql` | Feito |
 | `.env` do backend com `URL_PUBLICA` no endereço do Funnel e um `JWT_SECRET` forte | Feito em 06/10 |
 | Tailscale instalado, com o nome da máquina e da rede definidos e o Funnel ligado | Feito em 06/10 |
-| Senha das contas fictícias trocada | Falta |
+| Senha padrão em todas as contas de demonstração, já gravada no `dados_ficticios.sql` | Feito em 07/10 |
+| Contas do Erik e da Daiane no servidor do evento | Feito em 07/10; falta cada um preencher a própria ficha |
 | Energia e atualizações configuradas para o notebook não dormir nem reiniciar | Em parte: a suspensão já está em "Nunca"; faltam a tampa e as atualizações |
 | MySQL ligando sozinho ao abrir o XAMPP | Falta |
 
@@ -82,11 +83,11 @@ O `frontEnd/js/config.js` não precisa de nenhuma mudança: as telas acham o ser
 
 **Antes de tudo.** Instalar o Tailscale no notebook, escolher o nome da máquina, ligar o Funnel e abrir o BioShield pelo 4G. Feito em 06/10.
 
-**Uma semana antes.** Banco com os dados fictícios, `.env` completo e o teste completo do passo 6 do `SERVIDOR_ONLINE.md`: dois celulares no 4G, um mostrando o QR e o outro escaneando. Os pacientes da mesa já estão decididos (lista no README); falta a Daiane criar a ficha dela no app, no servidor do evento.
+**Uma semana antes.** Banco com os dados fictícios, `.env` completo e o teste completo do passo 6 do `SERVIDOR_ONLINE.md`: dois celulares no 4G, um mostrando o QR e o outro escaneando. Os pacientes da mesa já estão decididos (lista no README). As contas do Erik e da Daiane já existem no servidor do evento; falta cada um preencher a própria ficha no app.
 
-**Dois dias antes.** Trocar a senha das contas fictícias. Gerar os QR Codes pela tela de etiquetas, no navegador do notebook ou no app (os dois dão o mesmo resultado), conferindo que não aparece aviso vermelho. O PDF da folha, no tamanho real, também serve para imprimir numa gráfica. Imprimir os QR Codes e a placa. Testar cada papel com dois celulares no 4G. A partir daqui, ninguém troca, cancela ou recria paciente da mesa, e ninguém mexe no nome da máquina no Tailscale.
+**Dois dias antes.** Se quiserem uma senha só da equipe durante o evento, trocar a senha no servidor (passo 8 do `SERVIDOR_ONLINE.md`). Gerar os QR Codes pela tela de etiquetas, no navegador do notebook ou no app (os dois dão o mesmo resultado), conferindo que não aparece aviso vermelho. O PDF da folha, no tamanho real, também serve para imprimir numa gráfica. Imprimir os QR Codes e a placa. Testar cada papel com dois celulares no 4G. A partir daqui, ninguém troca, cancela ou recria paciente da mesa, e ninguém mexe no nome da máquina no Tailscale.
 
-**Na véspera.** Rodar o `dados_ficticios.sql` de novo, para o histórico de doses ficar com cara de hoje (os QR Codes continuam os mesmos), e trocar de novo a senha das contas fictícias. Escanear todos os papéis, conferir que cada leitura aparece no histórico de acessos da ficha e deixar o plano B pronto. Carregar o notebook e o celular que vai rotear.
+**Na véspera.** Rodar o `dados_ficticios.sql` de novo, para o histórico de doses ficar com cara de hoje (os QR Codes continuam os mesmos e a senha continua a padrão). Se tiverem trocado a senha no servidor, repetir a troca depois do script. Escanear todos os papéis, conferir que cada leitura aparece no histórico de acessos da ficha e deixar o plano B pronto. Carregar o notebook e o celular que vai rotear.
 
 **No dia, antes de abrir a mesa.** Seguir a lista "No dia do evento" do `SERVIDOR_ONLINE.md`: notebook na tomada e com internet, MySQL, backend, Funnel, `/api/status` pelo 4G e um papel escaneado abrindo a ficha. Conferir também o papel do Roberto mostrando o aviso de cancelado e o plano B aberto.
 
@@ -108,5 +109,5 @@ Cada leitura do QR fica registrada, com data, hora, o tipo de aparelho e o IP de
 Sugestão, para ajustar como preferirem:
 
 - **Erik:** notebook servidor, Tailscale, geração e impressão dos QR Codes e o celular do alarme.
-- **Daiane:** banco no notebook com os dados fictícios, troca da senha das contas, placa da mesa, teste de cada papel com dois celulares e plano B.
+- **Daiane:** banco no notebook com os dados fictícios, placa da mesa, teste de cada papel com dois celulares e plano B.
 - **Os dois:** a conferência da véspera e a do dia.
