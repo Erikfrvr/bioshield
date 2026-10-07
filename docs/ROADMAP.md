@@ -37,28 +37,23 @@ Três arquivos tiveram combinado próprio, porque os dois precisavam deles: o `s
 
 Para o evento (detalhes em [`DIA_DO_EVENTO.md`](DIA_DO_EVENTO.md)):
 
-- [ ] Montar o servidor no Linux Mint do professor, seguindo o [`SERVIDOR_LINUX.md`](SERVIDOR_LINUX.md)
-- [ ] Fixar o IP do servidor no roteador, para o endereço não mudar depois de imprimir
-- [ ] Abrir uma ficha com o celular no wifi do roteador, antes de gerar qualquer QR
-- [ ] Gerar e imprimir os QR Codes só depois disso, e testar cada papel com dois celulares
-- [ ] Separar um paciente com QR cancelado para mostrar o aviso
-- [ ] Imprimir a folha de etiquetas e colar uma num chaveiro para a demonstração · Erik
-- [ ] Gravar o vídeo do fluxo completo: cadastro, ficha, QR, escanear com o celular, remédio, alarme e dose · Erik
-- [ ] Gravar o corte do cancelamento: escaneia e abre, cancela no app, escaneia de novo e aparece o aviso · Erik
-- [ ] Deixar o plano B pronto: vídeo, modo demonstração no notebook e prints
+- [x] Gerar e imprimir os QR Codes só depois disso, e testar cada papel com dois celulares
+- [x] Separar um paciente com QR cancelado para mostrar o aviso
+- [x] Imprimir a folha de etiquetas e colar uma num chaveiro para a demonstração · Erik
+- [x] Deixar o plano B pronto: vídeo, modo demonstração no notebook e prints
 
 O corte do cancelamento é o melhor plano do vídeo: é ele que mostra que existe um produto pensado ali, e não só um cadastro com QR Code em cima.
 
 Testes num celular de verdade:
 
-- [ ] Abrir a ficha de emergência pelo QR no celular de um visitante, no wifi do roteador
-- [ ] Passar pelas telas do app num celular físico, com a letra no tamanho máximo
-- [ ] Conferir o botão Voltar do Android em cada tela
-- [ ] Conferir o alarme dos remédios com a tela bloqueada num celular de marca (Samsung, Motorola ou Xiaomi), que é onde a economia de bateria pode atrasar alarmes
+- [x] Abrir a ficha de emergência pelo QR no celular de um visitante, no wifi do roteador
+- [x] Passar pelas telas do app num celular físico, com a letra no tamanho máximo
+- [x] Conferir o botão Voltar do Android em cada tela
+- [x] Conferir o alarme dos remédios com a tela bloqueada num celular de marca (Samsung, Motorola ou Xiaomi), que é onde a economia de bateria pode atrasar alarmes
 
 No banco:
 
-- [ ] Quem criou o banco antes da agenda de doses virar índice único precisa rodar o `ALTER TABLE doses` que está no [`CONTRATO_API.md`](../frontEnd/CONTRATO_API.md). Banco criado do zero pelo `bioshield.sql` atual já está certo
+- [x] Quem criou o banco antes da agenda de doses virar índice único precisa rodar o `ALTER TABLE doses` que está no [`CONTRATO_API.md`](../frontEnd/CONTRATO_API.md). Banco criado do zero pelo `bioshield.sql` atual já está certo
 
 ## As fases
 

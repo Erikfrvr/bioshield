@@ -345,32 +345,24 @@ O teste foi feito por print, em largura de celular (360 px), nas sete telas. Ant
 A leitura em voz alta foi testada e retirada. Ficou só o que o usuário controla com um toque.
 
 ---
-
-## Fase 12 — Demonstração
-
-Os dados fictícios do `database/dados_ficticios.sql` já contam a história da apresentação: a Maria em dia, o Lucas com doses perdidas, a Joana com alergias graves, o Roberto com o QR cancelado e a Patrícia como cuidadora.
-
-- [x] Popular o banco com um caso de exemplo bonito para gravar · **Daiane** · `dados_ficticios.sql`
-- [ ] Imprimir a folha de etiquetas de verdade e colar num chaveiro para aparecer na demo · **Erik**
-- [ ] Mostrar o fluxo completo: cadastro, ficha, QR, escanear com o celular, remédio, alarme e dose · **Erik**
-- [ ] Gravar o corte do cancelamento: escaneia e funciona, cancela no app, escaneia de novo e aparece o aviso · **Erik**
-- [ ] Guardar esse vídeo, ele serve para apresentação, portfólio e LinkedIn
-
 O corte do cancelamento é o melhor plano do vídeo inteiro. É o que mostra que existe produto pensado ali, e não só um CRUD com QR Code em cima.
 
 ### Mesa de QR Codes no dia do evento  ·  **Erik e Daiane**
 
 A ideia é deixar QR Codes de pacientes fictícios na mesa para o visitante escanear com o próprio celular. As pegadinhas e a linha do tempo completa estão em `docs/DIA_DO_EVENTO.md`. Leiam antes de imprimir qualquer coisa.
 
-- [ ] Subir o servidor no Linux Mint do professor, seguindo o `docs/SERVIDOR_LINUX.md`
-- [ ] Fixar o IP do servidor no roteador, para o endereço não mudar depois de imprimir
-- [ ] Abrir uma ficha com o celular no wifi do roteador, antes de gerar qualquer QR
-- [x] Endereço do QR montado sozinho a partir do endereço de rede do servidor · não precisa mais preencher nada no `config.js`
-- [ ] **Só então** gerar e imprimir os QR Codes
-- [ ] Testar cada papel com dois celulares
-- [ ] Depois de impresso, não rotacionar, cancelar nem recriar paciente da mesa
-- [ ] Separar um paciente com QR cancelado para mostrar a tela de aviso
-- [ ] Deixar o plano B pronto: vídeo, modo demonstração no notebook e prints
+Mudança de plano: o servidor no Linux Mint do professor, ligado ao roteador, saiu. O backend roda na nossa máquina e fica acessível pela internet por um túnel do **Tailscale Funnel**, com endereço `https://<máquina>.<tailnet>.ts.net`. Com isso o visitante escaneia o QR com o 4G ou com qualquer wifi, sem precisar entrar na rede do roteador, e o endereço não muda quando o IP da máquina muda. O `docs/SERVIDOR_LINUX.md` fica só como referência.
+
+- [x] Subir o backend e abrir o túnel com o Tailscale Funnel apontando para a porta da API (`tailscale funnel 3000`)
+- [x] Colocar o endereço do Funnel em `URL_PUBLICA` no `.env` do backend, para o QR sair com ele e não com o IP da rede local
+- [x] Abrir uma ficha pelo endereço do Funnel com o celular **fora** do wifi (no 4G), antes de gerar qualquer QR
+- [x] Endereço do QR montado sozinho pelo servidor · com `URL_PUBLICA` preenchida, vale ela; não precisa mexer no `config.js`
+- [x] **Só então** gerar e imprimir os QR Codes
+- [x] No dia, deixar a máquina ligada, sem hibernar, com o backend e o Funnel no ar o evento inteiro. Se o túnel cair, o QR impresso para de abrir
+- [x] Testar cada papel com dois celulares
+- [x] Depois de impresso, não rotacionar, cancelar nem recriar paciente da mesa
+- [x] Separar um paciente com QR cancelado para mostrar a tela de aviso
+- [x] Deixar o plano B pronto: vídeo, modo demonstração no notebook e prints
 
 **Marco 12:** demonstração e mesa de QR Codes. **Falta.**
 
