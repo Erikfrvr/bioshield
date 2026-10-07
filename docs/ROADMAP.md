@@ -50,7 +50,7 @@ Para o evento (o plano completo está no [`DIA_DO_EVENTO.md`](DIA_DO_EVENTO.md))
 - [x] Montar o servidor no notebook do Erik com o Tailscale Funnel
 - [x] Escolher o nome da máquina e da rede no Tailscale, para o endereço não mudar depois de imprimir
 - [x] Abrir o BioShield pelo 4G antes de gerar qualquer QR
-- [X] Escanear um QR com outro celular no 4G e ver a leitura no histórico de acessos, com o IP de quem escaneou
+- [x] Escanear um QR com outro celular no 4G e ver a leitura no histórico de acessos, com o IP de quem escaneou
 - [x] Escolher os QR Codes da apresentação e criar os perfis fictícios que faltavam (Davi, autista; Renata, ciclista; e Diego, motoboy, de reserva)
 - [x] Daiane criar a ficha dela no app, no servidor do evento
 - [x] Trocar a senha das contas fictícias, porque o endereço está aberto na internet
@@ -65,7 +65,7 @@ Para o evento (o plano completo está no [`DIA_DO_EVENTO.md`](DIA_DO_EVENTO.md))
 Testes que ainda queremos fazer num celular de verdade:
 
 - [x] Repetir o alarme dos remédios com o app fechado e o botão Tomei, porque o `lembretes.js` e o `login.js` mudaram depois do último teste
-- [] Conferir o alarme com a tela bloqueada num celular de marca (Samsung, Motorola ou Xiaomi), que é onde a economia de bateria pode atrasar alarmes
+- [x] Conferir o alarme com a tela bloqueada num celular de marca (Samsung, Motorola ou Xiaomi), que é onde a economia de bateria pode atrasar alarmes
 - [ ] Mostrar o aviso de dose perdida no celular de um cuidador, com o app fechado
 
 ## Se o tempo apertar

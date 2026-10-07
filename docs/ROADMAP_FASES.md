@@ -371,10 +371,10 @@ Os dados fictícios do `database/dados_ficticios.sql` contam a história da apre
 - [x] Três perfis fictícios novos para a mesa, com código de QR fixo no script (06/10): o Davi, autista que não fala e pode se perder; o Diego, motoboy; e a Renata, ciclista com diabetes tipo 1
 - [x] O `dados_ficticios.sql` passou a apagar e recriar só as contas `@exemplo.com`. Antes ele apagava todas, e rodar o script na véspera teria trocado o QR das fichas reais da equipe
 - [x] Escolhemos os cinco QR Codes da apresentação: Maria, Davi, Renata, Erik e Daiane, com o Diego de reserva (lista no README)
-- [ ] Daiane criar a ficha dela no app, no servidor do evento
-- [ ] Imprimir a folha de etiquetas e colar uma num chaveiro para aparecer na demonstração · Erik
-- [ ] Gravar o fluxo completo: cadastro, ficha, QR, escanear com o celular, remédio, alarme e dose · Erik
-- [ ] Gravar o corte do cancelamento: escaneia e abre, cancela no app, escaneia de novo e aparece o aviso · Erik
+- [x] Daiane criar a ficha dela no app, no servidor do evento
+- [x] Imprimir a folha de etiquetas e colar uma num chaveiro para aparecer na demonstração · Erik
+- [x] Gravar o fluxo completo: cadastro, ficha, QR, escanear com o celular, remédio, alarme e dose · Erik
+- [x] Gravar o corte do cancelamento: escaneia e abre, cancela no app, escaneia de novo e aparece o aviso · Erik
 - [ ] Guardar o vídeo, que serve para a apresentação, para o portfólio e para o LinkedIn
 
 O corte do cancelamento é o melhor momento do vídeo: é ele que mostra que existe um produto pensado ali, e não só um cadastro com QR Code em cima.
@@ -391,11 +391,11 @@ A ideia é deixar QR Codes de pacientes fictícios na mesa para o visitante esca
 - [x] Trocar a senha das contas fictícias: desde 07/10, todas as contas de demonstração usam a senha padrão `@Senac_empreenda2026`, já gravada no `dados_ficticios.sql` · Erik
 - [x] Criar as contas do Erik e da Daiane no servidor do evento (`erik@bioshield.com` e `daiane@bioshield.com`), com a mesma senha padrão · Erik
 - [x] Trocar os emails das contas fictícias para o primeiro nome com `@bioshield.com` (`maria@bioshield.com`, `davi@bioshield.com`, `renata@bioshield.com` e as outras), no banco do evento, no script e no modo demonstração. Como agora as fictícias e as da equipe terminam igual, o `dados_ficticios.sql` passou a apagar as fictícias pela lista exata dos oito emails, e não mais pelo final do email · Erik
-- [ ] Só então gerar e imprimir os QR Codes
-- [ ] Testar cada papel com dois celulares no 4G
-- [ ] Depois de impresso, ninguém troca, cancela nem recria paciente da mesa
-- [ ] Separar o papel do Roberto, com o QR cancelado, para mostrar o aviso
-- [ ] Deixar o plano B pronto: vídeo, modo demonstração no notebook e prints
+- [x] Só então gerar e imprimir os QR Codes
+- [x] Testar cada papel com dois celulares no 4G
+- [x] Depois de impresso, ninguém troca, cancela nem recria paciente da mesa
+- [x] Separar o papel do Roberto, com o QR cancelado, para mostrar o aviso
+- [x] Deixar o plano B pronto: vídeo, modo demonstração no notebook e prints
 
 **Vai entregar:** a apresentação e a mesa de QR Codes funcionando no Empreenda.
 
